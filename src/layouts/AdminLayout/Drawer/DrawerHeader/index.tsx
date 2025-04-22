@@ -44,5 +44,3 @@ export default function DrawerHeader({ open }: { open: boolean }) {
     </Box>
   );
 }
-
-DrawerHeader.propTypes = { open: PropTypes.bool };

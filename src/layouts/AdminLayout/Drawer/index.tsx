@@ -72,5 +72,3 @@ export default function MainDrawer({ window }: { window?: () => Window }) {
     </Box>
   );
 }
-
-MainDrawer.propTypes = { window: PropTypes.func };

@@ -117,12 +117,3 @@ export default function NotificationItem({
     </Stack>
   );
 }
-
-NotificationItem.propTypes = {
-  avatar: PropTypes.any,
-  badgeAvatar: PropTypes.any,
-  title: PropTypes.any,
-  subTitle: PropTypes.any,
-  dateTime: PropTypes.any,
-  isSeen: PropTypes.bool,
-};

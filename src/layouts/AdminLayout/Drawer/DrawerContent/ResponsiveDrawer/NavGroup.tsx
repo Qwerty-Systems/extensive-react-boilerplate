@@ -8,8 +8,8 @@ import NavItem from "./NavItem";
 
 /***************************  RESPONSIVE DRAWER - GROUP  ***************************/
 
-export default function NavGroup({ item }) {
-  const renderNavItem = (menuItem) => {
+export default function NavGroup({ item }: any) {
+  const renderNavItem = (menuItem: any) => {
     // Render items based on the type
     switch (menuItem.type) {
       case "collapse":
@@ -50,9 +50,7 @@ export default function NavGroup({ item }) {
         },
       }}
     >
-      {item.children?.map((menuItem) => renderNavItem(menuItem))}
+      {item.children?.map((menuItem: any) => renderNavItem(menuItem))}
     </List>
   );
 }
-
-NavGroup.propTypes = { item: PropTypes.any };

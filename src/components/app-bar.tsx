@@ -1,31 +1,31 @@
 "use client";
-import { useState } from "react";
+// import { useState } from "react";
 
 import { styled } from "@mui/material/styles";
-import useAuth from "@/services/auth/use-auth";
-import useAuthActions from "@/services/auth/use-auth-actions";
+// import useAuth from "@/services/auth/use-auth";
+// import useAuthActions from "@/services/auth/use-auth-actions";
 import { useTranslation } from "@/services/i18n/client";
 import Link from "@/components/link";
-import { RoleEnum } from "@/services/api/types/role";
+// import { RoleEnum } from "@/services/api/types/role";
 import ThemeSwitchButton from "@/components/switch-theme-button";
 import { IS_SIGN_UP_ENABLED } from "@/services/auth/config";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import Divider from "@mui/material/Divider";
+// import Menu from "@mui/material/Menu";
+// import MenuItem from "@mui/material/MenuItem";
+// import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import Tooltip from "@mui/material/Tooltip";
-import Avatar from "@mui/material/Avatar";
+// import CircularProgress from "@mui/material/CircularProgress";
+// import Tooltip from "@mui/material/Tooltip";
+// import Avatar from "@mui/material/Avatar";
 import MenuIcon from "@mui/icons-material/Menu";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Logo from "./logo";
-
+import { usePathname } from "next/navigation";
 const StyledAppBar = styled(AppBar)((/* { theme } */) => ({
   background: "transparent",
   boxShadow: "none",
@@ -42,19 +42,20 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 
 const ResponsiveAppBar = () => {
   const { t } = useTranslation("common");
-  const { user, isLoaded } = useAuth();
+  /*  const { user, isLoaded } = useAuth();
   const { logOut } = useAuthActions();
   const [anchorNav, setAnchorNav] = useState<null | HTMLElement>(null);
-  const [anchorUser, setAnchorUser] = useState<null | HTMLElement>(null);
+  const [anchorUser, setAnchorUser] = useState<null | HTMLElement>(null); */
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) =>
-    setAnchorNav(event.currentTarget);
-  const handleCloseNavMenu = () => setAnchorNav(null);
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) =>
-    setAnchorUser(event.currentTarget);
-  const handleCloseUserMenu = () => setAnchorUser(null);
-
-  return (
+  const handleOpenNavMenu = (/* event: React.MouseEvent<HTMLElement> */) => {};
+  // setAnchorNav(event.currentTarget);
+  // const handleCloseNavMenu = () => setAnchorNav(null);
+  // const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) =>
+  //   setAnchorUser(event.currentTarget);
+  // const handleCloseUserMenu = () => setAnchorUser(null);
+  const pathname = usePathname();
+  console.log("pathname", pathname);
+  return pathname === "/en" ? (
     <Box sx={{ bgcolor: "grey.100" }}>
       <StyledAppBar position="static">
         <Container maxWidth="xl">
@@ -66,7 +67,7 @@ const ResponsiveAppBar = () => {
             >
               {/* Logo */}
               <Box sx={{ display: { xs: "none", md: "flex" } }}>
-                <Logo />
+                <Logo to="/" />
               </Box>
 
               {/* Mobile Menu Button */}
@@ -78,7 +79,7 @@ const ResponsiveAppBar = () => {
                 >
                   <MenuIcon />
                 </IconButton>
-                <Menu
+                {/* <Menu
                   anchorEl={anchorNav}
                   open={Boolean(anchorNav)}
                   onClose={handleCloseNavMenu}
@@ -124,7 +125,7 @@ const ResponsiveAppBar = () => {
                       )}
                     </>
                   )}
-                </Menu>
+                </Menu> */}
               </Box>
 
               {/* Title for Mobile */}
@@ -138,7 +139,7 @@ const ResponsiveAppBar = () => {
               </Typography>
 
               {/* Desktop Menu */}
-              <Box sx={{ display: { xs: "none", md: "flex" }, flexGrow: 1 }}>
+              {/* <Box sx={{ display: { xs: "none", md: "flex" }, flexGrow: 1 }}>
                 {!!user?.role &&
                   [RoleEnum.ADMIN].includes(Number(user?.role?.id)) && (
                     <Button
@@ -149,12 +150,12 @@ const ResponsiveAppBar = () => {
                       {t("common:navigation.users")}
                     </Button>
                   )}
-              </Box>
+              </Box> */}
 
               {/* Right-side Icons */}
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <ThemeSwitchButton />
-                {!isLoaded ? (
+                {/* {!isLoaded ? (
                   <CircularProgress size={24} sx={{ ml: 2 }} />
                 ) : user ? (
                   <>
@@ -200,13 +201,25 @@ const ResponsiveAppBar = () => {
                       </Button>
                     )}
                   </Box>
-                )}
+                )} */}
+                <Box sx={{ display: { xs: "none", md: "flex" } }}>
+                  <Button component={Link} href="/sign-in">
+                    {t("common:navigation.signIn")}
+                  </Button>
+                  {IS_SIGN_UP_ENABLED && (
+                    <Button component={Link} href="/sign-up" sx={{ ml: 1 }}>
+                      {t("common:navigation.signUp")}
+                    </Button>
+                  )}
+                </Box>
               </Box>
             </Stack>
           </StyledToolbar>
         </Container>
       </StyledAppBar>
     </Box>
+  ) : (
+    <></>
   );
 };
 

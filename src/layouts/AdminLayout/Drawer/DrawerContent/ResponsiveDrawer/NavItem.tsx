@@ -86,7 +86,7 @@ export default function NavItem({ item, level = 0 }: NavItemProps) {
             name={(item.icon as any) ?? "Menu"}
             color={iconcolor}
             size={18}
-            stroke={1.5}
+            // stroke={1.5}
           />
         </ListItemIcon>
       )}

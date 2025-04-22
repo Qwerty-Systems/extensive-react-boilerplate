@@ -271,7 +271,7 @@ export default function Notification() {
             <MainCard
               sx={{
                 borderRadius: 2,
-                boxShadow: theme.customShadows.tooltip,
+                // boxShadow: theme.customShadows.tooltip,
                 width: 1,
                 minWidth: { xs: 352, sm: 240 },
                 maxWidth: { xs: 352, md: 420 },

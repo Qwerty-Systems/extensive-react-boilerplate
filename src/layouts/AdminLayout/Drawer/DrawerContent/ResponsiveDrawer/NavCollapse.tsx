@@ -21,6 +21,7 @@ import useMenuCollapse from "@/hooks/useMenuCollapse";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
+import * as MuiIcons from "@mui/icons-material";
 // @style
 const verticalDivider = {
   "&:after": {
@@ -55,11 +56,14 @@ function NavCollapseLoop({ item }: { item: NavItemType }) {
 }
 
 /***************************  RESPONSIVE DRAWER - COLLAPSE  ***************************/
+// Define valid icon names type based on MUI icons
+type MuiIconName = keyof typeof MuiIcons;
 
 interface NavItemType {
   id: string;
+  url: string;
   title: string;
-  icon?: string;
+  icon?: MuiIconName;
   type: "collapse" | "item";
   children?: NavItemType[];
 }
@@ -105,10 +109,10 @@ export default function NavCollapse({
         {level === 0 && (
           <ListItemIcon>
             <DynamicIcon
-              name={(item.icon || "Menu") as "Menu"}
+              name={item.icon || "Home"}
               color={iconcolor}
               size={18}
-              stroke={1.5}
+              // stroke={1.5}
             />
           </ListItemIcon>
         )}
@@ -130,7 +134,3 @@ export default function NavCollapse({
     </>
   );
 }
-
-NavCollapseLoop.propTypes = { item: PropTypes.any };
-
-NavCollapse.propTypes = { item: PropTypes.any, level: PropTypes.number };

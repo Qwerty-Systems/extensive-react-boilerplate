@@ -46,11 +46,3 @@ export default function OverviewCard({
     </MainCard>
   );
 }
-
-OverviewCard.propTypes = {
-  title: PropTypes.string,
-  value: PropTypes.string,
-  chip: PropTypes.any,
-  compare: PropTypes.string,
-  cardProps: PropTypes.any,
-};

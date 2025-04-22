@@ -1,20 +1,21 @@
-/***************************  DYNAMIC - TABLER ICONS  ***************************/
+import * as MuiIcons from "@mui/icons-material"; // Import all MUI icons
+
+interface DynamicIconProps {
+  name: keyof typeof MuiIcons; // Enforce valid icon names
+  size?: number | string;
+  color?: string;
+}
 
 export default function DynamicIcon({
   name,
   size = 24,
   color = "black",
-}: {
-  name: any;
-  size?: number;
-  color?: string;
-  stroke?: number;
-}) {
-  // Dynamically get the icon component based on the `name` prop
-  const IconComponent = name;
+}: DynamicIconProps) {
+  const IconComponent = MuiIcons[name];
 
-  // If the provided `name` does not match any icon in TablerIcons, return null to avoid rendering errors
   if (!IconComponent) {
+    // Handle invalid icon names
+    console.warn(`Icon "${name}" not found`);
     return null;
   }
 

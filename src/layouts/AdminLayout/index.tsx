@@ -66,5 +66,3 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     </Stack>
   );
 }
-
-DashboardLayout.propTypes = { children: PropTypes.any };

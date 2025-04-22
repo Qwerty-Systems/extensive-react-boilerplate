@@ -30,53 +30,6 @@ const other = {
       target: true,
       icon: "IconLifebuoy",
     },
-
-    {
-      id: "menu-levels",
-      title: "Menu Levels",
-      type: "collapse",
-      icon: "IconMenu2",
-      children: [
-        {
-          id: "menu-level-1.1",
-          title: "Level 1",
-          type: "item",
-          url: "#",
-        },
-        {
-          id: "menu-level-1.2",
-          title: "Level 1",
-          type: "collapse",
-          children: [
-            {
-              id: "menu-level-2.1",
-              title: "Level 2",
-              type: "item",
-              url: "#",
-            },
-            {
-              id: "menu-level-2.2",
-              title: "Level 2",
-              type: "collapse",
-              children: [
-                {
-                  id: "menu-level-3.1",
-                  title: "Level 3",
-                  type: "item",
-                  url: "#",
-                },
-                {
-                  id: "menu-level-3.2",
-                  title: "Level 3",
-                  type: "item",
-                  url: "#",
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
   ],
 };
 

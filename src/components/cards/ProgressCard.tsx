@@ -37,9 +37,3 @@ export default function ProgressCard({
     </Stack>
   );
 }
-
-ProgressCard.propTypes = {
-  title: PropTypes.string,
-  value: PropTypes.string,
-  progress: PropTypes.any,
-};

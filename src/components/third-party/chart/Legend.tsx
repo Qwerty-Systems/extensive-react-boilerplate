@@ -48,5 +48,3 @@ export default function Legend({ items, onToggle }: LegendProps) {
     </Stack>
   );
 }
-
-Legend.propTypes = { items: PropTypes.object, onToggle: PropTypes.func };

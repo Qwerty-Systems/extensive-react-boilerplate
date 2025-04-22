@@ -89,5 +89,3 @@ export default function LogoFab({ size = 24 }) {
     </svg>
   );
 }
-
-LogoFab.propTypes = { size: Number };

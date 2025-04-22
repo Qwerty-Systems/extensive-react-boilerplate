@@ -60,13 +60,3 @@ export default function Profile({
     </Stack>
   );
 }
-
-Profile.propTypes = {
-  avatar: PropTypes.any,
-  title: PropTypes.any,
-  caption: PropTypes.any,
-  label: PropTypes.any,
-  sx: PropTypes.any,
-  titleProps: PropTypes.any,
-  captionProps: PropTypes.any,
-};

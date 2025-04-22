@@ -1,9 +1,14 @@
 "use client";
 
+import { generateFocusStyle } from "@/utils/generateFocusStyle";
+import ButtonBase from "@mui/material/ButtonBase";
+import Link from "@mui/material/Link";
+import { useTheme } from "@mui/material/styles";
+import LogoIcon from "./LogoIcon";
+import LogoMain from "./LogoMain";
+import { APP_DEFAULT_PATH } from "@/config";
 // @next
 
-// @project
-import Link from "../link";
 // import Link from "../link";
 /***************************  MAIN - LOGO  ***************************/
 
@@ -14,23 +19,20 @@ interface LogoSectionProps {
   to?: string;
 }
 
-export default function LogoSection({} /* isIcon, sx, to  */ : LogoSectionProps) {
-  // const theme = useTheme();
+export default function LogoSection({ isIcon, sx, to }: LogoSectionProps) {
+  const theme = useTheme();
   return (
-    <Link href={process.env.NEXT_PUBLIC_BASE_NAME || ""}>
-      {/* //TODO */}
-      {/* <ButtonBase
+    <Link href={!to ? APP_DEFAULT_PATH : to}>
+      <ButtonBase
         disableRipple
         sx={{
           ...sx,
-          display: "block",
-          "&:focus-visible": generateFocusVisibleStyles(
-            theme.palette.primary.main
-          ),
+          "&:focus-visible": generateFocusStyle(theme.palette.primary.main),
         }}
         aria-label="logo"
       >
-        </ButtonBase> */}
+        {isIcon ? <LogoIcon /> : <LogoMain />}
+      </ButtonBase>
     </Link>
   );
 }

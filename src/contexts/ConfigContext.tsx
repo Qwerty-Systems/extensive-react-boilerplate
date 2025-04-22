@@ -23,5 +23,3 @@ function ConfigProvider({ children }: { children: React.ReactNode }) {
 }
 
 export { ConfigProvider, ConfigContext };
-
-ConfigProvider.propTypes = { children: PropTypes.any };

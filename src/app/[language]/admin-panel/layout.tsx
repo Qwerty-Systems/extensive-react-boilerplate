@@ -6,8 +6,6 @@ const AdminLayout = dynamic(() => import("@/layouts/AdminLayout"));
 
 /***************************  LAYOUT - ADMIN  ***************************/
 
-export default function Layout({ children }) {
+export default function Layout({ children }: any) {
   return <AdminLayout>{children}</AdminLayout>;
 }
-
-Layout.propTypes = { children: PropTypes.any };

@@ -133,10 +133,10 @@
             "name": "@mui/material",
             "message": "Please use \"import ComponentName from '@mui/material/ComponentName'\" instead."
           },
-          {
+          /* {
             "name": "@mui/icons-material",
             "message": "Please use \"import IconName from '@mui/icons-material/IconName'\" instead."
-          },
+          }, */
           {
             "name": "next/link",
             "message": "Please use \"import Link from \"@/components/link\"\" instead. This is need for \"leave page\" logic"

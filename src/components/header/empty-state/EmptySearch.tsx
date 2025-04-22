@@ -1,29 +1,18 @@
 "use client";
 
 // @mui
-import Stack, { StackOwnProps } from "@mui/material/Stack";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
 // @assets
 import DumpingDoodle from "@/images/illustration/DumpingDoodle";
-import { CommonProps } from "@mui/material/OverridableComponent";
-import { JSX, ElementType } from "react";
 
 /***************************  HEADER - EMPTY SEARCH ***************************/
 
-export default function EmptySearch(
-  props: JSX.IntrinsicAttributes & {
-    component: ElementType<any, keyof JSX.IntrinsicElements>;
-  } & StackOwnProps &
-    CommonProps &
-    Omit<any, keyof CommonProps | keyof StackOwnProps>,
-  ref: unknown
-) {
+export default function EmptySearch() {
   return (
     <Stack
-      ref={ref}
-      {...props}
       sx={{
         width: 1,
         alignItems: "center",

@@ -33,6 +33,7 @@ import { AvatarSize } from "@/enum";
 // @assets
 import SearchIcon from "@mui/icons-material/Search";
 import KeyboardCommandKeyIcon from "@mui/icons-material/KeyboardCommandKey";
+import EmptySearch from "@/components/header/empty-state/EmptySearch";
 
 /***************************  HEADER - SEARCH DATA  ***************************/
 
@@ -254,7 +255,7 @@ export default function SearchBar() {
             <MainCard
               sx={{
                 borderRadius: 2,
-                boxShadow: theme.customShadows.tooltip,
+                // boxShadow: theme.customShadows.tooltip,
                 width: 1,
                 minWidth: { xs: 352, sm: 240 },
                 maxWidth: { xs: 352, md: 420 },
@@ -268,7 +269,7 @@ export default function SearchBar() {
                 }}
               >
                 {isEmptySearch ? (
-                  /*  <EmptySearch /> */ <> hello</>
+                  <EmptySearch />
                 ) : (
                   <List disablePadding>
                     {renderSubheader("Users")}

@@ -35,9 +35,3 @@ export default function MainCard({
     </Card>
   );
 }
-
-MainCard.propTypes = {
-  children: PropTypes.any,
-  sx: PropTypes.object,
-  others: PropTypes.any,
-};

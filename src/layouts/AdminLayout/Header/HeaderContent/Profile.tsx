@@ -37,14 +37,9 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import FormatTextdirectionLToRIcon from "@mui/icons-material/FormatTextdirectionLToR";
+import useAuth from "@/services/auth/use-auth";
 
 /***************************  HEADER - PROFILE DATA  ***************************/
-
-const profileData = {
-  avatar: { src: "/assets/images/users/avatar-1.png", size: AvatarSize.XS },
-  title: "Erika Collins",
-  caption: "Super Admin",
-};
 
 const languageList = [
   { key: ThemeI18n.EN, value: "English" },
@@ -63,13 +58,21 @@ export default function ProfileSection() {
   const [innerAnchorEl, setInnerAnchorEl] = useState<HTMLDivElement | null>(
     null
   );
-
+  const { user /* , isLoaded */ } = useAuth();
   const open = Boolean(anchorEl);
   const innerOpen = Boolean(innerAnchorEl);
   const id = open ? "profile-action-popper" : undefined;
   const innerId = innerOpen ? "profile-inner-popper" : undefined;
   const buttonStyle = { borderRadius: 2, p: 1 };
 
+  const profileData = {
+    avatar: {
+      src: user?.photo?.path || "/assets/images/users/avatar-1.png",
+      size: AvatarSize.XS,
+    },
+    title: `${user?.firstName} ${user?.lastName}`,
+    caption: ` ${user?.role?.name || " Super Admin"}`,
+  };
   const handleActionClick = (event: MouseEvent<HTMLDivElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
   };
@@ -115,7 +118,7 @@ export default function ProfileSection() {
             <MainCard
               sx={{
                 borderRadius: 2,
-                boxShadow: theme.customShadows.tooltip,
+                // boxShadow: theme.customShadows.tooltip,
                 minWidth: 220,
                 p: 0.5,
               }}

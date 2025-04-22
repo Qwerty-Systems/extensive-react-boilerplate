@@ -1,13 +1,13 @@
 // @project
 import manage from "./manage";
-import other from "./other";
-import pages from "./pages";
-import uiElements from "./ui-elements";
+/* import other from "./other"; */
+import regions from "./regions";
+import users from "./users";
 
 /***************************  MENU ITEMS  ***************************/
 
 const menuItems = {
-  items: [manage, uiElements, pages, other],
+  items: [manage, users, regions /* , other */],
 };
 
 export default menuItems;

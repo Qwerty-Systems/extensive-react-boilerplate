@@ -70,13 +70,13 @@ const yearlyPoints = [
 ];
 
 const yearlyData = {
-  pageViewData: [
+  pickupsScheduledData: [
     190, 230, 240, 230, 240, 230, 250, 270, 300, 320, 340, 360, 400, 420, 450,
     470, 490, 500, 480, 450, 420, 380, 420, 380, 190, 230, 240, 230, 240, 230,
     250, 270, 300, 320, 400, 440, 480, 520, 540, 580, 620, 640, 680, 720, 650,
     680, 720, 840, 950, 800,
   ],
-  uniqueVisitorData: [
+  transactionsCompletedData: [
     900, 920, 930, 860, 840, 820, 800, 840, 860, 840, 800, 780, 760, 790, 740,
     710, 670, 650, 690, 750, 780, 760, 730, 680, 650, 620, 500, 470, 430, 400,
     380, 360, 340, 320, 300, 280, 260, 240, 220, 260, 300, 340, 380, 420, 460,
@@ -124,12 +124,12 @@ const monthlyPoints = [
 ];
 
 const monthlyData = {
-  pageViewData: [
+  pickupsScheduledData: [
     190, 230, 240, 230, 300, 230, 250, 270, 230, 320, 340, 450, 400, 420, 485,
     470, 490, 500, 480, 450, 420, 380, 420, 380, 400, 600, 575, 540, 550, 520,
     580, 570, 600, 600, 720, 780,
   ],
-  uniqueVisitorData: [
+  transactionsCompletedData: [
     900, 920, 930, 860, 840, 820, 800, 840, 860, 840, 800, 780, 760, 790, 740,
     710, 670, 650, 690, 750, 780, 760, 730, 680, 650, 680, 630, 510, 460, 460,
     405, 460, 415, 430, 410, 500,
@@ -147,8 +147,8 @@ const dailyPoints = [
 ];
 
 const dailyData = {
-  pageViewData: [10, 5, 12, 8, 35, 14, 30],
-  uniqueVisitorData: [15, 20, 22, 18, 21, 30, 38],
+  pickupsScheduledData: [10, 5, 12, 8, 35, 14, 30],
+  transactionsCompletedData: [15, 20, 22, 18, 21, 30, 38],
 };
 
 const timeFilter = ["Daily", "Monthly", "Yearly"];
@@ -206,8 +206,8 @@ export default function Chart1() {
 
   const [view, setView] = useState(ViewMode.MONTHLY);
   const [visibilityOption, setVisibilityOption] = useState({
-    page_views: true,
-    unique_visitor: true,
+    scheduled_pickups: true,
+    completed_transactions: true,
   });
 
   const handleViewChange = (_event: any, newValue: any) => {
@@ -224,18 +224,18 @@ export default function Chart1() {
 
   const seriesData = [
     {
-      id: "page_views",
-      data: dataMap[view].pageViewData,
-      color: theme.palette.primary.light,
-      visible: visibilityOption["page_views"],
-      label: "Page View",
+      id: "scheduled_pickups",
+      data: dataMap[view].pickupsScheduledData,
+      color: theme.palette.success.light, // Green for environmental actions
+      visible: visibilityOption["scheduled_pickups"],
+      label: "Scheduled Pickups",
     },
     {
-      id: "unique_visitor",
-      data: dataMap[view].uniqueVisitorData,
-      color: theme.palette.primary.main,
-      visible: visibilityOption["unique_visitor"],
-      label: "Unique Visitor",
+      id: "completed_transactions",
+      data: dataMap[view].transactionsCompletedData,
+      color: theme.palette.info.main, // Blue for financial transactions
+      visible: visibilityOption["completed_transactions"],
+      label: "Completed Transactions",
     },
   ];
 
@@ -280,11 +280,11 @@ export default function Chart1() {
         >
           <Stack sx={{ gap: 0.5 }}>
             <Typography variant="h4" sx={{ fontWeight: 400 }}>
-              Analysis
+              Marketplace Performance
             </Typography>
             <Typography variant="caption" sx={{ color: "grey.700" }}>
-              Analyze user engagement and improve your product with real-time
-              analytics.
+              Track recycling volumes, transaction trends, and environmental
+              impact through real-time sustainability metrics.
             </Typography>
           </Stack>
           <Tabs

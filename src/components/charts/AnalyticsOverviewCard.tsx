@@ -9,9 +9,10 @@ import OverviewCard from "@/components/cards/OverviewCard";
 import { getRadiusStyles } from "@/utils/getRadiusStyles";
 
 // @assets
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import EnergySavingsLeafIcon from "@mui/icons-material/EnergySavingsLeaf";
+import WarningIcon from "@mui/icons-material/Warning";
 /***************************  CARDS - BORDER WITH RADIUS  ***************************/
 
 export function applyBorderWithRadius(radius: number, theme: Theme) {
@@ -43,43 +44,86 @@ export function applyBorderWithRadius(radius: number, theme: Theme) {
 /***************************   OVERVIEW CARD -DATA  ***************************/
 
 const overviewAnalytics = [
-  {
-    title: "Unique Visitors",
-    value: "23,876",
-    compare: "Compare to last week",
+  /*   {
+    title: "New Listings",
+    value: "1,876",
+    compare: "vs. last week",
     chip: {
-      label: "24.5%",
+      label: "18.2%",
+      color: "success",
+      avatar: <ArrowUpwardIcon />,
+    },
+  }, */
+  {
+    title: "Scheduled Pickups",
+    value: "3,450",
+    compare: "vs. previous month",
+    chip: {
+      label: "12.5%",
+      color: "success",
       avatar: <ArrowUpwardIcon />,
     },
   },
-  {
-    title: "Page View",
-    value: "30,450",
-    compare: "Compare to last week",
+  /*  {
+    title: "Completed Transactions",
+    value: "2,789",
+    compare: "vs. last week",
     chip: {
-      label: "20.5%",
-      avatar: <ArrowUpwardIcon />,
-    },
-  },
-  {
-    title: "Events",
-    value: "34,789",
-    compare: "Compare to last week",
-    chip: {
-      label: "20.5%",
+      label: "4.3%",
       color: "error",
       avatar: <ArrowDownwardIcon />,
     },
   },
   {
-    title: "Live Visitor",
-    value: "45,687",
-    compare: "Compare to last week",
+    title: "Active Users",
+    value: "4,687",
+    compare: "vs. last month",
     chip: {
-      label: "24.5%",
+      label: "22.1%",
+      color: "success",
       avatar: <ArrowUpwardIcon />,
     },
+  }, */
+  {
+    title: "Waste Diverted (tons)",
+    value: "2,345",
+    compare: "Monthly target progress",
+    chip: {
+      label: "78%",
+      color: "success",
+      avatar: <CheckCircleIcon />,
+    },
   },
+  {
+    title: "Carbon Offset (kg CO₂)",
+    value: "1.2M",
+    compare: "Equivalent to 25k trees planted",
+    chip: {
+      label: "34%↑",
+      color: "success",
+      avatar: <EnergySavingsLeafIcon />,
+    },
+  },
+  {
+    title: "Pending Disputes",
+    value: "45",
+    compare: "Need resolution",
+    chip: {
+      label: "+5 New",
+      color: "warning",
+      avatar: <WarningIcon />,
+    },
+  },
+  /* {
+    title: "Support Tickets",
+    value: "89",
+    compare: "vs. last week",
+    chip: {
+      label: "15%",
+      color: "error",
+      avatar: <ArrowDownwardIcon />,
+    },
+  }, */
 ];
 
 /***************************   OVERVIEW - CARDS  ***************************/

@@ -10,8 +10,8 @@ const manage = {
       id: "dashboard",
       title: "Dashboard",
       type: "item",
-      url: "/dashboard",
-      icon: "IconLayoutGrid",
+      url: "/admin-panel",
+      icon: "dashboard",
     },
   ],
 };
