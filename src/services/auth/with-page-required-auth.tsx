@@ -14,9 +14,7 @@ type OptionsType = {
   roles: RoleEnum[];
 };
 
-const roles = Object.values(RoleEnum).filter(
-  (value) => !Number.isNaN(Number(value))
-) as RoleEnum[];
+const roles = Object.values(RoleEnum).filter((value) => value) as RoleEnum[];
 
 function withPageRequiredAuth(
   Component: FunctionComponent<PropsType>,
@@ -33,8 +31,8 @@ function withPageRequiredAuth(
       const check = () => {
         if (
           (user &&
-            user?.role?.id &&
-            optionRoles.includes(Number(user?.role.id))) ||
+            user?.role?.name &&
+            optionRoles.includes(user?.role.name as RoleEnum)) ||
           !isLoaded
         )
           return;
@@ -60,8 +58,8 @@ function withPageRequiredAuth(
     }, [user, isLoaded, router, language]);
 
     return user &&
-      user?.role?.id &&
-      optionRoles.includes(Number(user?.role.id)) ? (
+      user?.role?.name &&
+      optionRoles.includes(user?.role.name as RoleEnum) ? (
       <Component {...props} />
     ) : null;
   };

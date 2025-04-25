@@ -3,7 +3,6 @@
 import { MouseEvent, useState } from "react";
 
 // @mui
-import { useTheme } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -38,26 +37,27 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import FormatTextdirectionLToRIcon from "@mui/icons-material/FormatTextdirectionLToR";
 import useAuth from "@/services/auth/use-auth";
+import useAuthActions from "@/services/auth/use-auth-actions";
 
 /***************************  HEADER - PROFILE DATA  ***************************/
 
 const languageList = [
   { key: ThemeI18n.EN, value: "English" },
+  { key: ThemeI18n.SW, value: "Swahili" },
   { key: ThemeI18n.FR, value: "French" },
-  { key: ThemeI18n.RO, value: "Romanian" },
-  { key: ThemeI18n.ZH, value: "Chinese" },
 ];
 
 /***************************  HEADER - PROFILE  ***************************/
 
 export default function ProfileSection() {
-  const theme = useTheme();
+  /* const theme = useTheme(); */
   const { i18n } = useConfig();
 
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [innerAnchorEl, setInnerAnchorEl] = useState<HTMLDivElement | null>(
     null
   );
+  const { logOut } = useAuthActions();
   const { user /* , isLoaded */ } = useAuth();
   const open = Boolean(anchorEl);
   const innerOpen = Boolean(innerAnchorEl);
@@ -82,13 +82,14 @@ export default function ProfileSection() {
   };
 
   const logoutAccount = () => {
+    logOut();
     setAnchorEl(null);
   };
 
-  const i18nHandler = (event: MouseEvent<HTMLDivElement>, key: any) => {
+  /*  const i18nHandler = (event: MouseEvent<HTMLDivElement>, key: any) => {
     handleInnerActionClick(event);
     if (key !== i18n) enqueueSnackbar("Upgrade to pro for language change");
-  };
+  }; */
 
   return (
     <>
@@ -220,7 +221,7 @@ export default function ProfileSection() {
                             <MainCard
                               sx={{
                                 borderRadius: 2,
-                                boxShadow: theme.customShadows.tooltip,
+                                // boxShadow: theme.customShadows.tooltip,
                                 minWidth: 150,
                                 p: 0.5,
                               }}
@@ -235,7 +236,8 @@ export default function ProfileSection() {
                                       key={index}
                                       sx={buttonStyle}
                                       onClick={(event) =>
-                                        i18nHandler(event, item.key)
+                                        // i18nHandler(event, item.key)
+                                        console.log("event", event)
                                       }
                                     >
                                       <ListItemText>{item.value}</ListItemText>
@@ -248,7 +250,7 @@ export default function ProfileSection() {
                         )}
                       </Popper>
                     </ListItemButton>
-                    <ListItemButton href="#" sx={{ ...buttonStyle, my: 0.5 }}>
+                    <ListItemButton href="/" sx={{ ...buttonStyle, my: 0.5 }}>
                       <ListItemIcon>
                         <SettingsIcon fontSize="small" />
                       </ListItemIcon>

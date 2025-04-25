@@ -36,17 +36,17 @@ const data = [
       {
         label: "Why SakaTaka?",
         link: {
-          href: "",
+          href: "/",
           ...linkProps,
         },
       },
       {
         label: "About",
-        link: { href: "", ...linkProps },
+        link: { href: "/", ...linkProps },
       },
       {
         label: "Contact Us",
-        link: { href: "", ...linkProps },
+        link: { href: "/", ...linkProps },
       },
     ],
   },
@@ -80,7 +80,7 @@ const data = [
     menu: [
       {
         label: "Documentation",
-        link: { href: "", ...linkProps },
+        link: { href: "/", ...linkProps },
       },
       {
         label: "Blog",
@@ -110,7 +110,7 @@ const usefullLinks: any[] = [
   // {
   //   icon: <SvgIcon name="tabler-sparkles" {...iconProps} />,
   //   title: "Documentation",
-  //   href: "",
+  //   href: "/",
   // },
 ];
 

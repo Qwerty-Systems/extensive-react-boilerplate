@@ -3,7 +3,6 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import Stack from "@mui/material/Stack";
 
 // @project
-import NavCard from "./NavCard";
 import ResponsiveDrawer from "./ResponsiveDrawer";
 
 import { useGetMenuMaster } from "@/states/menu";
@@ -30,7 +29,7 @@ export default function DrawerContent() {
         }}
       >
         <ResponsiveDrawer />
-        <NavCard />
+        {/* <NavCard /> */}
       </Stack>
     </SimpleBar>
   );

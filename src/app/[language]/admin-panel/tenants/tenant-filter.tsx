@@ -10,7 +10,7 @@ import Popover from "@mui/material/Popover";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { UserFilterType } from "./user-filter-types";
+import { UserFilterType } from "./tenant-filter-types";
 
 type UserFilterFormData = UserFilterType;
 

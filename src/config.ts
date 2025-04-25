@@ -3,7 +3,7 @@ import { Archivo } from "next/font/google";
 
 /***************************  THEME CONSTANT  ***************************/
 
-export const APP_DEFAULT_PATH = "/"; /* "/dashboard */
+export const APP_DEFAULT_PATH = "/admin-panel"; /* "/dashboard */
 
 export const DRAWER_WIDTH = 254;
 export const MINI_DRAWER_WIDTH = 76 + 1; // 1px - for right-side border
@@ -28,10 +28,11 @@ export let ThemeDirection: { LTR?: any } = {};
   ThemeDirection["LTR"] = "ltr";
 })(ThemeDirection || (ThemeDirection = {}));
 
-export let ThemeI18n: { EN?: any; FR?: any; RO?: any; ZH?: any } = {};
+export let ThemeI18n: { EN?: any; SW?: any; FR?: any; RO?: any; ZH?: any } = {};
 
 (function (ThemeI18n) {
   ThemeI18n["EN"] = "en";
+  ThemeI18n["SW"] = "sw";
   ThemeI18n["FR"] = "fr";
   ThemeI18n["RO"] = "ro";
   ThemeI18n["ZH"] = "zh";

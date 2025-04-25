@@ -249,6 +249,15 @@ function FormEditUser() {
                   {
                     id: RoleEnum.USER,
                   },
+                  {
+                    id: RoleEnum.AGENT,
+                  },
+                  {
+                    id: RoleEnum.CUSTOMER,
+                  },
+                  {
+                    id: RoleEnum.MANAGER,
+                  },
                 ]}
                 keyValue="id"
                 renderOption={(option) =>

@@ -17,8 +17,11 @@ import {
 import useFetch from "@/services/api/use-fetch";
 import { AUTH_LOGOUT_URL, AUTH_ME_URL } from "@/services/api/config";
 import HTTP_CODES_ENUM from "../api/types/http-codes";
-import { getTokensInfo, setTokensInfoToStorage } from "./auth-tokens-info";
-import { useKeycloak } from "@react-keycloak/web";
+import {
+  getTokensInfo,
+  setTokensInfo as setTokensInfoToStorage,
+} from "./auth-tokens-info";
+// import { useKeycloak } from "@react-keycloak/web";
 
 function AuthProvider(props: PropsWithChildren<{}>) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -27,48 +30,28 @@ function AuthProvider(props: PropsWithChildren<{}>) {
     null
   );
   const fetchBase = useFetch();
-  const { keycloak } = useKeycloak();
-  // const setTokensInfo = useCallback((tokensInfo: TokensInfo) => {
-  //   setTokensInfoToStorage(tokensInfo);
 
-  //   if (!tokensInfo) {
-  //     setUser(null);
-  //   }
-  // }, []);
+  const setTokensInfo = useCallback((tokensInfo: TokensInfo) => {
+    setTokensInfoToStorage(tokensInfo);
 
-  // Update setTokensInfo to handle method-specific storage
-  const setTokensInfo = useCallback(
-    (tokensInfo: TokensInfo, method: "local" | "keycloak") => {
-      setAuthMethod(method);
-      setTokensInfoToStorage(tokensInfo, method); // Store tokens with method-specific key
-      if (!tokensInfo) setUser(null);
-    },
-    []
-  );
-
-  // const logOut = useCallback(async () => {
-  //   const tokens = getTokensInfo();
-
-  //   if (tokens?.token) {
-  //     await fetchBase(AUTH_LOGOUT_URL, {
-  //       method: "POST",
-  //     });
-  //   }
-  //   setTokensInfo(null);
-  // }, [setTokensInfo, fetchBase]);
-
-  // Modified logout to handle Keycloak
-  const logOut = useCallback(async () => {
-    if (authMethod === "keycloak") {
-      await keycloak.logout(); // Keycloak-specific logout
-    } else {
-      await fetchBase(AUTH_LOGOUT_URL, { method: "POST" }); // Local logout
+    if (!tokensInfo) {
+      setUser(null);
     }
-    setTokensInfo(null, authMethod!);
-  }, [authMethod, fetchBase, keycloak, setTokensInfo]);
+  }, []);
+
+  const logOut = useCallback(async () => {
+    const tokens = getTokensInfo();
+
+    if (tokens?.token) {
+      await fetchBase(AUTH_LOGOUT_URL, {
+        method: "POST",
+      });
+    }
+    setTokensInfo(null);
+  }, [setTokensInfo, fetchBase]);
 
   const loadData = useCallback(async () => {
-    const tokens = getTokensInfo("local");
+    const tokens = getTokensInfo();
 
     try {
       if (tokens?.token) {
@@ -106,15 +89,14 @@ function AuthProvider(props: PropsWithChildren<{}>) {
     () => ({
       setUser,
       logOut,
-      setAuthMethod, // Add setAuthMethod to the context actions
+      setAuthMethod,
     }),
     [logOut, setAuthMethod]
   );
 
   const contextTokensValue = useMemo(
     () => ({
-      setTokensInfo: (tokensInfo: TokensInfo) =>
-        setTokensInfo(tokensInfo, "local"),
+      setTokensInfo,
     }),
     [setTokensInfo]
   );
@@ -129,4 +111,5 @@ function AuthProvider(props: PropsWithChildren<{}>) {
     </AuthContext.Provider>
   );
 }
+
 export default AuthProvider;

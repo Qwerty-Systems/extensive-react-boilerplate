@@ -6,101 +6,37 @@ import { useTranslation } from "@/services/i18n/client";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import {
-  PropsWithChildren,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { useGetUsersQuery, usersQueryKeys } from "./queries/queries";
-import { TableVirtuoso } from "react-virtuoso";
-import TableCell from "@mui/material/TableCell";
-import TableRow from "@mui/material/TableRow";
-import Avatar from "@mui/material/Avatar";
-import LinearProgress from "@mui/material/LinearProgress";
-import { styled } from "@mui/material/styles";
-import TableComponents from "@/components/table/table-components";
-import ButtonGroup from "@mui/material/ButtonGroup";
-import Button from "@mui/material/Button";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import ClickAwayListener from "@mui/material/ClickAwayListener";
-import Grow from "@mui/material/Grow";
-import Paper from "@mui/material/Paper";
-import Popper from "@mui/material/Popper";
-import MenuItem from "@mui/material/MenuItem";
-import MenuList from "@mui/material/MenuList";
+import { useMemo, useState } from "react";
+import { useGetUsersQuery } from "./queries/queries";
 import { User } from "@/services/api/types/user";
 import Link from "@/components/link";
 import useAuth from "@/services/auth/use-auth";
 import useConfirmDialog from "@/components/confirm-dialog/use-confirm-dialog";
 import { useDeleteUsersService } from "@/services/api/services/users";
 import removeDuplicatesFromArrayObjects from "@/services/helpers/remove-duplicates-from-array-of-objects";
-import { InfiniteData, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import UserFilter from "./user-filter";
 import { useRouter, useSearchParams } from "next/navigation";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import { UserFilterType, UserSortType } from "./user-filter-types";
 import { SortEnum } from "@/services/api/types/sort-type";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import EditIcon from "@mui/icons-material/Edit";
+import { DataGrid, GridColDef, GridSortModel } from "@mui/x-data-grid";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 
 type UsersKeys = keyof User;
 
-const TableCellLoadingContainer = styled(TableCell)(() => ({
-  padding: 0,
-}));
-
-function TableSortCellWrapper(
-  props: PropsWithChildren<{
-    width?: number;
-    orderBy: UsersKeys;
-    order: SortEnum;
-    column: UsersKeys;
-    handleRequestSort: (
-      event: React.MouseEvent<unknown>,
-      property: UsersKeys
-    ) => void;
-  }>
-) {
-  return (
-    <TableCell
-      style={{ width: props.width }}
-      sortDirection={props.orderBy === props.column ? props.order : false}
-    >
-      <TableSortLabel
-        active={props.orderBy === props.column}
-        direction={props.orderBy === props.column ? props.order : SortEnum.ASC}
-        onClick={(event) => props.handleRequestSort(event, props.column)}
-      >
-        {props.children}
-      </TableSortLabel>
-    </TableCell>
-  );
-}
-
 function Actions({ user }: { user: User }) {
-  const [open, setOpen] = useState(false);
   const { user: authUser } = useAuth();
   const { confirmDialog } = useConfirmDialog();
   const fetchUserDelete = useDeleteUsersService();
   const queryClient = useQueryClient();
-  const anchorRef = useRef<HTMLDivElement>(null);
-  const canDelete = user.id !== authUser?.id;
   const { t: tUsers } = useTranslation("admin-panel-users");
-
-  const handleToggle = () => {
-    setOpen((prevOpen) => !prevOpen);
-  };
-
-  const handleClose = (event: Event) => {
-    if (
-      anchorRef.current &&
-      anchorRef.current.contains(event.target as HTMLElement)
-    ) {
-      return;
-    }
-
-    setOpen(false);
-  };
+  const canDelete = user.id !== authUser?.id;
 
   const handleDelete = async () => {
     const isConfirmed = await confirmDialog({
@@ -109,129 +45,47 @@ function Actions({ user }: { user: User }) {
     });
 
     if (isConfirmed) {
-      setOpen(false);
-
       const searchParams = new URLSearchParams(window.location.search);
-      const searchParamsFilter = searchParams.get("filter");
-      const searchParamsSort = searchParams.get("sort");
+      const filter = searchParams.get("filter");
+      const sort = searchParams.get("sort");
 
-      let filter: UserFilterType | undefined = undefined;
-      let sort: UserSortType | undefined = {
-        order: SortEnum.DESC,
-        orderBy: "id",
-      };
+      const previousData = queryClient.getQueryData<any>([
+        "users",
+        { sort, filter },
+      ]);
 
-      if (searchParamsFilter) {
-        filter = JSON.parse(searchParamsFilter);
-      }
-
-      if (searchParamsSort) {
-        sort = JSON.parse(searchParamsSort);
-      }
-
-      const previousData = queryClient.getQueryData<
-        InfiniteData<{ nextPage: number; data: User[] }>
-      >(usersQueryKeys.list().sub.by({ sort, filter }).key);
-
-      await queryClient.cancelQueries({ queryKey: usersQueryKeys.list().key });
-
-      const newData = {
+      queryClient.setQueryData(["users", { sort, filter }], {
         ...previousData,
-        pages: previousData?.pages.map((page) => ({
+        pages: previousData?.pages.map((page: any) => ({
           ...page,
-          data: page?.data.filter((item) => item.id !== user.id),
+          data: page?.data.filter((item: User) => item.id !== user.id),
         })),
-      };
-
-      queryClient.setQueryData(
-        usersQueryKeys.list().sub.by({ sort, filter }).key,
-        newData
-      );
-
-      await fetchUserDelete({
-        id: user.id,
       });
+
+      await fetchUserDelete({ id: user.id });
     }
   };
 
-  const mainButton = (
-    <Button
-      size="small"
-      variant="contained"
-      LinkComponent={Link}
-      href={`/admin-panel/users/edit/${user.id}`}
-    >
-      {tUsers("admin-panel-users:actions.edit")}
-    </Button>
-  );
-
   return (
-    <>
-      {[!canDelete].every(Boolean) ? (
-        mainButton
-      ) : (
-        <ButtonGroup
-          variant="contained"
-          ref={anchorRef}
-          aria-label="split button"
+    <Box display="flex" gap={1}>
+      <Tooltip title={tUsers("admin-panel-users:actions.edit")}>
+        <IconButton
           size="small"
+          LinkComponent={Link}
+          href={`/admin-panel/users/edit/${user.id}`}
+          color="primary"
         >
-          {mainButton}
-
-          <Button
-            size="small"
-            aria-controls={open ? "split-button-menu" : undefined}
-            aria-expanded={open ? "true" : undefined}
-            aria-label="select merge strategy"
-            aria-haspopup="menu"
-            onClick={handleToggle}
-          >
-            <ArrowDropDownIcon />
-          </Button>
-        </ButtonGroup>
+          <EditIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      {canDelete && (
+        <Tooltip title={tUsers("admin-panel-users:actions.delete")}>
+          <IconButton size="small" onClick={handleDelete} color="error">
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       )}
-      <Popper
-        sx={{
-          zIndex: 1,
-        }}
-        open={open}
-        anchorEl={anchorRef.current}
-        role={undefined}
-        transition
-        disablePortal
-      >
-        {({ TransitionProps, placement }) => (
-          <Grow
-            {...TransitionProps}
-            style={{
-              transformOrigin:
-                placement === "bottom" ? "center top" : "center bottom",
-            }}
-          >
-            <Paper>
-              <ClickAwayListener onClickAway={handleClose}>
-                <MenuList id="split-button-menu" autoFocusItem>
-                  {canDelete && (
-                    <MenuItem
-                      sx={{
-                        bgcolor: "error.main",
-                        color: `var(--mui-palette-common-white)`,
-                        "&:hover": {
-                          bgcolor: "error.light",
-                        },
-                      }}
-                      onClick={handleDelete}
-                    >
-                      {tUsers("admin-panel-users:actions.delete")}
-                    </MenuItem>
-                  )}
-                </MenuList>
-              </ClickAwayListener>
-            </Paper>
-          </Grow>
-        )}
-      </Popper>
-    </>
+    </Box>
   );
 }
 
@@ -240,59 +94,115 @@ function Users() {
   const { t: tRoles } = useTranslation("admin-panel-roles");
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [{ order, orderBy }, setSort] = useState<{
-    order: SortEnum;
-    orderBy: UsersKeys;
-  }>(() => {
-    const searchParamsSort = searchParams.get("sort");
-    if (searchParamsSort) {
-      return JSON.parse(searchParamsSort);
-    }
-    return { order: SortEnum.DESC, orderBy: "id" };
-  });
 
-  const handleRequestSort = (
-    event: React.MouseEvent<unknown>,
-    property: UsersKeys
-  ) => {
-    const isAsc = orderBy === property && order === SortEnum.ASC;
-    const searchParams = new URLSearchParams(window.location.search);
-    const newOrder = isAsc ? SortEnum.DESC : SortEnum.ASC;
-    const newOrderBy = property;
-    searchParams.set(
-      "sort",
-      JSON.stringify({ order: newOrder, orderBy: newOrderBy })
-    );
-    setSort({
-      order: newOrder,
-      orderBy: newOrderBy,
-    });
-    router.push(window.location.pathname + "?" + searchParams.toString());
-  };
+  const [sortModel, setSortModel] = useState<GridSortModel>([
+    {
+      field: "id",
+      sort: "desc",
+    },
+  ]);
 
   const filter = useMemo(() => {
     const searchParamsFilter = searchParams.get("filter");
-    if (searchParamsFilter) {
-      return JSON.parse(searchParamsFilter) as UserFilterType;
-    }
-
-    return undefined;
+    return searchParamsFilter ? JSON.parse(searchParamsFilter) : undefined;
   }, [searchParams]);
 
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useGetUsersQuery({ filter, sort: { order, orderBy } });
+    useGetUsersQuery({
+      filter,
+      sort: {
+        order: (sortModel[0]?.sort?.toUpperCase() as SortEnum) || SortEnum.DESC,
+        orderBy: (sortModel[0]?.field as UsersKeys) || "id",
+      },
+    });
 
-  const handleScroll = useCallback(() => {
-    if (!hasNextPage || isFetchingNextPage) return;
-    fetchNextPage();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  const handleSortModelChange = (newModel: GridSortModel) => {
+    setSortModel(newModel);
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set(
+      "sort",
+      JSON.stringify({
+        order: newModel[0]?.sort?.toUpperCase() || SortEnum.DESC,
+        orderBy: newModel[0]?.field || "id",
+      })
+    );
+    router.replace(window.location.pathname + "?" + searchParams.toString());
+  };
 
   const result = useMemo(() => {
-    const result =
-      (data?.pages.flatMap((page) => page?.data) as User[]) ?? ([] as User[]);
-
-    return removeDuplicatesFromArrayObjects(result, "id");
+    const allData = data?.pages.flatMap((page) => page?.data) || [];
+    return removeDuplicatesFromArrayObjects<User>(allData as User[], "id");
   }, [data]);
+
+  const columns: GridColDef[] = [
+    {
+      field: "avatar",
+      headerName: "",
+      width: 60,
+      renderCell: (params: any) => (
+        <Avatar
+          alt={`${params.row.firstName} ${params.row.lastName}`}
+          src={params.row.photo?.path}
+          sx={{ width: 32, height: 32 }}
+        />
+      ),
+      sortable: false,
+    },
+    {
+      field: "id",
+      headerName: tUsers("admin-panel-users:table.column1"),
+      width: 120,
+    },
+    {
+      field: "name",
+      headerName: tUsers("admin-panel-users:table.column2"),
+      width: 200,
+      valueGetter: (params: any) =>
+        `${params?.row?.firstName} ${params?.row?.lastName}`,
+      renderCell: (params: any) => (
+        <Box
+          sx={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {`${params?.row?.firstName} ${params?.row?.lastName}`}
+        </Box>
+      ),
+    },
+    {
+      field: "email",
+      headerName: tUsers("admin-panel-users:table.column3"),
+      flex: 1,
+      minWidth: 250,
+      renderCell: (params: any) => (
+        <Box
+          sx={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {params.value}
+        </Box>
+      ),
+    },
+    {
+      field: "role",
+      headerName: tUsers("admin-panel-users:table.column4"),
+      width: 150,
+      valueGetter: (params: any) => tRoles(`role.${params.row?.role?.name}`),
+    },
+    {
+      field: "actions",
+      headerName: "",
+      width: 120,
+      renderCell: (params: any) => <Actions user={params.row} />,
+      sortable: false,
+      filterable: false,
+    },
+  ];
 
   return (
     <Container maxWidth="xl">
@@ -319,76 +229,40 @@ function Users() {
             </Grid>
           </Grid>
         </Grid>
-
         <Grid size={{ xs: 12 }} mb={2}>
-          <TableVirtuoso
-            style={{ height: 500 }}
-            data={result}
-            components={TableComponents}
-            endReached={handleScroll}
-            overscan={20}
-            useWindowScroll
-            increaseViewportBy={400}
-            fixedHeaderContent={() => (
-              <>
-                <TableRow>
-                  <TableCell style={{ width: 50 }}></TableCell>
-                  <TableSortCellWrapper
-                    width={100}
-                    orderBy={orderBy}
-                    order={order}
-                    column="id"
-                    handleRequestSort={handleRequestSort}
+          <DataGrid
+            rows={result}
+            columns={columns}
+            loading={isFetchingNextPage}
+            sortModel={sortModel}
+            onSortModelChange={handleSortModelChange}
+            slots={{
+              footer: () => (
+                <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
+                  <Button
+                    onClick={() => fetchNextPage()}
+                    disabled={!hasNextPage || isFetchingNextPage}
+                    variant="outlined"
                   >
-                    {tUsers("admin-panel-users:table.column1")}
-                  </TableSortCellWrapper>
-                  <TableCell style={{ width: 200 }}>
-                    {tUsers("admin-panel-users:table.column2")}
-                  </TableCell>
-                  <TableSortCellWrapper
-                    orderBy={orderBy}
-                    order={order}
-                    column="email"
-                    handleRequestSort={handleRequestSort}
-                  >
-                    {tUsers("admin-panel-users:table.column3")}
-                  </TableSortCellWrapper>
-
-                  <TableCell style={{ width: 80 }}>
-                    {tUsers("admin-panel-users:table.column4")}
-                  </TableCell>
-                  <TableCell style={{ width: 130 }}></TableCell>
-                </TableRow>
-                {isFetchingNextPage && (
-                  <TableRow>
-                    <TableCellLoadingContainer colSpan={6}>
-                      <LinearProgress />
-                    </TableCellLoadingContainer>
-                  </TableRow>
-                )}
-              </>
-            )}
-            itemContent={(index, user) => (
-              <>
-                <TableCell style={{ width: 50 }}>
-                  <Avatar
-                    alt={user?.firstName + " " + user?.lastName}
-                    src={user?.photo?.path}
-                  />
-                </TableCell>
-                <TableCell style={{ width: 100 }}>{user?.id}</TableCell>
-                <TableCell style={{ width: 200 }}>
-                  {user?.firstName} {user?.lastName}
-                </TableCell>
-                <TableCell>{user?.email}</TableCell>
-                <TableCell style={{ width: 80 }}>
-                  {tRoles(`role.${user?.role?.id}`)}
-                </TableCell>
-                <TableCell style={{ width: 130 }}>
-                  {!!user && <Actions user={user} />}
-                </TableCell>
-              </>
-            )}
+                    {tUsers("admin-panel-users:loadMore")}
+                  </Button>
+                  {isFetchingNextPage && (
+                    <CircularProgress size={24} sx={{ ml: 2 }} />
+                  )}
+                </Box>
+              ),
+            }}
+            disableRowSelectionOnClick
+            disableColumnMenu
+            hideFooterPagination
+            rowHeight={60}
+            sx={{
+              border: 1,
+              borderColor: "divider",
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: "background.paper",
+              },
+            }}
           />
         </Grid>
       </Grid>

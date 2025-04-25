@@ -27,11 +27,17 @@ export const AuthActionsContext = createContext<{
   setAuthMethod: () => {},
 });
 
+// export const AuthTokensContext = createContext<{
+//   setTokensInfo: (
+//     tokensInfo: TokensInfo,
+//     method: Exclude<AuthMethod, null>
+//   ) => void;
+// }>({
+//   setTokensInfo: () => {},
+// });
+
 export const AuthTokensContext = createContext<{
-  setTokensInfo: (
-    tokensInfo: TokensInfo,
-    method: Exclude<AuthMethod, null>
-  ) => void;
+  setTokensInfo: (tokensInfo: TokensInfo) => void;
 }>({
   setTokensInfo: () => {},
 });

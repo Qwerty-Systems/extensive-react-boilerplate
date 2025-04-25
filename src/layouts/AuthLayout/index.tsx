@@ -12,7 +12,7 @@ import LogoMain from "@/components/logo/LogoMain";
 import GetImagePath from "@/utils/GetImagePath";
 
 const dashBoardImage = {
-  light: "/assets/images/graphics/hosting/dashboard-light.svg",
+  light: "/assets/images/graphics/hosting/dashboard-light.png", //dashboard-light.svg
   dark: "/assets/images/graphics/hosting/dashboard-dark.svg",
 };
 
@@ -43,8 +43,11 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
               align="center"
               sx={{ maxWidth: 400 }}
             >
-              SaaS platform for seamless data management and user insights.
-              Unlock growth with real-time analytics and flexible features.
+              <p>
+                We’re on a mission to revolutionize waste management. Join us as
+                we build a platform that empowers waste collectors and
+                communities.
+              </p>
             </Typography>
           </Stack>
           <Box sx={{ pt: 6, pl: 6, height: "calc(100% - 114px)" }}>

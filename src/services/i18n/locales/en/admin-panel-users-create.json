@@ -33,8 +33,14 @@
         "required": "Last Name is required"
       },
       "options": {
-        "1": "Admin",
-        "2": "User"
+        "Admin": "Admin",
+        "User": "User",
+        "Platform Owner": "Platform Owner",
+        "Agent": "Agent",
+        "Customer": "Customer",
+        "Manager": "Manager",
+        "Finance": "Finance",
+        "Guest": "Guest"
       }
     },
     "password": {

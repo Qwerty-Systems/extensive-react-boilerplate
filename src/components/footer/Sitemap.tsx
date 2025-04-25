@@ -59,7 +59,7 @@ const menuItems = [
       },
       {
         label: "License Terms",
-        link: { href: "", ...linkProps },
+        link: { href: "/", ...linkProps },
       },
     ],
   },
@@ -71,7 +71,7 @@ const menuItems = [
       {
         label: "Why SakaTaka?",
         link: {
-          href: "",
+          href: "/",
           ...linkProps,
         },
       },

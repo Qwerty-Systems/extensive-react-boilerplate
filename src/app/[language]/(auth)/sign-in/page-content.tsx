@@ -102,8 +102,8 @@ function Form() {
           token: data.token,
           refreshToken: data.refreshToken,
           tokenExpires: data.tokenExpires,
-        },
-        "local" // Assuming the second argument is the user object
+        }
+        // "local"
       );
       setUser(data.user);
     }

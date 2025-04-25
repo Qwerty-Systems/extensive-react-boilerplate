@@ -12,7 +12,6 @@ import { Clientele3 } from "@/components/clientele";
 import Faq6 from "@/components/faq/Faq6"; // Adjust the path based on your project structure
 
 import { useEffect } from "react";
-
 // @next
 import { useRouter } from "next/navigation";
 
@@ -31,6 +30,8 @@ import branding from "@/branding.json";
 import Typography from "@mui/material/Typography";
 // import Link from "next/link";
 import { Footer7 } from "@/components/footer";
+import useAuth from "@/services/auth/use-auth";
+// import useAuth from "@/services/auth/use-auth";
 // @asssets
 // const imagePrefix = "/assets/images/presentation";
 
@@ -54,21 +55,20 @@ function DescriptionLine() {
 
 export default function Home(/* props: Props */) {
   const router = useRouter();
-
+  const { user } = useAuth();
   useEffect(() => {
-    router.replace(APP_DEFAULT_PATH);
-  }, [router]);
-  // const params = await props.params;
-  // const { t } = await getServerTranslation(params.language, "home");
-
+    if (user) {
+      router.replace(APP_DEFAULT_PATH);
+    }
+  }, [router, user]);
   const linkProps = { target: "_blank", rel: "noopener noreferrer" };
   const hero = {
     headLine: "Powering Waste Collectors, Cleaning Up Communities",
     captionLine:
-      "Kata gives waste collectors and community groups the tools to streamline operations, track payments, and scale sustainably—because waste management shouldn’t be messy",
+      "SakaKata gives waste collectors and community groups the tools to streamline operations, track payments, and scale sustainably—because waste management shouldn’t be messy",
     primaryBtn: {
       children: "Download the App (For Garbage Collectors)",
-      href: "",
+      href: "/",
     },
     videoSrc:
       "https://www.youtube.com/embed/JrhLKkqwZ5s" /* "https://d2elhhoq00m1pj.cloudfront.net/saasable-intro.mp4" */,
@@ -216,15 +216,15 @@ export default function Home(/* props: Props */) {
     heading: `For Waste Collectors & Community Game Changers`,
     caption:
       "SakaTata is designed for waste collectors and community groups. We’re building a platform that empowers you to streamline operations, track payments, and scale sustainably.",
-    image: "/assets/images/graphics/ai/desktop1-light.svg",
+    image: "/assets/images/graphics/hosting/dashboard-light.png",
     primaryBtn: {
       children: "Find out more",
-      href: "",
+      href: "/",
       ...linkProps,
     },
     secondaryBtn: {
       children: "Start Now",
-      href: "",
+      href: "/",
       ...linkProps,
     },
     features: [
