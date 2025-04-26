@@ -152,7 +152,7 @@ function FormEditUser() {
   const onSubmit = handleSubmit(async (formData) => {
     const isEmailDirty = methods.getFieldState("email").isDirty;
     const { data, status } = await fetchPatchUser({
-      id: userId,
+      id: parseInt(userId),
       data: {
         ...formData,
         email: isEmailDirty ? formData.email : undefined,
@@ -181,7 +181,9 @@ function FormEditUser() {
 
   useEffect(() => {
     const getInitialDataForEdit = async () => {
-      const { status, data: user } = await fetchGetUser({ id: userId });
+      const { status, data: user } = await fetchGetUser({
+        id: parseInt(userId),
+      });
 
       if (status === HTTP_CODES_ENUM.OK) {
         reset({
@@ -306,7 +308,7 @@ function FormChangePasswordUser() {
 
   const onSubmit = handleSubmit(async (formData) => {
     const { data, status } = await fetchPatchUser({
-      id: userId,
+      id: parseInt(userId),
       data: formData,
     });
     if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {

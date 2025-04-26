@@ -3,11 +3,38 @@ import { useMemo } from "react";
 // @third-party
 import useSWR, { mutate } from "swr";
 
+// Types
+interface SnackbarAlert {
+  color: "primary" | "secondary" | "error" | "info" | "success" | string;
+  variant: "filled" | "outlined" | "standard" | string;
+}
+
+type TransitionType = "Zoom" | "Fade" | "Grow" | "Slide" | string;
+
+interface SnackbarState {
+  action: boolean;
+  open: boolean;
+  message: string;
+  anchorOrigin: {
+    vertical: "top" | "bottom";
+    horizontal: "left" | "center" | "right";
+  };
+  variant: string;
+  alert: SnackbarAlert;
+  transition: TransitionType;
+  close: boolean;
+  actionButton: boolean;
+  maxStack: number;
+  dense: boolean;
+  iconVariant: string;
+  hideIconVariant: boolean;
+}
+
 const endpoints = {
   key: "snackbar",
 };
 
-const initialState = {
+const initialState: SnackbarState = {
   action: false,
   open: false,
   message: "Note archived",
@@ -29,8 +56,8 @@ const initialState = {
   hideIconVariant: false,
 };
 
-export function useGetSnackbar() {
-  const { data } = useSWR(endpoints.key, () => initialState, {
+export function useGetSnackbar(): { snackbar: SnackbarState | undefined } {
+  const { data } = useSWR<SnackbarState>(endpoints.key, () => initialState, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -41,39 +68,25 @@ export function useGetSnackbar() {
   return memoizedValue;
 }
 
-export function openSnackbar(snackbar) {
-  // to update local state based on key
-
-  const {
-    action,
-    open,
-    message,
-    anchorOrigin,
-    variant,
-    alert,
-    transition,
-    close,
-    actionButton,
-  } = snackbar;
-
-  mutate(
+export function openSnackbar(snackbar: Partial<SnackbarState>) {
+  mutate<SnackbarState>(
     endpoints.key,
     (currentSnackbar) => {
       const safeSnackbar = currentSnackbar || initialState;
       return {
         ...safeSnackbar,
-        action: action || initialState.action,
-        open: open || initialState.open,
-        message: message || initialState.message,
-        anchorOrigin: anchorOrigin || initialState.anchorOrigin,
-        variant: variant || initialState.variant,
+        action: snackbar.action ?? safeSnackbar.action,
+        open: snackbar.open ?? safeSnackbar.open,
+        message: snackbar.message ?? safeSnackbar.message,
+        anchorOrigin: snackbar.anchorOrigin ?? safeSnackbar.anchorOrigin,
+        variant: snackbar.variant ?? safeSnackbar.variant,
         alert: {
-          color: alert?.color || initialState.alert.color,
-          variant: alert?.variant || initialState.alert.variant,
+          color: snackbar.alert?.color ?? safeSnackbar.alert.color,
+          variant: snackbar.alert?.variant ?? safeSnackbar.alert.variant,
         },
-        transition: transition || initialState.transition,
-        close: close || initialState.close,
-        actionButton: actionButton || initialState.actionButton,
+        transition: snackbar.transition ?? safeSnackbar.transition,
+        close: snackbar.close ?? safeSnackbar.close,
+        actionButton: snackbar.actionButton ?? safeSnackbar.actionButton,
       };
     },
     false
@@ -81,53 +94,46 @@ export function openSnackbar(snackbar) {
 }
 
 export function closeSnackbar() {
-  // to update local state based on key
-  mutate(
+  mutate<SnackbarState>(
     endpoints.key,
-    (currentSnackbar) => {
-      const safeSnackbar = currentSnackbar || initialState;
-      return { ...safeSnackbar, open: false };
-    },
+    (currentSnackbar) => ({
+      ...(currentSnackbar || initialState),
+      open: false,
+    }),
     false
   );
 }
 
-export function handlerIncrease(maxStack) {
-  // to update local state based on key
-  mutate(
+export function handlerIncrease(maxStack: number) {
+  mutate<SnackbarState>(
     endpoints.key,
-    (currentSnackbar) => {
-      const safeSnackbar = currentSnackbar || initialState;
-      return { ...safeSnackbar, maxStack };
-    },
+    (currentSnackbar) => ({
+      ...(currentSnackbar || initialState),
+      maxStack,
+    }),
     false
   );
 }
 
-export function handlerDense(dense) {
-  // to update local state based on key
-  mutate(
+export function handlerDense(dense: boolean) {
+  mutate<SnackbarState>(
     endpoints.key,
-    (currentSnackbar) => {
-      const safeSnackbar = currentSnackbar || initialState;
-      return { ...safeSnackbar, dense };
-    },
+    (currentSnackbar) => ({
+      ...(currentSnackbar || initialState),
+      dense,
+    }),
     false
   );
 }
 
-export function handlerIconVariants(iconVariant) {
-  // to update local state based on key
-  mutate(
+export function handlerIconVariants(iconVariant: string) {
+  mutate<SnackbarState>(
     endpoints.key,
-    (currentSnackbar) => {
-      const safeSnackbar = currentSnackbar || initialState;
-      return {
-        ...safeSnackbar,
-        iconVariant,
-        hideIconVariant: iconVariant === "hide",
-      };
-    },
+    (currentSnackbar) => ({
+      ...(currentSnackbar || initialState),
+      iconVariant,
+      hideIconVariant: iconVariant === "hide",
+    }),
     false
   );
 }

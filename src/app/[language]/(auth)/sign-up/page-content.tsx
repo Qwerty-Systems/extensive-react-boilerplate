@@ -135,8 +135,8 @@ function Form() {
           token: dataSignIn.token,
           refreshToken: dataSignIn.refreshToken,
           tokenExpires: dataSignIn.tokenExpires,
-        },
-        "local"
+        }
+        /*  "local" */
       );
       setUser(dataSignIn.user);
     }

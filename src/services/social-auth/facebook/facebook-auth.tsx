@@ -35,8 +35,8 @@ export default function FacebookAuth() {
             token: data.token,
             refreshToken: data.refreshToken,
             tokenExpires: data.tokenExpires,
-          },
-          "local"
+          }
+          // "local"
         );
         setUser(data.user);
       }

@@ -31,8 +31,8 @@ export default function GoogleAuth() {
           token: data.token,
           refreshToken: data.refreshToken,
           tokenExpires: data.tokenExpires,
-        },
-        "local"
+        }
+        /* "local" */
       );
       setUser(data.user);
     }
