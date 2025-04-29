@@ -123,7 +123,7 @@ export default function Feature20({
           <Typeset
             {...{
               heading: heading || "",
-              stackProps: {
+              stackprops: {
                 sx: {
                   maxWidth: { md: 500 },
                   ...(!image && { maxWidth: 1, textAlign: "center" }),

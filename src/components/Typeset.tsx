@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography";
 interface TypesetProps {
   heading: string;
   caption?: string;
-  stackProps?: Record<string, any>;
+  stackprops?: Record<string, any>;
   headingProps?: Record<string, any>;
   captionProps?: Record<string, any>;
 }
@@ -16,11 +16,11 @@ interface TypesetProps {
 export default function Typeset({
   heading,
   caption,
-  stackProps,
+  stackprops,
   headingProps,
   captionProps,
 }: TypesetProps) {
-  const { sx, ...rest } = stackProps || {};
+  const { sx, ...rest } = stackprops || {};
 
   return (
     <Stack {...rest} sx={{ gap: { xs: 1, sm: 1.5 }, ...sx }}>

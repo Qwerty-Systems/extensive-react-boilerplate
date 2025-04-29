@@ -18,7 +18,7 @@ export default function IconCard({
   iconAvatar,
   contentCard,
   titleProps,
-  stackProps,
+  stackprops,
   contentProps,
   cardPadding,
 }: {
@@ -28,7 +28,7 @@ export default function IconCard({
   iconAvatar?: boolean | string;
   contentCard?: boolean | string;
   titleProps?: object;
-  stackProps?: object;
+  stackprops?: object;
   contentProps?: object;
   cardPadding?: object;
 }) {
@@ -39,7 +39,7 @@ export default function IconCard({
     <GraphicsCard sx={{ height: 1 }}>
       <Stack
         sx={{ gap: iconAvatar || contentCard ? 2.5 : 2, height: 1 }}
-        {...(stackProps && { ...stackProps })}
+        {...(stackprops && { ...stackprops })}
       >
         <Box sx={{ px: boxPadding, pt: boxPadding, lineHeight: 0 }}>
           {iconAvatar ? (

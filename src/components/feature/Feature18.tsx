@@ -64,7 +64,7 @@ export default function Feature18({
           {...{
             heading,
             caption,
-            stackProps: {
+            stackprops: {
               sx: {
                 alignItems: "center",
                 textAlign: "center",

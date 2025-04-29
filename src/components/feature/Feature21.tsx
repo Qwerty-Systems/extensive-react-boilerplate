@@ -61,7 +61,7 @@ export default function Feature21({
             {...{
               heading: heading || "",
               caption: caption || "",
-              stackProps: { sx: { textAlign: "center" } },
+              stackprops: { sx: { textAlign: "center" } },
             }}
           />
         </motion.div>
@@ -124,7 +124,7 @@ export default function Feature21({
                         : { ...iconProps, ...item.icon }),
                     }}
                     title={item.title}
-                    stackProps={{ sx: { gap: 0 } }}
+                    stackprops={{ sx: { gap: 0 } }}
                   />
                 </motion.div>
               </Grid>

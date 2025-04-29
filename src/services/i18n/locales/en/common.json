@@ -1,13 +1,15 @@
 {
-  "app-name": "APP",
+  "app-name": "SakaTaka",
   "loading": "Loading ...",
   "navigation": {
     "home": "Home",
+    "marketplace": "Marketplace",
+    "recyclers": "Recyclers",
+    "wasteCollectors": "Waste Collectors",
+    "communityGroups": "Community Groups",
+    "downloadApp": "Download App",
     "signIn": "Sign In",
-    "signUp": "Sign Up",
-    "profile": "Profile",
-    "users": "Users",
-    "logout": "Logout"
+    "signUp": "Sign Up"
   },
   "formInputs": {
     "avatarInput": {

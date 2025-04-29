@@ -13,7 +13,7 @@ import Typeset from "@/components/Typeset";
 
 interface JoinUSProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  stackProps: Record<string, any>;
+  stackprops: Record<string, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   headingProps: Record<string, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,12 +21,12 @@ interface JoinUSProps {
 }
 
 export default function JoinUS({
-  stackProps,
+  stackprops,
   headingProps,
   captionProps,
 }: JoinUSProps) {
   const theme = useTheme();
-  const { sx, ...rest } = stackProps;
+  const { sx, ...rest } = stackprops;
 
   return (
     <Stack {...rest} sx={{ gap: 2, ...sx }}>
@@ -35,7 +35,7 @@ export default function JoinUS({
           heading: "Join our newsletter",
           caption:
             "Discover the features that will transform your customer relationships",
-          stackProps: { sx: { gap: 0.5, width: { xs: 1, md: "60%" } } },
+          stackprops: { sx: { gap: 0.5, width: { xs: 1, md: "60%" } } },
           headingProps: { variant: "h4", ...headingProps },
           captionProps: { variant: "body1", ...captionProps },
         }}

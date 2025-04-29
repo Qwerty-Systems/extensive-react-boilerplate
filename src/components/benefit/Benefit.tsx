@@ -50,7 +50,7 @@ export default function Benefit({
             {...{
               heading,
               caption,
-              stackProps: { sx: { alignItems: "center", textAlign: "center" } },
+              stackprops: { sx: { alignItems: "center", textAlign: "center" } },
               captionProps: { sx: { width: { xs: 1, sm: "80%", md: "65%" } } },
             }}
           />

@@ -4,7 +4,7 @@ import { JSX, useEffect, useRef, useState } from "react";
 
 // @mui
 import { useTheme } from "@mui/material/styles";
-import Button from "@mui/material/Button";
+/* import Button from "@mui/material/Button"; */
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -14,7 +14,7 @@ import Box from "@mui/material/Box";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 // @project
-import ButtonAnimationWrapper from "@/components/ButtonAnimationWrapper";
+/* import ButtonAnimationWrapper from "@/components/ButtonAnimationWrapper"; */
 import GraphicsCard from "@/components/cards/GraphicsCard";
 import ContainerWrapper from "@/components/ContainerWrapper";
 import GraphicsImage from "@/components/GraphicsImage";
@@ -22,7 +22,7 @@ import { getBackgroundDots } from "@/utils/getBackgroundDots";
 
 // @assets
 import Wave from "@/images/graphics/Wave";
-import SvgIcon from "@mui/material/SvgIcon";
+/* import SvgIcon from "@mui/material/SvgIcon"; */
 
 // threshold - adjust threshold as needed
 const options = { root: null, rootMargin: "0px", threshold: 0.6 };
@@ -37,7 +37,7 @@ export default function Hero({
   chip,
   headLine,
   captionLine,
-  primaryBtn,
+  /* primaryBtn, */
   videoSrc,
   videoThumbnail,
   listData,
@@ -220,7 +220,7 @@ export default function Hero({
             <Stack
               sx={{ alignItems: "center", gap: 2, mt: { xs: 3, sm: 4, md: 5 } }}
             >
-              <motion.div
+              {/* <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -244,7 +244,7 @@ export default function Hero({
                     {...primaryBtn}
                   />
                 </ButtonAnimationWrapper>
-              </motion.div>
+              </motion.div> */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}

@@ -1,40 +1,31 @@
 "use client";
-// import { useState } from "react";
-
+import { useState } from "react";
 import { styled } from "@mui/material/styles";
-// import useAuth from "@/services/auth/use-auth";
-// import useAuthActions from "@/services/auth/use-auth-actions";
 import { useTranslation } from "@/services/i18n/client";
 import Link from "@/components/link";
-// import { RoleEnum } from "@/services/api/types/role";
 import ThemeSwitchButton from "@/components/switch-theme-button";
 import { IS_SIGN_UP_ENABLED } from "@/services/auth/config";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Stack from "@mui/material/Stack";
-import IconButton from "@mui/material/IconButton";
-// import Menu from "@mui/material/Menu";
-// import MenuItem from "@mui/material/MenuItem";
-// import Divider from "@mui/material/Divider";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-// import Tooltip from "@mui/material/Tooltip";
-// import Avatar from "@mui/material/Avatar";
 import MenuIcon from "@mui/icons-material/Menu";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
 import Logo from "./logo";
 import { usePathname } from "next/navigation";
 import useAuth from "@/services/auth/use-auth";
-import { useState } from "react";
-import Menu from "@mui/material/Menu";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
 import Divider from "@mui/material/Divider";
-const StyledAppBar = styled(AppBar)((/* { theme } */) => ({
+import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
+
+const StyledAppBar = styled(AppBar)({
   background: "transparent",
   boxShadow: "none",
-}));
+});
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   minHeight: 56,
@@ -45,22 +36,98 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   },
 }));
 
+enum SectionKeys {
+  MARKETPLACE = "marketplace",
+  RECYCLERS = "recyclers",
+  WASTE_COLLECTORS = "waste-collectors",
+  COMMUNITY_GROUPS = "community-groups",
+}
+
+type DownloadLinks = Record<SectionKeys, string> & { default: string };
+
+const APP_DOWNLOAD_LINKS: DownloadLinks = {
+  [SectionKeys.MARKETPLACE]: "https://marketplace-app-download.com",
+  [SectionKeys.RECYCLERS]: "https://recyclers-app-download.com",
+  [SectionKeys.WASTE_COLLECTORS]: "https://waste-collectors-app-download.com",
+  [SectionKeys.COMMUNITY_GROUPS]: "https://community-groups-app-download.com",
+  default: "https://default-app-download.com",
+};
+
+const validSections = Object.values(SectionKeys);
+
 const ResponsiveAppBar = () => {
   const { t } = useTranslation("common");
   const { user, isLoaded } = useAuth();
-  // const { logOut } = useAuthActions();
-  const [anchorNav, setAnchorNav] = useState<null | HTMLElement>(null);
-  // const [anchorUser, setAnchorUser] = useState<null | HTMLElement>(null);
-
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) =>
-    setAnchorNav(event.currentTarget);
-  const handleCloseNavMenu = () => setAnchorNav(null);
-  // const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) =>
-  //   setAnchorUser(event.currentTarget);
-  // const handleCloseUserMenu = () => setAnchorUser(null);
+  const [anchorNav, setAnchorNav] = useState<HTMLElement | null>(null);
   const pathname = usePathname();
-  console.log("pathname", pathname);
-  return pathname === "/en" ? (
+
+  const segments = pathname.split("/");
+  const lang = segments[1] || "en";
+  const currentSection = segments[2];
+  const fromParam = validSections.includes(currentSection as SectionKeys)
+    ? { from: currentSection }
+    : undefined;
+
+  const getAppDownloadLink = (): string => {
+    if (
+      currentSection &&
+      validSections.includes(currentSection as SectionKeys)
+    ) {
+      return APP_DOWNLOAD_LINKS[currentSection as SectionKeys];
+    }
+    return APP_DOWNLOAD_LINKS.default;
+  };
+
+  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorNav(event.currentTarget);
+  };
+
+  const handleCloseNavMenu = () => {
+    setAnchorNav(null);
+  };
+
+  const navItems = [
+    { key: "marketplace", path: SectionKeys.MARKETPLACE },
+    { key: "recyclers", path: SectionKeys.RECYCLERS },
+    { key: "wasteCollectors", path: SectionKeys.WASTE_COLLECTORS },
+    { key: "communityGroups", path: SectionKeys.COMMUNITY_GROUPS },
+  ];
+
+  const desktopNav = (
+    <Stack
+      direction="row"
+      spacing={2}
+      sx={{
+        flexGrow: 1,
+        justifyContent: "center",
+        display: { xs: "none", md: "flex" },
+      }}
+    >
+      {navItems.map((item) => (
+        <Button
+          key={item.key}
+          component={Link}
+          href={`/${lang}/${item.path}`}
+          sx={{ color: "inherit" }}
+        >
+          {t(`common:navigation.${item.key}`)}
+        </Button>
+      ))}
+    </Stack>
+  );
+
+  const mobileNavItems = navItems.map((item) => (
+    <MenuItem
+      key={item.key}
+      component={Link}
+      href={`/${lang}/${item.path}`}
+      onClick={handleCloseNavMenu}
+    >
+      {t(`common:navigation.${item.key}`)}
+    </MenuItem>
+  ));
+
+  return pathname === `/${lang}` ? (
     <Box sx={{ bgcolor: "grey.100" }}>
       <StyledAppBar position="static">
         <Container maxWidth="xl">
@@ -70,17 +137,16 @@ const ResponsiveAppBar = () => {
               alignItems="center"
               sx={{ width: "100%", justifyContent: "space-between" }}
             >
-              {/* Logo */}
               <Box sx={{ display: { xs: "none", md: "flex" } }}>
                 <Logo to="/" />
               </Box>
 
-              {/* Mobile Menu Button */}
               <Box sx={{ display: { xs: "flex", md: "none" } }}>
                 <IconButton
                   size="large"
                   onClick={handleOpenNavMenu}
                   color="inherit"
+                  aria-label="open navigation menu"
                 >
                   <MenuIcon />
                 </IconButton>
@@ -88,8 +154,6 @@ const ResponsiveAppBar = () => {
                   anchorEl={anchorNav}
                   open={Boolean(anchorNav)}
                   onClose={handleCloseNavMenu}
-                  anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                  transformOrigin={{ vertical: "top", horizontal: "left" }}
                   sx={{ display: { xs: "block", md: "none" } }}
                 >
                   <MenuItem
@@ -99,22 +163,23 @@ const ResponsiveAppBar = () => {
                   >
                     {t("common:navigation.home")}
                   </MenuItem>
-                  {/* {!!user?.role &&
-                    [RoleEnum.ADMIN].includes(Number(user?.role?.id)) && (
-                      <MenuItem
-                        component={Link}
-                        href="/admin-panel/users"
-                        onClick={handleCloseNavMenu}
-                      >
-                        {t("common:navigation.users")}
-                      </MenuItem>
-                    )} */}
+                  {mobileNavItems}
+                  <Divider />
+                  <MenuItem
+                    component="a"
+                    href={getAppDownloadLink()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={handleCloseNavMenu}
+                  >
+                    {t("common:navigation.downloadApp")}
+                  </MenuItem>
                   {isLoaded && !user && (
                     <>
                       <Divider />
                       <MenuItem
                         component={Link}
-                        href="/sign-in"
+                        href={{ pathname: "/sign-in", query: fromParam }}
                         onClick={handleCloseNavMenu}
                       >
                         {t("common:navigation.signIn")}
@@ -122,7 +187,7 @@ const ResponsiveAppBar = () => {
                       {IS_SIGN_UP_ENABLED && (
                         <MenuItem
                           component={Link}
-                          href="/sign-up"
+                          href={{ pathname: "/sign-up", query: fromParam }}
                           onClick={handleCloseNavMenu}
                         >
                           {t("common:navigation.signUp")}
@@ -133,61 +198,54 @@ const ResponsiveAppBar = () => {
                 </Menu>
               </Box>
 
-              {/* Title for Mobile */}
               <Typography
                 variant="h6"
-                component="a"
+                component={Link}
                 href="/"
-                sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}
+                sx={{
+                  flexGrow: 1,
+                  display: { xs: "flex", md: "none" },
+                  textDecoration: "none",
+                  color: "inherit",
+                }}
               >
                 {t("common:app-name")}
               </Typography>
 
-              {/* Right-side Icons */}
-              <Box sx={{ display: "flex", alignItems: "center" }}>
+              {desktopNav}
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <ThemeSwitchButton />
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  href={getAppDownloadLink()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ display: { xs: "none", md: "flex" } }}
+                >
+                  {t("common:navigation.downloadApp")}
+                </Button>
                 {!isLoaded ? (
                   <CircularProgress size={24} sx={{ ml: 2 }} />
                 ) : user ? (
-                  <>
-                    {/* <Tooltip title="Profile">
-                      <IconButton onClick={handleOpenUserMenu} sx={{ ml: 1 }}>
-                        <Avatar
-                          alt={`${user?.firstName} ${user?.lastName}`}
-                          src={user.photo?.path}
-                        />
-                      </IconButton>
-                    </Tooltip>
-                    <Menu
-                      anchorEl={anchorUser}
-                      open={Boolean(anchorUser)}
-                      onClose={handleCloseUserMenu}
-                      sx={{ mt: 5 }}
-                    >
-                      <MenuItem
-                        component={Link}
-                        href="/profile"
-                        onClick={handleCloseUserMenu}
-                      >
-                        {t("common:navigation.profile")}
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => {
-                          logOut();
-                          handleCloseUserMenu();
-                        }}
-                      >
-                        {t("common:navigation.logout")}
-                      </MenuItem>
-                    </Menu> */}
-                  </>
+                  // Add user menu component here
+                  <></>
                 ) : (
-                  <Box sx={{ display: { xs: "none", md: "flex" } }}>
-                    <Button component={Link} href="/sign-in">
+                  <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
+                    <Button
+                      component={Link}
+                      href={`/sign-in?${fromParam}`}
+                      // href={{ pathname: "/sign-in", query: fromParam }}
+                    >
                       {t("common:navigation.signIn")}
                     </Button>
                     {IS_SIGN_UP_ENABLED && (
-                      <Button component={Link} href="/sign-up" sx={{ ml: 1 }}>
+                      <Button
+                        component={Link}
+                        href={`/sign-up?${fromParam}`}
+                        // href={{ pathname: "/sign-up", query: fromParam }}
+                      >
                         {t("common:navigation.signUp")}
                       </Button>
                     )}
@@ -199,9 +257,7 @@ const ResponsiveAppBar = () => {
         </Container>
       </StyledAppBar>
     </Box>
-  ) : (
-    <></>
-  );
+  ) : null;
 };
 
 export default ResponsiveAppBar;

@@ -66,10 +66,10 @@ export default function Home(/* props: Props */) {
     headLine: "Powering Waste Collectors, Cleaning Up Communities",
     captionLine:
       "SakaKata gives waste collectors and community groups the tools to streamline operations, track payments, and scale sustainably—because waste management shouldn’t be messy",
-    primaryBtn: {
-      children: "Download the App (For Garbage Collectors)",
-      href: "/",
-    },
+    // primaryBtn: {
+    //   children: "Download the App (For Garbage Collectors)",
+    //   href: "/",
+    // },
     videoSrc:
       "https://www.youtube.com/embed/JrhLKkqwZ5s" /* "https://d2elhhoq00m1pj.cloudfront.net/saasable-intro.mp4" */,
     videoThumbnail: "/assets/videos/thumbnails/intro-thumbnail.png",
@@ -545,7 +545,7 @@ export default function Home(/* props: Props */) {
           <Hero
             headLine={hero.headLine}
             captionLine={hero.captionLine}
-            primaryBtn={hero.primaryBtn}
+            /* primaryBtn={hero.primaryBtn} */
             videoSrc={hero.videoSrc}
             videoThumbnail={hero.videoThumbnail}
             listData={hero.listData}
