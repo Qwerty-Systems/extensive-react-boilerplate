@@ -192,6 +192,88 @@ export default function Notification() {
     },
   ]);
 
+  /*   const [systemNotifications, setSystemNotifications] = useState([
+  {
+    avatar: <RecyclingIcon sx={{ color: theme.palette.success.main }} />,
+    title: "New Collection Scheduled · Nairobi West Ward",
+    subTitle: "Plastic & Paper Collection",
+    dateTime: "Jul 9",
+    badge: <ScheduleIcon sx={{ fontSize: 14, color: theme.palette.text.primary }} />,
+    meta: {
+      regionId: "nairobi-west-001",
+      collectionType: "mixed-recyclables"
+    }
+  },
+  {
+    avatar: <LocalShippingIcon sx={{ color: theme.palette.warning.main }} />,
+    title: "Collection Route Updated · Optimized Path",
+    subTitle: "Mombasa County Route #5",
+    dateTime: "Jul 10",
+    isSeen: true,
+    badge: <RouteIcon sx={{ fontSize: 14, color: theme.palette.text.primary }} />
+  },
+  {
+    avatar: <BusinessIcon sx={{ color: theme.palette.info.main }} />,
+    title: "New Tenant Onboarded · GreenCycle Ltd",
+    subTitle: "Recycling Company (Nakuru)",
+    dateTime: "Jul 11",
+    badge: <VerifiedUserIcon sx={{ fontSize: 14, color: theme.palette.text.primary }} />
+  },
+  {
+    avatar: <AttachMoneyIcon sx={{ color: theme.palette.success.main }} />,
+    title: "Invoice Generated · August Collection",
+    subTitle: "Payment Due: 2023-08-30",
+    dateTime: "Jul 15",
+    badge: <ReceiptIcon sx={{ fontSize: 14, color: theme.palette.text.primary }} />,
+    isSeen: true
+  },
+  {
+    avatar: <WarningIcon sx={{ color: theme.palette.error.main }} />,
+    title: "Service Disruption · Kisumu Region",
+    subTitle: "Collection Delay Alert",
+    dateTime: "Jul 24",
+    badge: <ErrorOutlineIcon sx={{ fontSize: 14, color: theme.palette.text.primary }} />
+  }
+]);
+
+const [tenantNotifications, setTenantNotifications] = useState([
+  {
+    avatar: <AssignmentIcon sx={{ color: theme.palette.primary.main }} />,
+    title: "KYC Verification Approved",
+    subTitle: "Account Fully Activated",
+    dateTime: "Jul 9",
+    badge: <VerifiedIcon sx={{ fontSize: 14, color: theme.palette.success.main }} />
+  },
+  {
+    avatar: <MapIcon sx={{ color: theme.palette.secondary.main }} />,
+    title: "New Region Assigned · Kiambu County",
+    subTitle: "Service Area Expanded",
+    dateTime: "Jul 10",
+    badge: <PublicIcon sx={{ fontSize: 14, color: theme.palette.text.primary }} />
+  },
+  {
+    avatar: <ShoppingCartIcon sx={{ color: theme.palette.info.main }} />,
+    title: "New Marketplace Order · 200kg PET Plastic",
+    subTitle: "From EcoManufacturers Ltd",
+    dateTime: "Jul 11",
+    badge: <NewReleasesIcon sx={{ fontSize: 14, color: theme.palette.text.primary }} />
+  },
+  {
+    avatar: <DescriptionIcon sx={{ color: theme.palette.warning.main }} />,
+    title: "Compliance Document Expiring",
+    subTitle: "NEMA License Renewal Required",
+    dateTime: "Jul 15",
+    badge: <WarningIcon sx={{ fontSize: 14, color: theme.palette.warning.main }} />
+  },
+  {
+    avatar: <PeopleIcon sx={{ color: theme.palette.success.main }} />,
+    title: "New Team Member Added · Driver Account",
+    subTitle: "James Mwangi - Fleet Management",
+    dateTime: "Jul 24",
+    badge: <PersonAddIcon sx={{ fontSize: 14, color: theme.palette.text.primary }} />
+  }
+]); */
+
   const handleActionClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
   };

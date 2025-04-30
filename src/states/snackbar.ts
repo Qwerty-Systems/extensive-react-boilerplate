@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo } from "react";
 
 // @third-party
@@ -56,7 +58,7 @@ const initialState: SnackbarState = {
   hideIconVariant: false,
 };
 
-export function useGetSnackbar(): { snackbar: SnackbarState | undefined } {
+function useGetSnackbar(): { snackbar: SnackbarState | undefined } {
   const { data } = useSWR<SnackbarState>(endpoints.key, () => initialState, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
@@ -68,7 +70,7 @@ export function useGetSnackbar(): { snackbar: SnackbarState | undefined } {
   return memoizedValue;
 }
 
-export function openSnackbar(snackbar: Partial<SnackbarState>) {
+function openSnackbar(snackbar: Partial<SnackbarState>) {
   mutate<SnackbarState>(
     endpoints.key,
     (currentSnackbar) => {
@@ -93,7 +95,7 @@ export function openSnackbar(snackbar: Partial<SnackbarState>) {
   );
 }
 
-export function closeSnackbar() {
+function closeSnackbar() {
   mutate<SnackbarState>(
     endpoints.key,
     (currentSnackbar) => ({
@@ -104,7 +106,7 @@ export function closeSnackbar() {
   );
 }
 
-export function handlerIncrease(maxStack: number) {
+function handlerIncrease(maxStack: number) {
   mutate<SnackbarState>(
     endpoints.key,
     (currentSnackbar) => ({
@@ -115,7 +117,7 @@ export function handlerIncrease(maxStack: number) {
   );
 }
 
-export function handlerDense(dense: boolean) {
+function handlerDense(dense: boolean) {
   mutate<SnackbarState>(
     endpoints.key,
     (currentSnackbar) => ({
@@ -126,7 +128,7 @@ export function handlerDense(dense: boolean) {
   );
 }
 
-export function handlerIconVariants(iconVariant: string) {
+function handlerIconVariants(iconVariant: string) {
   mutate<SnackbarState>(
     endpoints.key,
     (currentSnackbar) => ({
@@ -137,3 +139,12 @@ export function handlerIconVariants(iconVariant: string) {
     false
   );
 }
+
+export {
+  useGetSnackbar,
+  openSnackbar,
+  closeSnackbar,
+  handlerIncrease,
+  handlerDense,
+  handlerIconVariants,
+};

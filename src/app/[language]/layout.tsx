@@ -23,6 +23,7 @@ import FacebookAuthProvider from "@/services/social-auth/facebook/facebook-auth-
 import ConfirmDialogProvider from "@/components/confirm-dialog/confirm-dialog-provider";
 import InitColorSchemeScript from "@/components/theme/init-color-scheme-script";
 import KeycloakProvider from "@/services/social-auth/keycloak/keycloak-provider";
+import Notistack from "@/components/third-party/Notistack";
 
 // Client-side providers wrapper
 const AuthProviders = ({ children }: { children: React.ReactNode }) => (
@@ -73,9 +74,11 @@ export default async function RootLayout(props: {
             <StoreLanguageProvider>
               <ConfirmDialogProvider>
                 <AuthProviders>
-                  <ResponsiveAppBar />
-                  {children}
-                  <ToastContainer position="bottom-left" hideProgressBar />
+                  <Notistack>
+                    <ResponsiveAppBar />
+                    {children}
+                    <ToastContainer position="bottom-left" hideProgressBar />
+                  </Notistack>
                 </AuthProviders>
               </ConfirmDialogProvider>
             </StoreLanguageProvider>

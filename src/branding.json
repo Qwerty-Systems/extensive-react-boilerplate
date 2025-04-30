@@ -1,11 +1,12 @@
 {
   "brandName": "SakaTaka",
-  "title": "",
+  "title": "SakaTaka",
   "company": {
     "name": "SakaTaka",
     "url": "https://sakataka.co.ke",
     "socialLink": {
-      "linkedin": "#",
+      "linkedin": "https://www.linkedin.com/company/sakataka/",
+      "twitter":"https://x.com/sakataka___",
       "instagram": "#",
       "facebook": "#",
       "youtube": "#",

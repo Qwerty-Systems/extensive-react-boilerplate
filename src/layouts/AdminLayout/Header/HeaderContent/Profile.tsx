@@ -38,6 +38,7 @@ import Brightness4Icon from "@mui/icons-material/Brightness4";
 import FormatTextdirectionLToRIcon from "@mui/icons-material/FormatTextdirectionLToR";
 import useAuth from "@/services/auth/use-auth";
 import useAuthActions from "@/services/auth/use-auth-actions";
+import { useColorScheme } from "@mui/material/styles";
 
 /***************************  HEADER - PROFILE DATA  ***************************/
 
@@ -64,7 +65,7 @@ export default function ProfileSection() {
   const id = open ? "profile-action-popper" : undefined;
   const innerId = innerOpen ? "profile-inner-popper" : undefined;
   const buttonStyle = { borderRadius: 2, p: 1 };
-
+  const { colorScheme, setMode } = useColorScheme();
   const profileData = {
     avatar: {
       src: user?.photo?.path || "/assets/images/users/avatar-1.png",
@@ -144,7 +145,7 @@ export default function ProfileSection() {
                           size="small"
                           checked={false}
                           onChange={() =>
-                            enqueueSnackbar("Upgrade to pro for dark theme")
+                            setMode(colorScheme === "light" ? "dark" : "light")
                           }
                         />
                       }
@@ -165,7 +166,7 @@ export default function ProfileSection() {
                           size="small"
                           checked={false}
                           onChange={() =>
-                            enqueueSnackbar("Upgrade to pro for RTL")
+                            enqueueSnackbar("Feature coming soon")
                           }
                         />
                       }

@@ -37,10 +37,10 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 }));
 
 enum SectionKeys {
-  MARKETPLACE = "marketplace",
-  RECYCLERS = "recyclers",
-  WASTE_COLLECTORS = "waste-collectors",
-  COMMUNITY_GROUPS = "community-groups",
+  MARKETPLACE = "/market",
+  RECYCLERS = "/recycle",
+  WASTE_COLLECTORS = "collectors",
+  COMMUNITY_GROUPS = "community",
 }
 
 type DownloadLinks = Record<SectionKeys, string> & { default: string };
@@ -107,7 +107,7 @@ const ResponsiveAppBar = () => {
         <Button
           key={item.key}
           component={Link}
-          href={`/${lang}/${item.path}`}
+          href={`/${item.path}`}
           sx={{ color: "inherit" }}
         >
           {t(`common:navigation.${item.key}`)}
@@ -120,14 +120,18 @@ const ResponsiveAppBar = () => {
     <MenuItem
       key={item.key}
       component={Link}
-      href={`/${lang}/${item.path}`}
+      href={`/${item.path}`}
       onClick={handleCloseNavMenu}
     >
       {t(`common:navigation.${item.key}`)}
     </MenuItem>
   ));
 
-  return pathname === `/${lang}` ? (
+  return pathname === `/${lang}` ||
+    pathname === `/${lang}/market` ||
+    pathname === `/${lang}/recycle` ||
+    pathname === `/${lang}/collectors` ||
+    pathname === `/${lang}/community` ? (
     <Box sx={{ bgcolor: "grey.100" }}>
       <StyledAppBar position="static">
         <Container maxWidth="xl">
@@ -235,16 +239,14 @@ const ResponsiveAppBar = () => {
                   <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
                     <Button
                       component={Link}
-                      href={`/sign-in?${fromParam}`}
-                      // href={{ pathname: "/sign-in", query: fromParam }}
+                      href={`/sign-in${fromParam ? `?from=${fromParam.from}` : ""}`}
                     >
                       {t("common:navigation.signIn")}
                     </Button>
                     {IS_SIGN_UP_ENABLED && (
                       <Button
                         component={Link}
-                        href={`/sign-up?${fromParam}`}
-                        // href={{ pathname: "/sign-up", query: fromParam }}
+                        href={`/sign-up${fromParam ? `?from=${fromParam.from}` : ""}`}
                       >
                         {t("common:navigation.signUp")}
                       </Button>

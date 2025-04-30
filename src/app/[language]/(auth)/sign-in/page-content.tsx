@@ -23,6 +23,7 @@ import { isGoogleAuthEnabled } from "@/services/social-auth/google/google-config
 import { isFacebookAuthEnabled } from "@/services/social-auth/facebook/facebook-config";
 import { IS_SIGN_UP_ENABLED } from "@/services/auth/config";
 import { isKeycloakAuthEnabled } from "@/services/social-auth/keycloak/keycloak-config";
+import { useSearchParams } from "next/navigation";
 
 type SignInFormData = {
   email: string;
@@ -67,6 +68,9 @@ function Form() {
   const fetchAuthLogin = useAuthLoginService();
   const { t } = useTranslation("sign-in");
   const validationSchema = useValidationSchema();
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
+  console.log("from", from);
 
   const methods = useForm<SignInFormData>({
     resolver: yupResolver(validationSchema),
