@@ -10,16 +10,16 @@ import Popover from "@mui/material/Popover";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { UserFilterType } from "./tenant-filter-types";
+import { TenantFilterType } from "./tenant-filter-types";
 
-type UserFilterFormData = UserFilterType;
+type TenantFilterFormData = TenantFilterType;
 
-function UserFilter() {
+function TenantFilter() {
   const { t } = useTranslation("admin-panel-users");
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const methods = useForm<UserFilterFormData>({
+  const methods = useForm<TenantFilterFormData>({
     defaultValues: {
       roles: [],
     },
@@ -77,7 +77,7 @@ function UserFilter() {
           >
             <Grid container spacing={2} mb={3} mt={3}>
               <Grid size={{ xs: 12 }}>
-                <FormMultipleSelectInput<UserFilterFormData, Pick<Role, "id">>
+                <FormMultipleSelectInput<TenantFilterFormData, Pick<Role, "id">>
                   name="roles"
                   testId="roles"
                   label={t("admin-panel-users:filter.inputs.role.label")}
@@ -122,4 +122,4 @@ function UserFilter() {
   );
 }
 
-export default UserFilter;
+export default TenantFilter;

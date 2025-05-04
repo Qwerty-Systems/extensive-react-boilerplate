@@ -3,8 +3,9 @@
   "table": {
     "column1": "ID",
     "column2": "Name",
-    "column3": "Email",
-    "column4": "Role"
+    "column3": "Domain",
+    "column4": "primaryPhone",
+    "column5": "primaryEmail"
   },
   "actions": {
     "add": "Add Tenant",

@@ -7,15 +7,15 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { useMemo, useState } from "react";
-import { useGetUsersQuery } from "./queries/queries";
-import { User } from "@/services/api/types/user";
+import { useGetTenantsQuery } from "./queries/queries";
+import { Tenant } from "@/services/api/types/tenant";
 import Link from "@/components/link";
 import useAuth from "@/services/auth/use-auth";
 import useConfirmDialog from "@/components/confirm-dialog/use-confirm-dialog";
-import { useDeleteUsersService } from "@/services/api/services/users";
+import { useDeleteTenantsService } from "@/services/api/services/tenants";
 import removeDuplicatesFromArrayObjects from "@/services/helpers/remove-duplicates-from-array-of-objects";
 import { useQueryClient } from "@tanstack/react-query";
-import UserFilter from "./tenant-filter";
+import TenantFilter from "./tenant-filter";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SortEnum } from "@/services/api/types/sort-type";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
@@ -28,20 +28,20 @@ import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 
-type UsersKeys = keyof User;
+type TenantsKeys = keyof Tenant;
 
-function Actions({ user }: { user: User }) {
+function Actions({ tenant }: { tenant: Tenant }) {
   const { user: authUser } = useAuth();
   const { confirmDialog } = useConfirmDialog();
-  const fetchUserDelete = useDeleteUsersService();
+  const fetchTenantDelete = useDeleteTenantsService();
   const queryClient = useQueryClient();
-  const { t: tUsers } = useTranslation("admin-panel-tenants");
-  const canDelete = user.id !== authUser?.id;
+  const { t: tTenants } = useTranslation("admin-panel-tenants");
+  const canDelete = tenant.id !== authUser?.id;
 
   const handleDelete = async () => {
     const isConfirmed = await confirmDialog({
-      title: tUsers("admin-panel-tenants:confirm.delete.title"),
-      message: tUsers("admin-panel-tenants:confirm.delete.message"),
+      title: tTenants("admin-panel-tenants:confirm.delete.title"),
+      message: tTenants("admin-panel-tenants:confirm.delete.message"),
     });
 
     if (isConfirmed) {
@@ -50,36 +50,36 @@ function Actions({ user }: { user: User }) {
       const sort = searchParams.get("sort");
 
       const previousData = queryClient.getQueryData<any>([
-        "users",
+        "tenants",
         { sort, filter },
       ]);
 
-      queryClient.setQueryData(["users", { sort, filter }], {
+      queryClient.setQueryData(["tenants", { sort, filter }], {
         ...previousData,
         pages: previousData?.pages.map((page: any) => ({
           ...page,
-          data: page?.data.filter((item: User) => item.id !== user.id),
+          data: page?.data.filter((item: Tenant) => item.id !== tenant.id),
         })),
       });
 
-      await fetchUserDelete({ id: user.id });
+      await fetchTenantDelete({ id: tenant.id });
     }
   };
 
   return (
     <Box display="flex" gap={1}>
-      <Tooltip title={tUsers("admin-panel-tenants:actions.edit")}>
+      <Tooltip title={tTenants("admin-panel-tenants:actions.edit")}>
         <IconButton
           size="small"
           LinkComponent={Link}
-          href={`/admin-panel/users/edit/${user.id}`}
+          href={`/admin-panel/tenants/edit/${tenant.id}`}
           color="primary"
         >
           <EditIcon fontSize="small" />
         </IconButton>
       </Tooltip>
       {canDelete && (
-        <Tooltip title={tUsers("admin-panel-tenants:actions.delete")}>
+        <Tooltip title={tTenants("admin-panel-tenants:actions.delete")}>
           <IconButton size="small" onClick={handleDelete} color="error">
             <DeleteIcon fontSize="small" />
           </IconButton>
@@ -89,9 +89,8 @@ function Actions({ user }: { user: User }) {
   );
 }
 
-function Users() {
-  const { t: tUsers } = useTranslation("admin-panel-tenants");
-  const { t: tRoles } = useTranslation("admin-panel-roles");
+function Tenants() {
+  const { t: tTenants } = useTranslation("admin-panel-tenants");
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -108,11 +107,11 @@ function Users() {
   }, [searchParams]);
 
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useGetUsersQuery({
+    useGetTenantsQuery({
       filter,
       sort: {
         order: (sortModel[0]?.sort?.toUpperCase() as SortEnum) || SortEnum.DESC,
-        orderBy: (sortModel[0]?.field as UsersKeys) || "id",
+        orderBy: (sortModel[0]?.field as TenantsKeys) || "id",
       },
     });
 
@@ -131,7 +130,7 @@ function Users() {
 
   const result = useMemo(() => {
     const allData = data?.pages.flatMap((page) => page?.data) || [];
-    return removeDuplicatesFromArrayObjects<User>(allData as User[], "id");
+    return removeDuplicatesFromArrayObjects<Tenant>(allData as Tenant[], "id");
   }, [data]);
 
   const columns: GridColDef[] = [
@@ -148,17 +147,17 @@ function Users() {
       ),
       sortable: false,
     },
-    {
-      field: "id",
-      headerName: tUsers("admin-panel-tenants:table.column1"),
-      width: 120,
-    },
+    // {
+    //   field: "id",
+    //   headerName: tTenants("admin-panel-tenants:table.column1"),
+    //   width: 120,
+    // },
     {
       field: "name",
-      headerName: tUsers("admin-panel-tenants:table.column2"),
+      headerName: tTenants("admin-panel-tenants:table.column2"),
       width: 200,
-      valueGetter: (params: any) =>
-        `${params?.row?.firstName} ${params?.row?.lastName}`,
+      // valueGetter: (params: any) =>
+      //   `${params?.row?.firstName} ${params?.row?.lastName}`,
       renderCell: (params: any) => (
         <Box
           sx={{
@@ -167,13 +166,14 @@ function Users() {
             textOverflow: "ellipsis",
           }}
         >
-          {`${params?.row?.firstName} ${params?.row?.lastName}`}
+          {/* {`${params?.row?.firstName} ${params?.row?.lastName}`} */}
+          {`${params?.value} `}
         </Box>
       ),
     },
     {
-      field: "email",
-      headerName: tUsers("admin-panel-tenants:table.column3"),
+      field: "domain",
+      headerName: tTenants("admin-panel-tenants:table.column3"),
       flex: 1,
       minWidth: 250,
       renderCell: (params: any) => (
@@ -189,16 +189,78 @@ function Users() {
       ),
     },
     {
-      field: "role",
-      headerName: tUsers("admin-panel-tenants:table.column4"),
-      width: 150,
-      valueGetter: (params: any) => tRoles(`role.${params.row?.role?.name}`),
+      field: "primaryPhone",
+      headerName: tTenants("admin-panel-tenants:table.column4"),
+      flex: 1,
+      minWidth: 250,
+      renderCell: (params: any) => (
+        <Box
+          sx={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {params.value}
+        </Box>
+      ),
     },
+    {
+      field: "primaryEmail",
+      headerName: tTenants("admin-panel-tenants:table.column5"),
+      flex: 1,
+      minWidth: 250,
+      renderCell: (params: any) => (
+        <Box
+          sx={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {params.value}
+        </Box>
+      ),
+    },
+    // {
+    //   field: "TenantType",
+    //   headerName: tTenants("admin-panel-tenants:table.column3"),
+    //   flex: 1,
+    //   minWidth: 250,
+    //   renderCell: (params: any) => (
+    //     <Box
+    //       sx={{
+    //         whiteSpace: "nowrap",
+    //         overflow: "hidden",
+    //         textOverflow: "ellipsis",
+    //       }}
+    //     >
+    //       {params.value}
+    //     </Box>
+    //   ),
+    // },
+    // {
+    //   field: "isActive",
+    //   headerName: tTenants("admin-panel-tenants:table.column3"),
+    //   flex: 1,
+    //   minWidth: 250,
+    //   renderCell: (params: any) => (
+    //     <Box
+    //       sx={{
+    //         whiteSpace: "nowrap",
+    //         overflow: "hidden",
+    //         textOverflow: "ellipsis",
+    //       }}
+    //     >
+    //       {params.value}
+    //     </Box>
+    //   ),
+    // },
     {
       field: "actions",
       headerName: "",
       width: 120,
-      renderCell: (params: any) => <Actions user={params.row} />,
+      renderCell: (params: any) => <Actions tenant={params.row} />,
       sortable: false,
       filterable: false,
     },
@@ -210,21 +272,21 @@ function Users() {
         <Grid container spacing={3} size={{ xs: 12 }}>
           <Grid size="grow">
             <Typography variant="h3">
-              {tUsers("admin-panel-tenants:title")}
+              {tTenants("admin-panel-tenants:title")}
             </Typography>
           </Grid>
           <Grid container size="auto" wrap="nowrap" spacing={2}>
             <Grid size="auto">
-              <UserFilter />
+              <TenantFilter />
             </Grid>
             <Grid size="auto">
               <Button
                 variant="contained"
                 LinkComponent={Link}
-                href="/admin-panel/users/create"
+                href="/admin-panel/tenants/create"
                 color="success"
               >
-                {tUsers("admin-panel-tenants:actions.create")}
+                {tTenants("admin-panel-tenants:actions.create")}
               </Button>
             </Grid>
           </Grid>
@@ -244,7 +306,7 @@ function Users() {
                     disabled={!hasNextPage || isFetchingNextPage}
                     variant="outlined"
                   >
-                    {tUsers("admin-panel-tenants:loadMore")}
+                    {tTenants("admin-panel-tenants:loadMore")}
                   </Button>
                   {isFetchingNextPage && (
                     <CircularProgress size={24} sx={{ ml: 2 }} />
@@ -270,4 +332,6 @@ function Users() {
   );
 }
 
-export default withPageRequiredAuth(Users, { roles: [RoleEnum.ADMIN] });
+export default withPageRequiredAuth(Tenants, {
+  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER],
+});

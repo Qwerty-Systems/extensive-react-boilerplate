@@ -23,5 +23,5 @@ function DashboardPanel() {
 }
 
 export default withPageRequiredAuth(DashboardPanel, {
-  roles: [RoleEnum.ADMIN],
+  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER],
 });

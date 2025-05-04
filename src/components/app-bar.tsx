@@ -178,27 +178,30 @@ const ResponsiveAppBar = () => {
                   >
                     {t("common:navigation.downloadApp")}
                   </MenuItem>
-                  {isLoaded && !user && (
-                    <>
-                      <Divider />
-                      <MenuItem
-                        component={Link}
-                        href={{ pathname: "/sign-in", query: fromParam }}
-                        onClick={handleCloseNavMenu}
-                      >
-                        {t("common:navigation.signIn")}
-                      </MenuItem>
-                      {IS_SIGN_UP_ENABLED && (
+
+                  {isLoaded && !user
+                    ? [
+                        <Divider key="auth-divider" />,
                         <MenuItem
+                          key="sign-in"
                           component={Link}
-                          href={{ pathname: "/sign-up", query: fromParam }}
+                          href={{ pathname: "/sign-in", query: fromParam }}
                           onClick={handleCloseNavMenu}
                         >
-                          {t("common:navigation.signUp")}
-                        </MenuItem>
-                      )}
-                    </>
-                  )}
+                          {t("common:navigation.signIn")}
+                        </MenuItem>,
+                        IS_SIGN_UP_ENABLED && (
+                          <MenuItem
+                            key="sign-up"
+                            component={Link}
+                            href={{ pathname: "/sign-up", query: fromParam }}
+                            onClick={handleCloseNavMenu}
+                          >
+                            {t("common:navigation.signUp")}
+                          </MenuItem>
+                        ),
+                      ]
+                    : null}
                 </Menu>
               </Box>
 

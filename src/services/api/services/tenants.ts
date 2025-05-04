@@ -1,137 +1,165 @@
-// import { useCallback } from "react";
-// import useFetch from "../use-fetch";
-// import { API_URL } from "../config";
-// import wrapperFetchJsonResponse from "../wrapper-fetch-json-response";
-// import { User } from "../types/user";
-// import { InfinityPaginationType } from "../types/infinity-pagination";
-// import { Role } from "../types/role";
-// import { SortEnum } from "../types/sort-type";
-// import { RequestConfigType } from "./types/request-config";
+import { useCallback } from "react";
+import useFetch from "../use-fetch";
+import { API_URL } from "../config";
+import wrapperFetchJsonResponse from "../wrapper-fetch-json-response";
+import { Tenant, TenantType } from "../types/tenant";
+import { InfinityPaginationType } from "../types/infinity-pagination";
+import { SortEnum } from "../types/sort-type";
+import { RequestConfigType } from "./types/request-config";
+import { Region } from "../types/region";
+import { Setting } from "../types/settings";
 
-// export type UsersRequest = {
-//   page: number;
-//   limit: number;
-//   filters?: {
-//     roles?: Role[];
-//   };
-//   sort?: Array<{
-//     orderBy: keyof User;
-//     order: SortEnum;
-//   }>;
-// };
+export type TenantsRequest = {
+  page: number;
+  limit: number;
+  filters?: {
+    isActive?: boolean;
+    type?: string[];
+  };
+  sort?: Array<{
+    orderBy: keyof Tenant;
+    order: SortEnum;
+  }>;
+};
 
-// export type UsersResponse = InfinityPaginationType<User>;
+export type TenantsResponse = InfinityPaginationType<Tenant>;
 
-// export function useGetUsersService() {
-//   const fetch = useFetch();
+export function useGetTenantsService() {
+  const fetch = useFetch();
 
-//   return useCallback(
-//     (data: UsersRequest, requestConfig?: RequestConfigType) => {
-//       const requestUrl = new URL(`${API_URL}/v1/users`);
-//       requestUrl.searchParams.append("page", data.page.toString());
-//       requestUrl.searchParams.append("limit", data.limit.toString());
-//       if (data.filters) {
-//         requestUrl.searchParams.append("filters", JSON.stringify(data.filters));
-//       }
-//       if (data.sort) {
-//         requestUrl.searchParams.append("sort", JSON.stringify(data.sort));
-//       }
+  return useCallback(
+    (data: TenantsRequest, requestConfig?: RequestConfigType) => {
+      const requestUrl = new URL(`${API_URL}/v1/tenants`);
+      requestUrl.searchParams.append("page", data.page.toString());
+      requestUrl.searchParams.append("limit", data.limit.toString());
+      if (data.filters) {
+        requestUrl.searchParams.append("filters", JSON.stringify(data.filters));
+      }
+      if (data.sort) {
+        requestUrl.searchParams.append("sort", JSON.stringify(data.sort));
+      }
 
-//       return fetch(requestUrl, {
-//         method: "GET",
-//         ...requestConfig,
-//       }).then(wrapperFetchJsonResponse<UsersResponse>);
-//     },
-//     [fetch]
-//   );
-// }
+      return fetch(requestUrl, {
+        method: "GET",
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<TenantsResponse>);
+    },
+    [fetch]
+  );
+}
 
-// export type UserRequest = {
-//   id: User["id"];
-// };
+export type TenantRequest = {
+  id: Tenant["id"];
+};
 
-// export type UserResponse = User;
+export type TenantResponse = Tenant;
 
-// export function useGetUserService() {
-//   const fetch = useFetch();
+export function useGetTenantService() {
+  const fetch = useFetch();
 
-//   return useCallback(
-//     (data: UserRequest, requestConfig?: RequestConfigType) => {
-//       return fetch(`${API_URL}/v1/users/${data.id}`, {
-//         method: "GET",
-//         ...requestConfig,
-//       }).then(wrapperFetchJsonResponse<UserResponse>);
-//     },
-//     [fetch]
-//   );
-// }
+  return useCallback(
+    (data: TenantRequest, requestConfig?: RequestConfigType) => {
+      return fetch(`${API_URL}/v1/tenants/${data.id}`, {
+        method: "GET",
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<TenantResponse>);
+    },
+    [fetch]
+  );
+}
 
-// export type UserPostRequest = Pick<
-//   User,
-//   "email" | "firstName" | "lastName" | "photo" | "role"
-// > & {
-//   password: string;
-// };
+export type TenantPostRequest = Pick<
+  Tenant,
+  "name" | "domain" | "schemaName" | "address" | "primaryPhone" | "primaryEmail"
+> & {
+  type: TenantType["code"]; // Use type code instead of full object
+  logo?: File | string; // Allow file upload or existing photo ID
+  regions?: Omit<Region, "id" | "tenant" | "createdAt" | "updatedAt">[]; // Region create payloads
+};
+export type TenantPostResponse = Tenant;
 
-// export type UserPostResponse = User;
+export function usePostTenantService() {
+  const fetch = useFetch();
 
-// export function usePostUserService() {
-//   const fetch = useFetch();
+  return useCallback(
+    (data: TenantPostRequest, requestConfig?: RequestConfigType) => {
+      return fetch(`${API_URL}/v1/tenants`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<TenantPostResponse>);
+    },
+    [fetch]
+  );
+}
 
-//   return useCallback(
-//     (data: UserPostRequest, requestConfig?: RequestConfigType) => {
-//       return fetch(`${API_URL}/v1/users`, {
-//         method: "POST",
-//         body: JSON.stringify(data),
-//         ...requestConfig,
-//       }).then(wrapperFetchJsonResponse<UserPostResponse>);
-//     },
-//     [fetch]
-//   );
-// }
+export type TenantPatchRequest = {
+  id: NonNullable<Tenant["id"]>;
+  data: Partial<
+    Pick<
+      Tenant,
+      | "name"
+      | "domain"
+      | "schemaName"
+      | "address"
+      | "primaryPhone"
+      | "primaryEmail"
+      | "isActive"
+    > & {
+      type?: {
+        id: TenantType["id"];
+      };
+      logo?: File | string | null; // File for upload, string for existing ID, null for removal
+      regions?: Array<
+        Partial<Region> & {
+          _action?: "update" | "create" | "delete";
+          // Include minimum required fields for each action
+          id?: string; // Required for update/delete
+        }
+      >;
+      settings?: Array<
+        Partial<Setting> & {
+          _action?: "update" | "create" | "delete";
+          id?: string;
+        }
+      >;
+    }
+  >;
+};
 
-// export type UserPatchRequest = {
-//   id: User["id"];
-//   data: Partial<
-//     Pick<User, "email" | "firstName" | "lastName" | "photo" | "role"> & {
-//       password: string;
-//     }
-//   >;
-// };
+export type TenantPatchResponse = Tenant;
 
-// export type UserPatchResponse = User;
+export function usePatchTenantService() {
+  const fetch = useFetch();
 
-// export function usePatchUserService() {
-//   const fetch = useFetch();
+  return useCallback(
+    (data: TenantPatchRequest, requestConfig?: RequestConfigType) => {
+      return fetch(`${API_URL}/v1/tenants/${data.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data.data),
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<TenantPatchResponse>);
+    },
+    [fetch]
+  );
+}
 
-//   return useCallback(
-//     (data: UserPatchRequest, requestConfig?: RequestConfigType) => {
-//       return fetch(`${API_URL}/v1/users/${data.id}`, {
-//         method: "PATCH",
-//         body: JSON.stringify(data.data),
-//         ...requestConfig,
-//       }).then(wrapperFetchJsonResponse<UserPatchResponse>);
-//     },
-//     [fetch]
-//   );
-// }
+export type TenantsDeleteRequest = {
+  id: Tenant["id"];
+};
 
-// export type UsersDeleteRequest = {
-//   id: User["id"];
-// };
+export type TenantsDeleteResponse = undefined;
 
-// export type UsersDeleteResponse = undefined;
+export function useDeleteTenantsService() {
+  const fetch = useFetch();
 
-// export function useDeleteUsersService() {
-//   const fetch = useFetch();
-
-//   return useCallback(
-//     (data: UsersDeleteRequest, requestConfig?: RequestConfigType) => {
-//       return fetch(`${API_URL}/v1/users/${data.id}`, {
-//         method: "DELETE",
-//         ...requestConfig,
-//       }).then(wrapperFetchJsonResponse<UsersDeleteResponse>);
-//     },
-//     [fetch]
-//   );
-// }
+  return useCallback(
+    (data: TenantsDeleteRequest, requestConfig?: RequestConfigType) => {
+      return fetch(`${API_URL}/v1/tenants/${data.id}`, {
+        method: "DELETE",
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<TenantsDeleteResponse>);
+    },
+    [fetch]
+  );
+}

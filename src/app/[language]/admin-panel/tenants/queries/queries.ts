@@ -1,10 +1,16 @@
-import { useGetUsersService } from "@/services/api/services/users";
+import { useGetTenantsService } from "@/services/api/services/tenants";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import { createQueryKeys } from "@/services/react-query/query-key-factory";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { UserFilterType, UserSortType } from "../tenant-filter-types";
+import {
+  TenantFilterType,
+  TenantSortType,
+  TenantTypeFilterType,
+  TenantTypeSortType,
+} from "../tenant-filter-types";
+import { useGetTenantTypesService } from "@/services/api/services/tenant-types";
 
-export const usersQueryKeys = createQueryKeys(["users"], {
+export const tenantsQueryKeys = createQueryKeys(["tenants"], {
   list: () => ({
     key: [],
     sub: {
@@ -12,8 +18,8 @@ export const usersQueryKeys = createQueryKeys(["users"], {
         sort,
         filter,
       }: {
-        filter: UserFilterType | undefined;
-        sort?: UserSortType | undefined;
+        filter: TenantFilterType | undefined;
+        sort?: TenantSortType | undefined;
       }) => ({
         key: [sort, filter],
       }),
@@ -21,17 +27,75 @@ export const usersQueryKeys = createQueryKeys(["users"], {
   }),
 });
 
-export const useGetUsersQuery = ({
+export const useGetTenantsQuery = ({
   sort,
   filter,
 }: {
-  filter?: UserFilterType | undefined;
-  sort?: UserSortType | undefined;
+  filter?: TenantFilterType | undefined;
+  sort?: TenantSortType | undefined;
 } = {}) => {
-  const fetch = useGetUsersService();
+  const fetch = useGetTenantsService();
 
   const query = useInfiniteQuery({
-    queryKey: usersQueryKeys.list().sub.by({ sort, filter }).key,
+    queryKey: tenantsQueryKeys.list().sub.by({ sort, filter }).key,
+    initialPageParam: 1,
+    queryFn: async ({ pageParam, signal }) => {
+      const { status, data } = await fetch(
+        {
+          page: pageParam,
+          limit: 10,
+          filters: filter,
+          sort: sort ? [sort] : undefined,
+        },
+        {
+          signal,
+        }
+      );
+
+      if (status === HTTP_CODES_ENUM.OK) {
+        return {
+          data: data.data,
+          nextPage: data.hasNextPage ? pageParam + 1 : undefined,
+        };
+      }
+    },
+    getNextPageParam: (lastPage) => {
+      return lastPage?.nextPage;
+    },
+    gcTime: 0,
+  });
+
+  return query;
+};
+
+export const tenantTypesQueryKeys = createQueryKeys(["tenant-types"], {
+  list: () => ({
+    key: [],
+    sub: {
+      by: ({
+        sort,
+        filter,
+      }: {
+        filter: TenantTypeFilterType | undefined;
+        sort?: TenantTypeSortType | undefined;
+      }) => ({
+        key: [sort, filter],
+      }),
+    },
+  }),
+});
+
+export const useGetTenantTypesQuery = ({
+  sort,
+  filter,
+}: {
+  filter?: TenantTypeFilterType | undefined;
+  sort?: TenantTypeSortType | undefined;
+} = {}) => {
+  const fetch = useGetTenantTypesService();
+
+  const query = useInfiniteQuery({
+    queryKey: tenantTypesQueryKeys.list().sub.by({ sort, filter }).key,
     initialPageParam: 1,
     queryFn: async ({ pageParam, signal }) => {
       const { status, data } = await fetch(

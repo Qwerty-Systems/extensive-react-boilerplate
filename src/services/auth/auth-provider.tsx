@@ -58,13 +58,15 @@ function AuthProvider(props: PropsWithChildren<{}>) {
         const response = await fetchBase(AUTH_ME_URL, {
           method: "GET",
         });
-
+        console.log("response me ", response);
         if (response.status === HTTP_CODES_ENUM.UNAUTHORIZED) {
           logOut();
           return;
         }
 
         const data = await response.json();
+
+        console.log("user data me ", data);
         setUser(data);
       }
     } finally {

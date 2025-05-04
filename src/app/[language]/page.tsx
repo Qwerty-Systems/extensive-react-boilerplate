@@ -10,30 +10,9 @@ import { Cta4, Cta5 } from "@/components/cta";
 import { DynamicComponentType } from "@/enum";
 import { Clientele3 } from "@/components/clientele";
 import Faq6 from "@/components/faq/Faq6"; // Adjust the path based on your project structure
-
-import { useEffect } from "react";
-// @next
-import { useRouter } from "next/navigation";
-
-// @project
-import { APP_DEFAULT_PATH } from "@/config";
-
-/* export async function generateMetadata(props: Props): Promise<Metadata> {
-  const params = await props.params;
-  const { t } = await getServerTranslation(params.language, "home");
-
-  return {
-    title: t("title"),
-  };
-} */
 import branding from "@/branding.json";
 import Typography from "@mui/material/Typography";
-// import Link from "next/link";
 import { Footer7 } from "@/components/footer";
-import useAuth from "@/services/auth/use-auth";
-// import useAuth from "@/services/auth/use-auth";
-// @asssets
-// const imagePrefix = "/assets/images/presentation";
 
 function DescriptionLine() {
   return (
@@ -54,13 +33,6 @@ function DescriptionLine() {
 }
 
 export default function Home(/* props: Props */) {
-  const router = useRouter();
-  const { user } = useAuth();
-  useEffect(() => {
-    if (user) {
-      router.replace(APP_DEFAULT_PATH);
-    }
-  }, [router, user]);
   const linkProps = { target: "_blank", rel: "noopener noreferrer" };
   const hero = {
     headLine: "Powering Waste Collectors, Cleaning Up Communities",
@@ -107,56 +79,6 @@ export default function Home(/* props: Props */) {
     ],
   };
 
-  // const tags = {
-  //   heading: `Blocks `,
-  //   description:
-  //     "Explore a wide range of ready-made blocks—from Hero to CTA, Features, and more to speed up your design process.",
-  //   primaryBtn: { children: "Explore all Blocks", href: "" },
-  //   sections: [
-  //     {
-  //       animationDelay: 0.2,
-  //       title: "Hero",
-  //       subTitle: "17 Different Variants",
-  //       image: `${imagePrefix}/hero-light.svg`,
-  //       link: "/",
-  //     },
-  //     {
-  //       animationDelay: 0.3,
-  //       title: "Call to Action",
-  //       subTitle: "12 Different Variants",
-  //       image: `${imagePrefix}/cta-light.svg`,
-  //       link: "/",
-  //     },
-  //     {
-  //       animationDelay: 0.4,
-  //       title: "Feature",
-  //       subTitle: "23 Different Variants",
-  //       image: `${imagePrefix}/feature-light.svg`,
-  //       link: "/",
-  //     },
-  //     {
-  //       animationDelay: 0.2,
-  //       title: "Benefits",
-  //       subTitle: "9 Different Variants",
-  //       image: `${imagePrefix}/benefits-light.svg`,
-  //       link: "/",
-  //     },
-  //     {
-  //       animationDelay: 0.3,
-  //       title: "Process",
-  //       subTitle: "7 Different Variants",
-  //       image: `${imagePrefix}/process-light.svg`,
-  //       link: "/",
-  //     },
-  //     {
-  //       animationDelay: 0.4,
-  //       title: "Integration",
-  //       subTitle: "8 Different Variants",
-  //       image: `${imagePrefix}/integration-light.svg`,
-  //       link: "/",
-  //     },
-  //   ],
-  // };
   const feature18 = {
     heading: "What’s Next? Buckle Up.",
     caption:
@@ -556,15 +478,6 @@ export default function Home(/* props: Props */) {
             caption={benefit.caption}
             blockDetail={benefit.blockDetail}
           />
-          {/* <Integration
-            headLine={tags.heading}
-            primaryBtn={tags.primaryBtn}
-            captionLine={tags.description}
-            tagList={tags.sections.map((section) => ({
-              label: section.title,
-              icon: section.image,
-            }))}
-          /> */}
           <Feature18
             heading={feature18.heading}
             caption={feature18.caption}

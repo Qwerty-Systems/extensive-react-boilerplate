@@ -61,6 +61,7 @@
     "react-device-detect": "^2.2.3",
     "react-dom": "19.0.0",
     "react-dropzone": "^14.2.3",
+    "react-error-boundary": "^6.0.0",
     "react-hook-form": "^7.45.4",
     "react-i18next": "^15.0.0",
     "react-slick": "^0.30.3",

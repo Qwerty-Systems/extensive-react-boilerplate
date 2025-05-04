@@ -43,11 +43,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
               align="center"
               sx={{ maxWidth: 400 }}
             >
-              <p>
-                We’re on a mission to revolutionize waste management. Join us as
-                we build a platform that empowers waste collectors and
-                communities.
-              </p>
+              We’re on a mission to revolutionize waste management. Join us as
+              we build a platform that empowers waste collectors and
+              communities.
             </Typography>
           </Stack>
           <Box sx={{ pt: 6, pl: 6, height: "calc(100% - 114px)" }}>

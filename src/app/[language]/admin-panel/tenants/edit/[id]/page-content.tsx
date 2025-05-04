@@ -9,7 +9,7 @@ import FormTextInput from "@/components/form/text-input/form-text-input";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useSnackbar } from "@/hooks/use-snackbar";
 import Link from "@/components/link";
 import FormAvatarInput from "@/components/form/avatar-input/form-avatar-input";
@@ -19,82 +19,78 @@ import Box from "@mui/material/Box";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import { useTranslation } from "@/services/i18n/client";
 import {
-  useGetUserService,
-  usePatchUserService,
-} from "@/services/api/services/users";
+  useGetTenantService,
+  usePatchTenantService,
+} from "@/services/api/services/tenants";
 import { useParams } from "next/navigation";
-import { Role, RoleEnum } from "@/services/api/types/role";
-import FormSelectInput from "@/components/form/select/form-select";
+import { TenantType } from "@/services/api/types/tenant";
+// import FormCheckboxInput from "@/components/form/checkbox/form-checkbox";
+import { SortEnum } from "@/services/api/types/sort-type";
+import removeDuplicatesFromArrayObjects from "@/services/helpers/remove-duplicates-from-array-of-objects";
+import { useGetTenantTypesQuery } from "../../queries/queries";
+import { RoleEnum } from "@/services/api/types/role";
+// import FormSelectInput from "@/components/form/select/form-select";
 
-type EditUserFormData = {
-  email: string;
-  firstName: string;
-  lastName: string;
-  photo?: FileEntity;
-  role: Role;
+type EditTenantFormData = {
+  name: string;
+  domain: string;
+  schemaName: string;
+  primaryPhone: string;
+  primaryEmail: string;
+  logo?: FileEntity;
+  type: {
+    id: string;
+  };
+  isActive: boolean;
 };
 
-type ChangeUserPasswordFormData = {
-  password: string;
-  passwordConfirmation: string;
-};
-
-const useValidationEditUserSchema = () => {
-  const { t } = useTranslation("admin-panel-users-edit");
+const useValidationEditTenantSchema = () => {
+  const { t } = useTranslation("admin-panel-tenants-edit");
 
   return yup.object().shape({
-    email: yup
+    name: yup
       .string()
-      .email(t("admin-panel-users-edit:inputs.email.validation.invalid"))
-      .required(
-        t("admin-panel-users-edit:inputs.firstName.validation.required")
-      ),
-    firstName: yup
+      .required(t("admin-panel-tenants-edit:inputs.name.validation.required")),
+    domain: yup
       .string()
       .required(
-        t("admin-panel-users-edit:inputs.firstName.validation.required")
+        t("admin-panel-tenants-edit:inputs.domain.validation.required")
       ),
-    lastName: yup
+    schemaName: yup
       .string()
       .required(
-        t("admin-panel-users-edit:inputs.lastName.validation.required")
+        t("admin-panel-tenants-edit:inputs.schemaName.validation.required")
       ),
-    role: yup
-      .object()
-      .shape({
-        id: yup.mixed<string | number>().required(),
-        name: yup.string(),
-      })
-      .required(t("admin-panel-users-edit:inputs.role.validation.required")),
-  });
-};
-
-const useValidationChangePasswordSchema = () => {
-  const { t } = useTranslation("admin-panel-users-edit");
-
-  return yup.object().shape({
-    password: yup
+    primaryPhone: yup
       .string()
-      .min(6, t("admin-panel-users-edit:inputs.password.validation.min"))
       .required(
-        t("admin-panel-users-edit:inputs.password.validation.required")
+        t("admin-panel-tenants-edit:inputs.primaryPhone.validation.required")
       ),
-    passwordConfirmation: yup
+    primaryEmail: yup
       .string()
-      .oneOf(
-        [yup.ref("password")],
-        t("admin-panel-users-edit:inputs.passwordConfirmation.validation.match")
+      .email(
+        t("admin-panel-tenants-edit:inputs.primaryEmail.validation.invalid")
       )
       .required(
-        t(
-          "admin-panel-users-edit:inputs.passwordConfirmation.validation.required"
-        )
+        t("admin-panel-tenants-edit:inputs.primaryEmail.validation.required")
+      ),
+    type: yup.object().shape({
+      id: yup
+        .string()
+        .required(
+          t("admin-panel-tenants-edit:inputs.type.validation.required")
+        ),
+    }),
+    isActive: yup
+      .boolean()
+      .required(
+        t("admin-panel-tenants-edit:inputs.isActive.validation.required")
       ),
   });
 };
 
-function EditUserFormActions() {
-  const { t } = useTranslation("admin-panel-users-edit");
+function EditTenantFormActions() {
+  const { t } = useTranslation("admin-panel-tenants-edit");
   const { isSubmitting, isDirty } = useFormState();
   useLeavePage(isDirty);
 
@@ -105,272 +101,195 @@ function EditUserFormActions() {
       type="submit"
       disabled={isSubmitting}
     >
-      {t("admin-panel-users-edit:actions.submit")}
+      {t("admin-panel-tenants-edit:actions.submit")}
     </Button>
   );
 }
 
-function ChangePasswordUserFormActions() {
-  const { t } = useTranslation("admin-panel-users-edit");
-  const { isSubmitting, isDirty } = useFormState();
-  useLeavePage(isDirty);
-
-  return (
-    <Button
-      variant="contained"
-      color="primary"
-      type="submit"
-      disabled={isSubmitting}
-    >
-      {t("admin-panel-users-edit:actions.submit")}
-    </Button>
-  );
-}
-
-function FormEditUser() {
+function FormEditTenant() {
   const params = useParams<{ id: string }>();
-  const userId = params.id;
-  const fetchGetUser = useGetUserService();
-  const fetchPatchUser = usePatchUserService();
-  const { t } = useTranslation("admin-panel-users-edit");
-  const validationSchema = useValidationEditUserSchema();
+  const tenantId = params.id as string; // Type assertion for string
+  const fetchGetTenant = useGetTenantService();
+  const fetchPatchTenant = usePatchTenantService();
+  const { t } = useTranslation("admin-panel-tenants-edit");
+  const validationSchema = useValidationEditTenantSchema();
+
   const { enqueueSnackbar } = useSnackbar();
 
-  const methods = useForm<EditUserFormData>({
+  const methods = useForm<EditTenantFormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
-      email: "",
-      firstName: "",
-      lastName: "",
-      role: undefined,
-      photo: undefined,
+      name: "",
+      domain: "",
+      schemaName: "",
+      primaryPhone: "",
+      primaryEmail: "",
+      type: {
+        id: "",
+      },
+      isActive: true,
     },
   });
 
   const { handleSubmit, setError, reset } = methods;
 
   const onSubmit = handleSubmit(async (formData) => {
-    const isEmailDirty = methods.getFieldState("email").isDirty;
-    const { data, status } = await fetchPatchUser({
-      id: parseInt(userId),
+    const { data, status } = await fetchPatchTenant({
+      id: tenantId,
       data: {
         ...formData,
-        email: isEmailDirty ? formData.email : undefined,
+        logo: formData.logo?.id,
+        type: {
+          id: formData.type.id,
+        },
       },
     });
+
     if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
-      (Object.keys(data.errors) as Array<keyof EditUserFormData>).forEach(
+      (Object.keys(data.errors) as Array<keyof EditTenantFormData>).forEach(
         (key) => {
           setError(key, {
             type: "manual",
             message: t(
-              `admin-panel-users-edit:inputs.${key}.validation.server.${data.errors[key]}`
+              `admin-panel-tenants-edit:inputs.${key}.validation.server.${data.errors[key]}`
             ),
           });
         }
       );
       return;
     }
+
     if (status === HTTP_CODES_ENUM.OK) {
       reset(formData);
-      enqueueSnackbar(t("admin-panel-users-edit:alerts.user.success"), {
+      enqueueSnackbar(t("admin-panel-tenants-edit:alerts.tenant.success"), {
         variant: "success",
       });
     }
   });
-
-  useEffect(() => {
-    const getInitialDataForEdit = async () => {
-      const { status, data: user } = await fetchGetUser({
-        id: parseInt(userId),
-      });
-
-      if (status === HTTP_CODES_ENUM.OK) {
-        reset({
-          email: user?.email ?? "",
-          firstName: user?.firstName ?? "",
-          lastName: user?.lastName ?? "",
-          role: {
-            id: Number(user?.role?.id),
-          },
-          photo: user?.photo,
-        });
-      }
-    };
-
-    getInitialDataForEdit();
-  }, [userId, reset, fetchGetUser]);
-
-  return (
-    <FormProvider {...methods}>
-      <Container maxWidth="xs">
-        <form onSubmit={onSubmit}>
-          <Grid container spacing={2} mb={3} mt={3}>
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="h6">
-                {t("admin-panel-users-edit:title1")}
-              </Typography>
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <FormAvatarInput<EditUserFormData> name="photo" testId="photo" />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<EditUserFormData>
-                name="email"
-                testId="email"
-                label={t("admin-panel-users-edit:inputs.email.label")}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<EditUserFormData>
-                name="firstName"
-                testId="first-name"
-                label={t("admin-panel-users-edit:inputs.firstName.label")}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<EditUserFormData>
-                name="lastName"
-                testId="last-name"
-                label={t("admin-panel-users-edit:inputs.lastName.label")}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormSelectInput<EditUserFormData, Pick<Role, "id">>
-                name="role"
-                testId="role"
-                label={t("admin-panel-users-edit:inputs.role.label")}
-                options={[
-                  {
-                    id: RoleEnum.ADMIN,
-                  },
-                  {
-                    id: RoleEnum.USER,
-                  },
-                  {
-                    id: RoleEnum.AGENT,
-                  },
-                  {
-                    id: RoleEnum.CUSTOMER,
-                  },
-                  {
-                    id: RoleEnum.MANAGER,
-                  },
-                ]}
-                keyValue="id"
-                renderOption={(option) =>
-                  t(`admin-panel-users-edit:inputs.role.options.${option.id}`)
-                }
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <EditUserFormActions />
-              <Box ml={1} component="span">
-                <Button
-                  variant="contained"
-                  color="inherit"
-                  LinkComponent={Link}
-                  href="/admin-panel/users"
-                >
-                  {t("admin-panel-users-edit:actions.cancel")}
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </form>
-      </Container>
-    </FormProvider>
-  );
-}
-
-function FormChangePasswordUser() {
-  const params = useParams<{ id: string }>();
-  const userId = params.id;
-  const fetchPatchUser = usePatchUserService();
-  const { t } = useTranslation("admin-panel-users-edit");
-  const validationSchema = useValidationChangePasswordSchema();
-  const { enqueueSnackbar } = useSnackbar();
-
-  const methods = useForm<ChangeUserPasswordFormData>({
-    resolver: yupResolver(validationSchema),
-    defaultValues: {
-      password: "",
-      passwordConfirmation: "",
+  // Fetch tenant types on mount
+  const { data, isLoading: isLoadingTenantTypes } = useGetTenantTypesQuery({
+    filter: undefined, // Add filters if needed
+    sort: {
+      order: SortEnum.ASC,
+      orderBy: "name",
     },
   });
 
-  const { handleSubmit, setError, reset } = methods;
+  const tenantTypes = useMemo(() => {
+    const allData = data?.pages.flatMap((page) => page?.data) || [];
+    return removeDuplicatesFromArrayObjects<TenantType>(
+      allData as unknown as TenantType[],
+      "id"
+    );
+  }, [data]);
+  useEffect(() => {
+    const getInitialDataForEdit = async () => {
+      if (isLoadingTenantTypes) return;
+      const { status, data: tenant } = await fetchGetTenant({ id: tenantId });
 
-  const onSubmit = handleSubmit(async (formData) => {
-    const { data, status } = await fetchPatchUser({
-      id: parseInt(userId),
-      data: formData,
-    });
-    if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
-      (
-        Object.keys(data.errors) as Array<keyof ChangeUserPasswordFormData>
-      ).forEach((key) => {
-        setError(key, {
-          type: "manual",
-          message: t(
-            `admin-panel-users-edit:inputs.${key}.validation.server.${data.errors[key]}`
-          ),
+      if (status === HTTP_CODES_ENUM.OK && tenant) {
+        reset({
+          name: tenant.name ?? "",
+          domain: tenant.domain ?? "",
+          schemaName: tenant.schemaName ?? "",
+          primaryPhone: tenant.primaryPhone ?? "",
+          primaryEmail: tenant.primaryEmail ?? "",
+          type: {
+            id: tenantTypes.find((t) => t.id === tenant.type?.id)?.id ?? "",
+          },
+          logo: tenant.logo,
+          isActive: tenant.isActive ?? true,
         });
-      });
-      return;
-    }
-    if (status === HTTP_CODES_ENUM.OK) {
-      reset();
-      enqueueSnackbar(t("admin-panel-users-edit:alerts.password.success"), {
-        variant: "success",
-      });
-    }
-  });
+      }
+    };
+    getInitialDataForEdit();
+  }, [tenantId, reset, fetchGetTenant, isLoadingTenantTypes, tenantTypes]);
 
   return (
     <FormProvider {...methods}>
       <Container maxWidth="xs">
         <form onSubmit={onSubmit}>
           <Grid container spacing={2} mb={3} mt={3}>
-            <Grid size={{ xs: 12 }}>
+            <Grid sx={{ xs: 12 }}>
               <Typography variant="h6">
-                {t("admin-panel-users-edit:title2")}
+                {t("admin-panel-tenants-edit:title1")}
               </Typography>
             </Grid>
+            <Grid sx={{ xs: 12 }}>
+              <FormAvatarInput<EditTenantFormData> name="logo" testId="logo" />
+            </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<ChangeUserPasswordFormData>
-                name="password"
-                type="password"
-                label={t("admin-panel-users-edit:inputs.password.label")}
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput<EditTenantFormData>
+                name="name"
+                label={t("admin-panel-tenants-edit:inputs.name.label")}
               />
             </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<ChangeUserPasswordFormData>
-                name="passwordConfirmation"
-                label={t(
-                  "admin-panel-users-edit:inputs.passwordConfirmation.label"
-                )}
-                type="password"
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput<EditTenantFormData>
+                name="domain"
+                label={t("admin-panel-tenants-edit:inputs.domain.label")}
               />
             </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <ChangePasswordUserFormActions />
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput<EditTenantFormData>
+                name="schemaName"
+                label={t("admin-panel-tenants-edit:inputs.schemaName.label")}
+              />
+            </Grid>
+
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput<EditTenantFormData>
+                name="primaryPhone"
+                label={t("admin-panel-tenants-edit:inputs.primaryPhone.label")}
+              />
+            </Grid>
+
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput<EditTenantFormData>
+                name="primaryEmail"
+                label={t("admin-panel-tenants-edit:inputs.primaryEmail.label")}
+              />
+            </Grid>
+
+            <Grid sx={{ xs: 12 }}>
+              {/* <FormSelectInput<EditTenantFormData>
+                name="type.id"
+                label={t("admin-panel-tenants-edit:inputs.type.label")}
+                options={tenantTypes}
+                // keyValue="id"
+                renderOption={(type: TenantType) => type.name}
+                getOptionValue={(type: TenantType) => type.name}
+              /> */}
+            </Grid>
+
+            <Grid sx={{ xs: 12 }}>
+              {/* <FormCheckboxInput<EditTenantFormData>
+                name="isActive"
+                label={t("admin-panel-tenants-edit:inputs.isActive.label")}
+                keyValue={[]}
+                options={[]}
+                keyExtractor={function (_option: unknown): string {
+                  throw new Error("Function not implemented.");
+                }}
+                renderOption={function (_option: unknown): React.ReactNode {
+                  throw new Error("Function not implemented.");
+                }}
+              /> */}
+            </Grid>
+
+            <Grid sx={{ xs: 12 }}>
+              <EditTenantFormActions />
               <Box ml={1} component="span">
                 <Button
                   variant="contained"
                   color="inherit"
                   LinkComponent={Link}
-                  href="/admin-panel/users"
+                  href="/admin-panel/tenants"
                 >
-                  {t("admin-panel-users-edit:actions.cancel")}
+                  {t("admin-panel-tenants-edit:actions.cancel")}
                 </Button>
               </Box>
             </Grid>
@@ -381,13 +300,14 @@ function FormChangePasswordUser() {
   );
 }
 
-function EditUser() {
+function EditTenant() {
   return (
     <>
-      <FormEditUser />
-      <FormChangePasswordUser />
+      <FormEditTenant />
     </>
   );
 }
 
-export default withPageRequiredAuth(EditUser);
+export default withPageRequiredAuth(EditTenant, {
+  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER],
+});
