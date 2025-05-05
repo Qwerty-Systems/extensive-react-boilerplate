@@ -1,253 +1,283 @@
 "use client";
 
-import Button from "@mui/material/Button";
 import { useForm, FormProvider, useFormState } from "react-hook-form";
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
-import FormTextInput from "@/components/form/text-input/form-text-input";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+
 import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
 import { useSnackbar } from "@/hooks/use-snackbar";
-import Link from "@/components/link";
-import FormAvatarInput from "@/components/form/avatar-input/form-avatar-input";
-import { FileEntity } from "@/services/api/types/file-entity";
 import useLeavePage from "@/services/leave-page/use-leave-page";
-import Box from "@mui/material/Box";
-import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
-import { useTranslation } from "@/services/i18n/client";
-import { usePostUserService } from "@/services/api/services/users";
 import { useRouter } from "next/navigation";
-import { Role, RoleEnum } from "@/services/api/types/role";
-import FormSelectInput from "@/components/form/select/form-select";
+import { useTranslation } from "@/services/i18n/client";
 
-type CreateFormData = {
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  passwordConfirmation: string;
-  photo?: FileEntity;
-  role: Role;
+import { usePostTenantService } from "@/services/api/services/tenants";
+
+import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
+import { FileEntity } from "@/services/api/types/file-entity";
+import { TenantType } from "@/services/api/services/tenant-types";
+import { RoleEnum } from "@/services/api/types/role";
+
+import FormTextInput from "@/components/form/text-input/form-text-input";
+import FormAvatarInput from "@/components/form/avatar-input/form-avatar-input";
+import FormSelectInput from "@/components/form/select/form-select";
+import Link from "@/components/link";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
+import { useGetTenantTypesQuery } from "../queries/queries";
+import { SortEnum } from "@/services/api/types/sort-type";
+import { useMemo } from "react";
+import removeDuplicatesFromArrayObjects from "@/services/helpers/remove-duplicates-from-array-of-objects";
+import Alert from "@mui/material/Alert";
+import Stack from "@mui/material/Stack";
+import LoadingButton from "@mui/lab/LoadingButton";
+
+type CreateTenantFormData = {
+  domain: string;
+  schemaName: string;
+  logo?: FileEntity;
+  primaryPhone: string;
+  primaryEmail: string;
+  name: string;
+  type: { id: string };
+  isActive?: boolean;
 };
 
+// type BooleanOption = { /* value: boolean; */ label: string };
+
 const useValidationSchema = () => {
-  const { t } = useTranslation("admin-panel-users-create");
+  const { t } = useTranslation("admin-panel-tenants-create");
 
   return yup.object().shape({
-    email: yup
+    domain: yup.string().required(t("inputs.domain.validation.required")),
+    schemaName: yup
       .string()
-      .email(t("admin-panel-users-create:inputs.email.validation.invalid"))
-      .required(
-        t("admin-panel-users-create:inputs.firstName.validation.required")
-      ),
-    firstName: yup
+      .required(t("inputs.schemaName.validation.required")),
+    name: yup.string().required(t("inputs.name.validation.required")),
+    primaryPhone: yup
       .string()
-      .required(
-        t("admin-panel-users-create:inputs.firstName.validation.required")
-      ),
-    lastName: yup
+      .required(t("inputs.primaryPhone.validation.required")),
+    primaryEmail: yup
       .string()
-      .required(
-        t("admin-panel-users-create:inputs.lastName.validation.required")
-      ),
-    password: yup
-      .string()
-      .min(6, t("admin-panel-users-create:inputs.password.validation.min"))
-      .required(
-        t("admin-panel-users-create:inputs.password.validation.required")
-      ),
-    passwordConfirmation: yup
-      .string()
-      .oneOf(
-        [yup.ref("password")],
-        t(
-          "admin-panel-users-create:inputs.passwordConfirmation.validation.match"
-        )
-      )
-      .required(
-        t(
-          "admin-panel-users-create:inputs.passwordConfirmation.validation.required"
-        )
-      ),
-    role: yup
-      .object()
-      .shape({
-        id: yup.mixed<string | number>().required(),
-        name: yup.string(),
-      })
-      .required(t("admin-panel-users-create:inputs.role.validation.required")),
+      .email(t("inputs.primaryEmail.validation.invalid"))
+      .required(t("inputs.primaryEmail.validation.required")),
+    logo: yup.mixed(),
+    type: yup.object().shape({
+      id: yup.string().required(t("inputs.type.validation.required")),
+    }),
+    isActive: yup.boolean().optional(),
   });
 };
 
-function CreateUserFormActions() {
-  const { t } = useTranslation("admin-panel-users-create");
+function CreateTenantFormActions() {
+  const { t } = useTranslation("admin-panel-tenants-create");
   const { isSubmitting, isDirty } = useFormState();
   useLeavePage(isDirty);
 
   return (
-    <Button
-      variant="contained"
-      color="primary"
-      type="submit"
-      disabled={isSubmitting}
+    <Stack
+      direction={{ xs: "column", sm: "row" }}
+      spacing={2}
+      justifyContent="space-between"
+      mt={4}
     >
-      {t("admin-panel-users-create:actions.submit")}
-    </Button>
+      <LoadingButton
+        variant="contained"
+        color="primary"
+        type="submit"
+        loading={isSubmitting}
+        // fullWidth={{ xs: true, sm: false }}
+      >
+        {t("actions.submit")}
+      </LoadingButton>
+      <Button
+        variant="outlined"
+        color="inherit"
+        LinkComponent={Link}
+        href="/admin-panel/tenants"
+        // fullWidth={{ xs: true, sm: false }}
+      >
+        {t("actions.cancel")}
+      </Button>
+    </Stack>
   );
 }
-
-function FormCreateUser() {
+function FormCreateTenant() {
   const router = useRouter();
-  const fetchPostUser = usePostUserService();
-  const { t } = useTranslation("admin-panel-users-create");
+  const fetchPostTenant = usePostTenantService();
+  const { t } = useTranslation("admin-panel-tenants-create");
   const validationSchema = useValidationSchema();
-
   const { enqueueSnackbar } = useSnackbar();
-
-  const methods = useForm<CreateFormData>({
+  const { data } = useGetTenantTypesQuery({
+    filter: undefined, // Add filters if needed
+    sort: {
+      order: SortEnum.ASC,
+      orderBy: "name",
+    },
+  });
+  const tenantTypes = useMemo(() => {
+    const allData = data?.pages.flatMap((page) => page?.data) || [];
+    return removeDuplicatesFromArrayObjects<TenantType>(
+      allData as unknown as TenantType[],
+      "id"
+    );
+  }, [data]);
+  const methods = useForm<CreateTenantFormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
-      email: "",
-      firstName: "",
-      lastName: "",
-      password: "",
-      passwordConfirmation: "",
-      role: {
-        id: RoleEnum.USER,
-      },
-      photo: undefined,
+      domain: "",
+      schemaName: "",
+      logo: undefined,
+      primaryPhone: "",
+      primaryEmail: "",
+      name: "",
+      type: { id: "" },
+      isActive: true,
     },
   });
 
   const { handleSubmit, setError } = methods;
 
   const onSubmit = handleSubmit(async (formData) => {
-    const { data, status } = await fetchPostUser(formData);
+    console.log("formData", formData);
+    const { data, status } = await fetchPostTenant(formData);
+    console.log("status", status);
     if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
-      (Object.keys(data.errors) as Array<keyof CreateFormData>).forEach(
+      (Object.keys(data.errors) as Array<keyof CreateTenantFormData>).forEach(
         (key) => {
           setError(key, {
             type: "manual",
-            message: t(
-              `admin-panel-users-create:inputs.${key}.validation.server.${data.errors[key]}`
-            ),
+            message: t(`inputs.${key}.validation.server.${data.errors[key]}`),
           });
         }
       );
       return;
     }
+
     if (status === HTTP_CODES_ENUM.CREATED) {
-      enqueueSnackbar(t("admin-panel-users-create:alerts.user.success"), {
-        variant: "success",
-      });
-      router.push("/admin-panel/users");
+      enqueueSnackbar(t("alerts.tenant.success"), { variant: "success" });
+      router.push("/admin-panel/tenants");
     }
   });
 
   return (
     <FormProvider {...methods}>
-      <Container maxWidth="xs">
-        <form onSubmit={onSubmit} autoComplete="create-new-user">
-          <Grid container spacing={2} mb={3} mt={3}>
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="h6">
-                {t("admin-panel-users-create:title")}
-              </Typography>
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <FormAvatarInput<CreateFormData> name="photo" testId="photo" />
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Paper elevation={3} sx={{ p: { xs: 2, sm: 4 }, borderRadius: 4 }}>
+          <Box mb={4}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              {t("title")}
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              {t("subtitle")}
+            </Typography>
+          </Box>
+
+          <form onSubmit={onSubmit} autoComplete="off">
+            <Grid container spacing={3}>
+              {/* Logo Upload */}
+              <Grid sx={{ xs: 12 }}>
+                <Box display="flex" justifyContent="center" mb={4}>
+                  <FormAvatarInput<CreateTenantFormData>
+                    name="logo"
+                    testId="logo"
+                    helperText={t("inputs.logo.helperText")}
+                  />
+                </Box>
+              </Grid>
+
+              {/* Main Form Fields */}
+              <Grid sx={{ xs: 12, md: 6 }}>
+                <FormTextInput<CreateTenantFormData>
+                  name="name"
+                  testId="tenant-name"
+                  label={t("inputs.name.label")}
+                  placeholder={t("inputs.name.placeholder")}
+                />
+              </Grid>
+
+              <Grid sx={{ xs: 12, md: 6 }}>
+                <FormTextInput<CreateTenantFormData>
+                  name="domain"
+                  testId="tenant-domain"
+                  label={t("inputs.domain.label")}
+                  placeholder="example.com"
+                />
+              </Grid>
+
+              <Grid sx={{ xs: 12 }}>
+                <FormTextInput<CreateTenantFormData>
+                  name="schemaName"
+                  testId="tenant-schemaName"
+                  label={t("inputs.schemaName.label")}
+                  placeholder="unique_schema_name"
+                />
+              </Grid>
+
+              <Grid sx={{ xs: 12, md: 6 }}>
+                <FormTextInput<CreateTenantFormData>
+                  name="primaryPhone"
+                  testId="tenant-primaryPhone"
+                  label={t("inputs.primaryPhone.label")}
+                  placeholder="+1 234 567 890"
+                />
+              </Grid>
+
+              <Grid sx={{ xs: 12, md: 6 }}>
+                <FormTextInput<CreateTenantFormData>
+                  name="primaryEmail"
+                  testId="tenant-primaryEmail"
+                  label={t("inputs.primaryEmail.label")}
+                  // placeholder="contact@example.com"
+                />
+              </Grid>
+
+              <Grid sx={{ xs: 12, md: 6 }}>
+                <FormSelectInput<CreateTenantFormData, TenantType>
+                  name="type"
+                  testId="type"
+                  keyValue="id"
+                  label={t("inputs.type.label")}
+                  options={tenantTypes}
+                  renderOption={(option) => option.name}
+                  // placeholder={t("inputs.type.placeholder")}
+                />
+              </Grid>
+
+              <Grid sx={{ xs: 12, md: 6 }}>
+                {/* <FormSelectInput<CreateTenantFormData, BooleanOption>
+                  name="isActive"
+                  testId="tenant-isActive"
+                  label={t("inputs.isActive.label")}
+                  options={[
+                    { label: t("options.active") },
+                    { label: t("options.inactive") },
+                  ]}
+                  keyValue="label"
+                  renderOption={(option) => option.label}
+                /> */}
+              </Grid>
             </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<CreateFormData>
-                name="email"
-                testId="new-user-email"
-                autoComplete="new-user-email"
-                label={t("admin-panel-users-create:inputs.email.label")}
-              />
-            </Grid>
+            <Alert severity="info" sx={{ mt: 3, mb: 2 }}>
+              {t("form.requiredFieldsNote")}
+            </Alert>
 
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<CreateFormData>
-                name="password"
-                type="password"
-                testId="new-user-password"
-                autoComplete="new-user-password"
-                label={t("admin-panel-users-create:inputs.password.label")}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<CreateFormData>
-                name="passwordConfirmation"
-                testId="new-user-password-confirmation"
-                label={t(
-                  "admin-panel-users-create:inputs.passwordConfirmation.label"
-                )}
-                type="password"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<CreateFormData>
-                name="firstName"
-                testId="first-name"
-                label={t("admin-panel-users-create:inputs.firstName.label")}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<CreateFormData>
-                name="lastName"
-                testId="last-name"
-                label={t("admin-panel-users-create:inputs.lastName.label")}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormSelectInput<CreateFormData, Pick<Role, "id">>
-                name="role"
-                testId="role"
-                label={t("admin-panel-users-create:inputs.role.label")}
-                options={[
-                  {
-                    id: RoleEnum.ADMIN,
-                  },
-                  {
-                    id: RoleEnum.USER,
-                  },
-                ]}
-                keyValue="id"
-                renderOption={(option) =>
-                  t(`admin-panel-users-create:inputs.role.options.${option.id}`)
-                }
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <CreateUserFormActions />
-              <Box ml={1} component="span">
-                <Button
-                  variant="contained"
-                  color="inherit"
-                  LinkComponent={Link}
-                  href="/admin-panel/users"
-                >
-                  {t("admin-panel-users-create:actions.cancel")}
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </form>
+            <CreateTenantFormActions />
+          </form>
+        </Paper>
       </Container>
     </FormProvider>
   );
 }
 
-function CreateUser() {
-  return <FormCreateUser />;
+function CreateTenant() {
+  return <FormCreateTenant />;
 }
 
-export default withPageRequiredAuth(CreateUser);
+export default withPageRequiredAuth(CreateTenant, {
+  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER],
+});

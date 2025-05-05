@@ -20,6 +20,8 @@ type TextInputProps = {
   disabled?: boolean;
   readOnly?: boolean;
   error?: string;
+  helperText?: string;
+  placeholder?: string;
   testId?: string;
   autoComplete?: string;
   inputComponent?: React.ElementType<InputBaseComponentProps>;
@@ -34,6 +36,8 @@ const TextInput = forwardRef<
   TextInputProps & {
     name: string;
     value: string;
+    helperText?: string;
+    placeholder?: string;
     onChange: (
       value: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => void;
@@ -64,7 +68,8 @@ const TextInput = forwardRef<
       fullWidth
       error={!!props.error}
       data-testid={props.testId}
-      helperText={props.error}
+      helperText={props.helperText}
+      placeholder={props.placeholder}
       disabled={props.disabled}
       autoComplete={props.autoComplete}
       multiline={props.multiline}
@@ -113,6 +118,7 @@ function FormTextInput<
           label={props.label}
           autoFocus={props.autoFocus}
           type={props.type}
+          placeholder={props.placeholder}
           error={fieldState.error?.message}
           disabled={props.disabled}
           readOnly={props.readOnly}

@@ -70,11 +70,15 @@ export function useGetTenantService() {
 
 export type TenantPostRequest = Pick<
   Tenant,
-  "name" | "domain" | "schemaName" | "address" | "primaryPhone" | "primaryEmail"
+  | "name"
+  | "domain"
+  | "schemaName"
+  | "primaryPhone"
+  | "primaryEmail"
+  | "isActive"
 > & {
-  type: TenantType["code"]; // Use type code instead of full object
-  logo?: File | string; // Allow file upload or existing photo ID
-  regions?: Omit<Region, "id" | "tenant" | "createdAt" | "updatedAt">[]; // Region create payloads
+  type: { id: string }; // match { type: { id: "string" } }
+  regions?: Omit<Region, "id" | "tenant" | "createdAt" | "updatedAt">[];
 };
 export type TenantPostResponse = Tenant;
 

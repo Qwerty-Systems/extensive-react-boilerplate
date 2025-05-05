@@ -76,7 +76,7 @@ export function useGetTenantTypeService() {
 
 export type TenantTypePostRequest = Pick<
   TenantType,
-  "code" | "name" | "description"
+  "code" | "name" | "description" | "id"
 >;
 
 export type TenantTypePostResponse = TenantType;

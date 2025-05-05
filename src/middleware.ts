@@ -18,7 +18,6 @@ export const config = {
 
 function checkAuth(req: NextRequest): boolean {
   const token = req.cookies.get(AUTH_TOKEN_KEY)?.value;
-  // Add proper token validation logic here
   return !!token;
 }
 

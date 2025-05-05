@@ -39,15 +39,18 @@ const verticalDivider = {
 /***************************  COLLAPSE - LOOP  ***************************/
 
 function NavCollapseLoop({ item }: { item: NavItemType }) {
-  return item.children?.map((item) => {
-    switch (item.type) {
+  return item.children?.map((childItem) => {
+    // Create unique key by combining parent and child IDs
+    const uniqueKey = `${item.id}-${childItem.id}`;
+
+    switch (childItem.type) {
       case "collapse":
-        return <NavCollapse key={item.id} item={item} level={1} />;
+        return <NavCollapse key={uniqueKey} item={childItem} level={1} />;
       case "item":
-        return <NavItem key={item.id} item={item} level={1} />;
+        return <NavItem key={uniqueKey} item={childItem} level={1} />;
       default:
         return (
-          <Typography key={item.id} variant="h6" color="error" align="center">
+          <Typography key={uniqueKey} variant="h6" color="error" align="center">
             Fix - Collapse or Item
           </Typography>
         );
