@@ -212,7 +212,11 @@ function FormEditUser() {
               </Typography>
             </Grid>
             <Grid size={{ xs: 12 }}>
-              <FormAvatarInput<EditUserFormData> name="photo" testId="photo" />
+              <FormAvatarInput<EditUserFormData>
+                name="photo"
+                testId="photo"
+                helperText={""}
+              />
             </Grid>
 
             <Grid size={{ xs: 12 }}>

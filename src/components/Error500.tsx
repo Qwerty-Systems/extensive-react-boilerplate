@@ -17,7 +17,7 @@ import Error500Server from "@/images/maintenance/Error500Server";
 
 /***************************  ERROR 500 - PAGES  ***************************/
 
-export default function Error500Page({ primaryBtn, heading }) {
+export default function Error500Page({ primaryBtn, heading }: any) {
   const theme = useTheme();
   const upMD = useMediaQuery(theme.breakpoints.up("md"));
   const upXL = useMediaQuery(theme.breakpoints.up("xl"));

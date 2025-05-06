@@ -21,7 +21,7 @@ function TenantFilter() {
 
   const methods = useForm<TenantFilterFormData>({
     defaultValues: {
-      roles: [],
+      type: [],
     },
   });
 
@@ -78,8 +78,8 @@ function TenantFilter() {
             <Grid container spacing={2} mb={3} mt={3}>
               <Grid size={{ xs: 12 }}>
                 <FormMultipleSelectInput<TenantFilterFormData, Pick<Role, "id">>
-                  name="roles"
-                  testId="roles"
+                  name="type"
+                  testId="type"
                   label={t("admin-panel-users:filter.inputs.role.label")}
                   options={[
                     {

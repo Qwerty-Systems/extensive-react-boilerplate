@@ -216,7 +216,11 @@ function FormEditTenant() {
               </Typography>
             </Grid>
             <Grid sx={{ xs: 12 }}>
-              <FormAvatarInput<EditTenantFormData> name="logo" testId="logo" />
+              <FormAvatarInput<EditTenantFormData>
+                name="logo"
+                testId="logo"
+                helperText={""}
+              />
             </Grid>
 
             <Grid sx={{ xs: 12 }}>

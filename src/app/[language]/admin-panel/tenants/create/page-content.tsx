@@ -142,9 +142,7 @@ function FormCreateTenant() {
   const { handleSubmit, setError } = methods;
 
   const onSubmit = handleSubmit(async (formData) => {
-    console.log("formData", formData);
     const { data, status } = await fetchPostTenant(formData);
-    console.log("status", status);
     if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
       (Object.keys(data.errors) as Array<keyof CreateTenantFormData>).forEach(
         (key) => {

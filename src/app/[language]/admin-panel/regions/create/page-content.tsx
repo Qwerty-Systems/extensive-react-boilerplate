@@ -157,7 +157,11 @@ function FormCreateUser() {
               </Typography>
             </Grid>
             <Grid size={{ xs: 12 }}>
-              <FormAvatarInput<CreateFormData> name="photo" testId="photo" />
+              <FormAvatarInput<CreateFormData>
+                name="photo"
+                testId="photo"
+                helperText={""}
+              />
             </Grid>
 
             <Grid size={{ xs: 12 }}>
