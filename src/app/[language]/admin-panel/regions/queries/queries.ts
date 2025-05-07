@@ -1,10 +1,10 @@
-import { useGetUsersService } from "@/services/api/services/users";
+import { useGetRegionsService } from "@/services/api/services/regions";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import { createQueryKeys } from "@/services/react-query/query-key-factory";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { UserFilterType, UserSortType } from "../user-filter-types";
+import { RegionFilterType, RegionSortType } from "../region-filter-types";
 
-export const usersQueryKeys = createQueryKeys(["users"], {
+export const regionsQueryKeys = createQueryKeys(["regions"], {
   list: () => ({
     key: [],
     sub: {
@@ -12,8 +12,8 @@ export const usersQueryKeys = createQueryKeys(["users"], {
         sort,
         filter,
       }: {
-        filter: UserFilterType | undefined;
-        sort?: UserSortType | undefined;
+        filter: RegionFilterType | undefined | any;
+        sort?: RegionSortType | undefined;
       }) => ({
         key: [sort, filter],
       }),
@@ -21,17 +21,17 @@ export const usersQueryKeys = createQueryKeys(["users"], {
   }),
 });
 
-export const useGetUsersQuery = ({
+export const useGetRegionsQuery = ({
   sort,
   filter,
 }: {
-  filter?: UserFilterType | undefined;
-  sort?: UserSortType | undefined;
+  filter?: RegionFilterType | undefined;
+  sort?: RegionSortType | undefined;
 } = {}) => {
-  const fetch = useGetUsersService();
+  const fetch = useGetRegionsService();
 
   const query = useInfiniteQuery({
-    queryKey: usersQueryKeys.list().sub.by({ sort, filter }).key,
+    queryKey: regionsQueryKeys.list().sub.by({ sort, filter }).key,
     initialPageParam: 1,
     queryFn: async ({ pageParam, signal }) => {
       const { status, data } = await fetch(

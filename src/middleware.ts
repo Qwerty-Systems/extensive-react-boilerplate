@@ -61,7 +61,12 @@ export function middleware(req: NextRequest) {
   const isAuthRoute =
     pathname.startsWith(`/${pathLanguage}/sign-in`) ||
     pathname.startsWith(`/${pathLanguage}/sign-up`);
-  const isPublicRoute = pathname === `/${pathLanguage}`; // Example: home page is public
+  const isPublicRoute =
+    pathname === `/${pathLanguage}` ||
+    pathname === `/${pathLanguage}/market` ||
+    pathname === `/${pathLanguage}/collectors` ||
+    pathname === `/${pathLanguage}/recycle` ||
+    pathname === `/${pathLanguage}/community`; // Example: home page is public
   const isProtectedRoute = !isAuthRoute && !isPublicRoute;
   console.log(
     "isAuthenticated",

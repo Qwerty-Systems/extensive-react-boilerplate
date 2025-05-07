@@ -1,380 +1,337 @@
 "use client";
 
-import Button from "@mui/material/Button";
+import { useEffect } from "react";
+import { useParams } from "next/navigation";
 import { useForm, FormProvider, useFormState } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+
+import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
+import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
+import { useSnackbar } from "@/hooks/use-snackbar";
+import useLeavePage from "@/services/leave-page/use-leave-page";
+
+import {
+  useGetRegionService,
+  usePatchRegionService,
+} from "@/services/api/services/regions";
+import { RoleEnum } from "@/services/api/types/role";
+import { FileEntity } from "@/services/api/types/file-entity";
+
+import { useTranslation } from "@/services/i18n/client";
+
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import FormTextInput from "@/components/form/text-input/form-text-input";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
-import { useEffect } from "react";
-import { useSnackbar } from "@/hooks/use-snackbar";
-import Link from "@/components/link";
-import FormAvatarInput from "@/components/form/avatar-input/form-avatar-input";
-import { FileEntity } from "@/services/api/types/file-entity";
-import useLeavePage from "@/services/leave-page/use-leave-page";
+import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
-import { useTranslation } from "@/services/i18n/client";
-import {
-  useGetUserService,
-  usePatchUserService,
-} from "@/services/api/services/users";
-import { useParams } from "next/navigation";
-import { Role, RoleEnum } from "@/services/api/types/role";
+
+import FormTextInput from "@/components/form/text-input/form-text-input";
+import FormAvatarInput from "@/components/form/avatar-input/form-avatar-input";
 import FormSelectInput from "@/components/form/select/form-select";
+import Link from "@/components/link";
 
-type EditUserFormData = {
-  email: string;
-  firstName: string;
-  lastName: string;
+// --- Types ---
+type EditRegionFormData = {
+  name: string;
+  zipCodes?: string[]; // array of strings, validated individually
+  operatingHours?: {
+    days: string[]; // Ensure this is always an array
+    startTime: string;
+    endTime: string;
+  };
+  serviceTypes?: string[];
+  boundary?: {
+    type: string;
+    coordinates: Array<Array<number[]>>;
+  };
+  tenant?: {
+    id: string;
+    name?: string;
+  };
   photo?: FileEntity;
-  role: Role;
 };
 
-type ChangeUserPasswordFormData = {
-  password: string;
-  passwordConfirmation: string;
-};
-
-const useValidationEditUserSchema = () => {
-  const { t } = useTranslation("admin-panel-users-edit");
+// --- Validation Schema ---
+const useValidationEditRegionSchema = () => {
+  const { t } = useTranslation("admin-panel-regions-create");
 
   return yup.object().shape({
-    email: yup
-      .string()
-      .email(t("admin-panel-users-edit:inputs.email.validation.invalid"))
-      .required(
-        t("admin-panel-users-edit:inputs.firstName.validation.required")
-      ),
-    firstName: yup
+    name: yup
       .string()
       .required(
-        t("admin-panel-users-edit:inputs.firstName.validation.required")
+        t("admin-panel-regions-create:inputs.name.validation.required")
       ),
-    lastName: yup
-      .string()
-      .required(
-        t("admin-panel-users-edit:inputs.lastName.validation.required")
-      ),
-    role: yup
+
+    tenant: yup
       .object()
       .shape({
-        id: yup.mixed<string | number>().required(),
-        name: yup.string(),
+        id: yup
+          .string()
+          .required(
+            t("admin-panel-regions-create:inputs.tenant.validation.required")
+          ),
+        name: yup.string(), // Optional or required as needed
       })
-      .required(t("admin-panel-users-edit:inputs.role.validation.required")),
-  });
-};
+      .optional(),
 
-const useValidationChangePasswordSchema = () => {
-  const { t } = useTranslation("admin-panel-users-edit");
-
-  return yup.object().shape({
-    password: yup
-      .string()
-      .min(6, t("admin-panel-users-edit:inputs.password.validation.min"))
-      .required(
-        t("admin-panel-users-edit:inputs.password.validation.required")
-      ),
-    passwordConfirmation: yup
-      .string()
-      .oneOf(
-        [yup.ref("password")],
-        t("admin-panel-users-edit:inputs.passwordConfirmation.validation.match")
+    serviceTypes: yup
+      .array()
+      .of(yup.string().required())
+      .min(
+        1,
+        t("admin-panel-regions-create:inputs.serviceTypes.validation.required")
       )
-      .required(
-        t(
-          "admin-panel-users-edit:inputs.passwordConfirmation.validation.required"
-        )
-      ),
+      .optional(),
+
+    // zipCodes: yup
+    //   .array()
+    //   .of(
+    //     yup
+    //       .string()
+    //       .matches(
+    //         /^\d+$/,
+    //         t("admin-panel-regions-create:inputs.zipCodes.validation.invalid")
+    //       )
+    //   )
+    //   .min(1)
+    //   .optional(),
+
+    // operatingHours: yup
+    //   .object()
+    //   .shape({
+    //     days: yup
+    //       .array()
+    //       .of(yup.string().required())
+    //       .min(
+    //         1,
+    //         t("admin-panel-regions-create:inputs.days.validation.required")
+    //       )
+    //       .optional(),
+    //     startTime: yup.string().optional(),
+    //     endTime: yup.string().optional(),
+    //   })
+    //   .optional(),
   });
 };
 
-function EditUserFormActions() {
-  const { t } = useTranslation("admin-panel-users-edit");
+// --- Form Submit Button ---
+function EditRegionFormActions() {
+  const { t } = useTranslation("admin-panel-regions-edit");
   const { isSubmitting, isDirty } = useFormState();
   useLeavePage(isDirty);
 
   return (
     <Button
+      type="submit"
       variant="contained"
       color="primary"
-      type="submit"
       disabled={isSubmitting}
     >
-      {t("admin-panel-users-edit:actions.submit")}
+      {t("actions.submit")}
     </Button>
   );
 }
 
-function ChangePasswordUserFormActions() {
-  const { t } = useTranslation("admin-panel-users-edit");
-  const { isSubmitting, isDirty } = useFormState();
-  useLeavePage(isDirty);
-
-  return (
-    <Button
-      variant="contained"
-      color="primary"
-      type="submit"
-      disabled={isSubmitting}
-    >
-      {t("admin-panel-users-edit:actions.submit")}
-    </Button>
-  );
-}
-
-function FormEditUser() {
+// --- Main Form ---
+function FormEditRegion() {
+  const { t } = useTranslation("admin-panel-regions-edit");
   const params = useParams<{ id: string }>();
-  const userId = params.id;
-  const fetchGetUser = useGetUserService();
-  const fetchPatchUser = usePatchUserService();
-  const { t } = useTranslation("admin-panel-users-edit");
-  const validationSchema = useValidationEditUserSchema();
+  const regionId = params.id;
+
+  const fetchGetRegion = useGetRegionService();
+  const fetchPatchRegion = usePatchRegionService();
   const { enqueueSnackbar } = useSnackbar();
 
-  const methods = useForm<EditUserFormData>({
+  const validationSchema = useValidationEditRegionSchema();
+
+  const methods = useForm<EditRegionFormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
-      email: "",
-      firstName: "",
-      lastName: "",
-      role: undefined,
+      name: "",
+      zipCodes: [], // array of strings
+      operatingHours: {
+        days: [], // initialized as an empty array
+        startTime: "",
+        endTime: "",
+      },
+      serviceTypes: [],
+      boundary: {
+        type: "",
+        coordinates: [],
+      },
+      tenant: {
+        id: "", // always a defined string
+      },
       photo: undefined,
     },
   });
 
   const { handleSubmit, setError, reset } = methods;
 
+  // --- Submit Logic ---
   const onSubmit = handleSubmit(async (formData) => {
-    const isEmailDirty = methods.getFieldState("email").isDirty;
-    const { data, status } = await fetchPatchUser({
-      id: parseInt(userId),
-      data: {
-        ...formData,
-        email: isEmailDirty ? formData.email : undefined,
-      },
-    });
-    if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
-      (Object.keys(data.errors) as Array<keyof EditUserFormData>).forEach(
-        (key) => {
-          setError(key, {
-            type: "manual",
-            message: t(
-              `admin-panel-users-edit:inputs.${key}.validation.server.${data.errors[key]}`
-            ),
-          });
-        }
-      );
-      return;
-    }
-    if (status === HTTP_CODES_ENUM.OK) {
-      reset(formData);
-      enqueueSnackbar(t("admin-panel-users-edit:alerts.user.success"), {
-        variant: "success",
-      });
-    }
-  });
-
-  useEffect(() => {
-    const getInitialDataForEdit = async () => {
-      const { status, data: user } = await fetchGetUser({
-        id: parseInt(userId),
-      });
-
-      if (status === HTTP_CODES_ENUM.OK) {
-        reset({
-          email: user?.email ?? "",
-          firstName: user?.firstName ?? "",
-          lastName: user?.lastName ?? "",
-          role: {
-            id: Number(user?.role?.id),
-          },
-          photo: user?.photo,
-        });
-      }
-    };
-
-    getInitialDataForEdit();
-  }, [userId, reset, fetchGetUser]);
-
-  return (
-    <FormProvider {...methods}>
-      <Container maxWidth="xs">
-        <form onSubmit={onSubmit}>
-          <Grid container spacing={2} mb={3} mt={3}>
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="h6">
-                {t("admin-panel-users-edit:title1")}
-              </Typography>
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <FormAvatarInput<EditUserFormData>
-                name="photo"
-                testId="photo"
-                helperText={""}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<EditUserFormData>
-                name="email"
-                testId="email"
-                label={t("admin-panel-users-edit:inputs.email.label")}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<EditUserFormData>
-                name="firstName"
-                testId="first-name"
-                label={t("admin-panel-users-edit:inputs.firstName.label")}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<EditUserFormData>
-                name="lastName"
-                testId="last-name"
-                label={t("admin-panel-users-edit:inputs.lastName.label")}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormSelectInput<EditUserFormData, Pick<Role, "id">>
-                name="role"
-                testId="role"
-                label={t("admin-panel-users-edit:inputs.role.label")}
-                options={[
-                  {
-                    id: RoleEnum.ADMIN,
-                  },
-                  {
-                    id: RoleEnum.USER,
-                  },
-                  {
-                    id: RoleEnum.AGENT,
-                  },
-                  {
-                    id: RoleEnum.CUSTOMER,
-                  },
-                  {
-                    id: RoleEnum.MANAGER,
-                  },
-                ]}
-                keyValue="id"
-                renderOption={(option) =>
-                  t(`admin-panel-users-edit:inputs.role.options.${option.id}`)
-                }
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <EditUserFormActions />
-              <Box ml={1} component="span">
-                <Button
-                  variant="contained"
-                  color="inherit"
-                  LinkComponent={Link}
-                  href="/admin-panel/users"
-                >
-                  {t("admin-panel-users-edit:actions.cancel")}
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </form>
-      </Container>
-    </FormProvider>
-  );
-}
-
-function FormChangePasswordUser() {
-  const params = useParams<{ id: string }>();
-  const userId = params.id;
-  const fetchPatchUser = usePatchUserService();
-  const { t } = useTranslation("admin-panel-users-edit");
-  const validationSchema = useValidationChangePasswordSchema();
-  const { enqueueSnackbar } = useSnackbar();
-
-  const methods = useForm<ChangeUserPasswordFormData>({
-    resolver: yupResolver(validationSchema),
-    defaultValues: {
-      password: "",
-      passwordConfirmation: "",
-    },
-  });
-
-  const { handleSubmit, setError, reset } = methods;
-
-  const onSubmit = handleSubmit(async (formData) => {
-    const { data, status } = await fetchPatchUser({
-      id: parseInt(userId),
+    const { status, data } = await fetchPatchRegion({
+      id: regionId,
       data: formData,
     });
+
     if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
-      (
-        Object.keys(data.errors) as Array<keyof ChangeUserPasswordFormData>
-      ).forEach((key) => {
-        setError(key, {
+      Object.entries(data.errors).forEach(([key, errorMsg]) => {
+        setError(key as keyof EditRegionFormData, {
           type: "manual",
-          message: t(
-            `admin-panel-users-edit:inputs.${key}.validation.server.${data.errors[key]}`
-          ),
+          message: t(`inputs.${key}.validation.server.${errorMsg}`),
         });
       });
       return;
     }
+
     if (status === HTTP_CODES_ENUM.OK) {
-      reset();
-      enqueueSnackbar(t("admin-panel-users-edit:alerts.password.success"), {
-        variant: "success",
-      });
+      reset(formData);
+      enqueueSnackbar(t("alerts.region.success"), { variant: "success" });
     }
   });
 
+  // --- Load Region Data ---
+  useEffect(() => {
+    const loadRegion = async () => {
+      //TODO // const { status, data } = await fetchGetRegion({ id: regionId });
+      // if (status === HTTP_CODES_ENUM.OK) reset(data);
+    };
+
+    loadRegion();
+  }, [regionId, reset, fetchGetRegion]);
+
   return (
     <FormProvider {...methods}>
-      <Container maxWidth="xs">
+      <Container maxWidth="sm">
         <form onSubmit={onSubmit}>
-          <Grid container spacing={2} mb={3} mt={3}>
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="h6">
-                {t("admin-panel-users-edit:title2")}
-              </Typography>
+          <Grid container spacing={2} mt={3} mb={3}>
+            <Grid sx={{ xs: 12 }}>
+              <Typography variant="h6">{t("title1")}</Typography>
             </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<ChangeUserPasswordFormData>
-                name="password"
-                type="password"
-                label={t("admin-panel-users-edit:inputs.password.label")}
+            <Grid sx={{ xs: 12 }}>
+              <FormAvatarInput name="photo" testId="photo" helperText="" />
+            </Grid>
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput
+                name="name"
+                testId="name"
+                label={t("inputs.name.label")}
+              />
+            </Grid>
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput
+                name="zipCodes"
+                testId="zipCodes"
+                label={t("inputs.zipCodes.label")}
+                multiline
+              />
+            </Grid>
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput
+                name="operatingHours.days"
+                testId="days"
+                label={t("inputs.operatingHours.days.label")}
+                multiline
+              />
+            </Grid>
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput
+                name="operatingHours.startTime"
+                testId="startTime"
+                label={t("inputs.operatingHours.startTime.label")}
+              />
+            </Grid>
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput
+                name="operatingHours.endTime"
+                testId="endTime"
+                label={t("inputs.operatingHours.endTime.label")}
+              />
+            </Grid>
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput
+                name="serviceTypes"
+                testId="serviceTypes"
+                label={t("inputs.serviceTypes.label")}
+                multiline
+              />
+            </Grid>
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput
+                name="centroidLat"
+                testId="centroidLat"
+                label={t("inputs.centroidLat.label")}
+                type="number"
+              />
+            </Grid>
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput
+                name="centroidLon"
+                testId="centroidLon"
+                label={t("inputs.centroidLon.label")}
+                type="number"
+              />
+            </Grid>
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput
+                name="boundary.type"
+                testId="boundaryType"
+                label={t("inputs.boundary.type.label")}
+              />
+            </Grid>
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput
+                name="boundary.coordinates"
+                testId="boundaryCoordinates"
+                label={t("inputs.boundary.coordinates.label")}
+                multiline
+              />
+            </Grid>
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput
+                name="tenant.id"
+                testId="tenantId"
+                label={t("inputs.tenant.id.label")}
+              />
+            </Grid>
+            <Grid sx={{ xs: 12 }}>
+              <FormTextInput
+                name="tenant.name"
+                testId="tenantName"
+                label={t("inputs.tenant.name.label")}
               />
             </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<ChangeUserPasswordFormData>
-                name="passwordConfirmation"
-                label={t(
-                  "admin-panel-users-edit:inputs.passwordConfirmation.label"
-                )}
-                type="password"
+            <Grid sx={{ xs: 12 }}>
+              <FormSelectInput
+                name="role"
+                testId="role"
+                label={t("inputs.role.label")}
+                options={[
+                  { id: RoleEnum.ADMIN },
+                  { id: RoleEnum.USER },
+                  { id: RoleEnum.AGENT },
+                  { id: RoleEnum.CUSTOMER },
+                  { id: RoleEnum.MANAGER },
+                ]}
+                keyValue="id"
+                renderOption={(option) => t(`inputs.role.options.${option.id}`)}
               />
             </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <ChangePasswordUserFormActions />
+            <Grid sx={{ xs: 12 }}>
+              <EditRegionFormActions />
               <Box ml={1} component="span">
                 <Button
                   variant="contained"
                   color="inherit"
                   LinkComponent={Link}
-                  href="/admin-panel/users"
+                  href="/admin-panel/regions"
                 >
-                  {t("admin-panel-users-edit:actions.cancel")}
+                  {t("actions.cancel")}
                 </Button>
               </Box>
             </Grid>
@@ -385,13 +342,11 @@ function FormChangePasswordUser() {
   );
 }
 
-function EditUser() {
-  return (
-    <>
-      <FormEditUser />
-      <FormChangePasswordUser />
-    </>
-  );
+// --- Exported Page ---
+function EditRegionPage() {
+  return <FormEditRegion />;
 }
 
-export default withPageRequiredAuth(EditUser);
+export default withPageRequiredAuth(EditRegionPage, {
+  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER],
+});

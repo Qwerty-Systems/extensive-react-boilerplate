@@ -7,41 +7,38 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { useMemo, useState } from "react";
-import { useGetUsersQuery } from "./queries/queries";
-import { User } from "@/services/api/types/user";
+import { useGetRegionsQuery } from "./queries/queries";
+import { Region } from "@/services/api/types/region";
 import Link from "@/components/link";
-import useAuth from "@/services/auth/use-auth";
 import useConfirmDialog from "@/components/confirm-dialog/use-confirm-dialog";
-import { useDeleteUsersService } from "@/services/api/services/users";
+import { useDeleteRegionService } from "@/services/api/services/regions";
 import removeDuplicatesFromArrayObjects from "@/services/helpers/remove-duplicates-from-array-of-objects";
 import { useQueryClient } from "@tanstack/react-query";
-import UserFilter from "./user-filter";
+import RegionFilter from "./region-filter";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SortEnum } from "@/services/api/types/sort-type";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import { DataGrid, GridColDef, GridSortModel } from "@mui/x-data-grid";
-import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import { Tenant } from "@/services/api/types/tenant";
 
-type UsersKeys = keyof User;
+type RegionKeys = keyof Region;
 
-function Actions({ user }: { user: User }) {
-  const { user: authUser } = useAuth();
+function Actions({ region }: { region: Region }) {
   const { confirmDialog } = useConfirmDialog();
-  const fetchUserDelete = useDeleteUsersService();
+  const fetchRegionDelete = useDeleteRegionService();
   const queryClient = useQueryClient();
-  const { t: tUsers } = useTranslation("admin-panel-users");
-  const canDelete = user.id !== authUser?.id;
+  const { t } = useTranslation("admin-panel-regions");
 
   const handleDelete = async () => {
     const isConfirmed = await confirmDialog({
-      title: tUsers("admin-panel-users:confirm.delete.title"),
-      message: tUsers("admin-panel-users:confirm.delete.message"),
+      title: t("confirm.delete.title"),
+      message: t("confirm.delete.message"),
     });
 
     if (isConfirmed) {
@@ -50,56 +47,49 @@ function Actions({ user }: { user: User }) {
       const sort = searchParams.get("sort");
 
       const previousData = queryClient.getQueryData<any>([
-        "users",
+        "regions",
         { sort, filter },
       ]);
-
-      queryClient.setQueryData(["users", { sort, filter }], {
+      queryClient.setQueryData(["regions", { sort, filter }], {
         ...previousData,
         pages: previousData?.pages.map((page: any) => ({
           ...page,
-          data: page?.data.filter((item: User) => item.id !== user.id),
+          data: page?.data.filter((item: Tenant) => item.id !== region.id),
         })),
       });
 
-      await fetchUserDelete({ id: user.id });
+      await fetchRegionDelete({ id: region.id! });
     }
   };
 
   return (
     <Box display="flex" gap={1}>
-      <Tooltip title={tUsers("admin-panel-users:actions.edit")}>
+      <Tooltip title={t("actions.edit")}>
         <IconButton
           size="small"
           LinkComponent={Link}
-          href={`/admin-panel/users/edit/${user.id}`}
+          href={`/admin-panel/regions/edit/${region.id}`}
           color="primary"
         >
           <EditIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      {canDelete && (
-        <Tooltip title={tUsers("admin-panel-users:actions.delete")}>
-          <IconButton size="small" onClick={handleDelete} color="error">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
+      <Tooltip title={t("actions.delete")}>
+        <IconButton size="small" onClick={handleDelete} color="error">
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
     </Box>
   );
 }
 
-function Users() {
-  const { t: tUsers } = useTranslation("admin-panel-users");
-  const { t: tRoles } = useTranslation("admin-panel-roles");
+function Regions() {
+  const { t } = useTranslation("admin-panel-regions");
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const [sortModel, setSortModel] = useState<GridSortModel>([
-    {
-      field: "id",
-      sort: "desc",
-    },
+    { field: "createdAt", sort: "desc" },
   ]);
 
   const filter = useMemo(() => {
@@ -108,11 +98,11 @@ function Users() {
   }, [searchParams]);
 
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useGetUsersQuery({
+    useGetRegionsQuery({
       filter,
       sort: {
         order: (sortModel[0]?.sort?.toUpperCase() as SortEnum) || SortEnum.DESC,
-        orderBy: (sortModel[0]?.field as UsersKeys) || "id",
+        orderBy: (sortModel[0]?.field as RegionKeys) || "createdAt",
       },
     });
 
@@ -123,7 +113,7 @@ function Users() {
       "sort",
       JSON.stringify({
         order: newModel[0]?.sort?.toUpperCase() || SortEnum.DESC,
-        orderBy: newModel[0]?.field || "id",
+        orderBy: newModel[0]?.field || "createdAt",
       })
     );
     router.replace(window.location.pathname + "?" + searchParams.toString());
@@ -131,105 +121,87 @@ function Users() {
 
   const result = useMemo(() => {
     const allData = data?.pages.flatMap((page) => page?.data) || [];
-    return removeDuplicatesFromArrayObjects<User>(allData as User[], "id");
+    return removeDuplicatesFromArrayObjects<Region>(allData as Region[], "id");
   }, [data]);
 
   const columns: GridColDef[] = [
     {
-      field: "avatar",
-      headerName: "",
-      width: 60,
-      renderCell: (params: any) => (
-        <Avatar
-          alt={`${params.row.firstName} ${params.row.lastName}`}
-          src={params.row.photo?.path}
-          sx={{ width: 32, height: 32 }}
-        />
-      ),
-      sortable: false,
-    },
-    {
-      field: "id",
-      headerName: tUsers("admin-panel-users:table.column1"),
-      width: 120,
-    },
-    {
       field: "name",
-      headerName: tUsers("admin-panel-users:table.column2"),
-      width: 200,
-      valueGetter: (params: any) =>
-        `${params?.row?.firstName} ${params?.row?.lastName}`,
-      renderCell: (params: any) => (
-        <Box
-          sx={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {`${params?.row?.firstName} ${params?.row?.lastName}`}
-        </Box>
-      ),
+      headerName: t("table.name"),
+      flex: 1,
+      minWidth: 200,
     },
     {
-      field: "email",
-      headerName: tUsers("admin-panel-users:table.column3"),
+      field: "tenant",
+      headerName: t("table.tenant"),
+      valueGetter: (params: any) => (params?.row?.tenant as Tenant)?.name,
+      flex: 1,
+      minWidth: 200,
+    },
+    {
+      field: "serviceTypes",
+      headerName: t("table.serviceTypes"),
+      valueGetter: (params: any) => params?.row?.serviceTypes?.join(", "),
       flex: 1,
       minWidth: 250,
-      renderCell: (params: any) => (
-        <Box
-          sx={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {params.value}
-        </Box>
-      ),
     },
     {
-      field: "role",
-      headerName: tUsers("admin-panel-users:table.column4"),
-      width: 150,
-      valueGetter: (params: any) => tRoles(`role.${params.row?.role?.name}`),
+      field: "zipCodes",
+      headerName: t("table.zipCodes"),
+      valueGetter: (params: any) => params?.row?.zipCodes?.join(", "),
+      flex: 1,
+      minWidth: 200,
+    },
+    {
+      field: "operatingHours",
+      headerName: t("table.operatingHours"),
+      valueGetter: (params: any) => {
+        const oh = params?.row?.operatingHours;
+        return oh ? `${oh.days?.join(", ")} ${oh.startTime}-${oh.endTime}` : "";
+      },
+      flex: 1,
+      minWidth: 300,
+    },
+    {
+      field: "createdAt",
+      headerName: t("table.createdAt"),
+      valueGetter: (params: any) => new Date(params.value).toLocaleDateString(),
+      flex: 1,
+      minWidth: 150,
     },
     {
       field: "actions",
       headerName: "",
       width: 120,
-      renderCell: (params: any) => <Actions user={params.row} />,
+      renderCell: (params: any) => <Actions region={params?.row} />,
       sortable: false,
-      filterable: false,
     },
   ];
 
   return (
     <Container maxWidth="xl">
       <Grid container spacing={3} pt={3}>
-        <Grid container spacing={3} size={{ xs: 12 }}>
-          <Grid size="grow">
-            <Typography variant="h3">
-              {tUsers("admin-panel-users:title")}
-            </Typography>
+        <Grid sx={{ xs: 12 }} spacing={3}>
+          <Grid>
+            <Typography variant="h3">{t("title")}</Typography>
           </Grid>
-          <Grid container size="auto" wrap="nowrap" spacing={2}>
-            <Grid size="auto">
-              <UserFilter />
+          <Grid container sx={{ xs: "auto" }} spacing={2}>
+            <Grid>
+              <RegionFilter />
             </Grid>
-            <Grid size="auto">
+            <Grid>
               <Button
                 variant="contained"
                 LinkComponent={Link}
-                href="/admin-panel/users/create"
+                href="/admin-panel/regions/create"
                 color="success"
               >
-                {tUsers("admin-panel-users:actions.create")}
+                {t("actions.create")}
               </Button>
             </Grid>
           </Grid>
         </Grid>
-        <Grid size={{ xs: 12 }} mb={2}>
+        <Grid sx={{ xs: 12, mb: 2 }}>
           <DataGrid
             rows={result}
             columns={columns}
@@ -244,7 +216,7 @@ function Users() {
                     disabled={!hasNextPage || isFetchingNextPage}
                     variant="outlined"
                   >
-                    {tUsers("admin-panel-users:loadMore")}
+                    {t("loadMore")}
                   </Button>
                   {isFetchingNextPage && (
                     <CircularProgress size={24} sx={{ ml: 2 }} />
@@ -270,4 +242,6 @@ function Users() {
   );
 }
 
-export default withPageRequiredAuth(Users, { roles: [RoleEnum.ADMIN] });
+export default withPageRequiredAuth(Regions, {
+  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER],
+});

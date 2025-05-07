@@ -16,16 +16,6 @@ export interface Photo {
   id?: string;
   path?: string;
 }
-export interface Boundary {
-  type?: string;
-  coordinates?: Array<Array<number[]>>;
-}
-
-export interface OperatingHours {
-  days?: string[];
-  startTime?: string;
-  endTime?: string;
-}
 
 // export interface Role {
 //   tenant?: Tenant;

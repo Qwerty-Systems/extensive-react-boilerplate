@@ -1,7 +1,6 @@
 "use client";
 
 import FormMultipleSelectInput from "@/components/form/multiple-select/form-multiple-select";
-import { Role, RoleEnum } from "@/services/api/types/role";
 import { useTranslation } from "@/services/i18n/client";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
@@ -10,18 +9,19 @@ import Popover from "@mui/material/Popover";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { UserFilterType } from "./user-filter-types";
+import { RegionFilterType } from "./region-filter-types";
+import { Tenant } from "@/services/api/types/tenant";
 
-type UserFilterFormData = UserFilterType;
+type RegionFilterFormData = RegionFilterType;
 
-function UserFilter() {
-  const { t } = useTranslation("admin-panel-users");
+function RegionFilter() {
+  const { t } = useTranslation("admin-panel-regions");
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const methods = useForm<UserFilterFormData>({
+  const methods = useForm<RegionFilterFormData>({
     defaultValues: {
-      roles: [],
+      tenantId: "",
     },
   });
 
@@ -38,7 +38,7 @@ function UserFilter() {
   };
 
   const open = Boolean(anchorEl);
-  const id = open ? "user-filter-popover" : undefined;
+  const id = open ? "region-filter-popover" : undefined;
 
   useEffect(() => {
     const filter = searchParams.get("filter");
@@ -77,29 +77,25 @@ function UserFilter() {
           >
             <Grid container spacing={2} mb={3} mt={3}>
               <Grid size={{ xs: 12 }}>
-                <FormMultipleSelectInput<UserFilterFormData, Pick<Role, "id">>
-                  name="roles"
-                  testId="roles"
-                  label={t("admin-panel-users:filter.inputs.role.label")}
-                  options={[
-                    {
-                      id: RoleEnum.ADMIN,
-                    },
-                    {
-                      id: RoleEnum.USER,
-                    },
-                  ]}
+                <FormMultipleSelectInput<
+                  RegionFilterFormData,
+                  Pick<Tenant, "id">
+                >
+                  name="tenantId"
+                  testId="tenantId"
+                  label={t("admin-panel-regions:filter.inputs.role.label")}
+                  options={[]}
                   keyValue="id"
                   renderOption={(option) =>
                     t(
-                      `admin-panel-users:filter.inputs.role.options.${option.id}`
+                      `admin-panel-regions:filter.inputs.role.options.${option.id}`
                     )
                   }
                   renderValue={(values) =>
                     values
                       .map((value) =>
                         t(
-                          `admin-panel-users:filter.inputs.role.options.${value.id}`
+                          `admin-panel-regions:filter.inputs.role.options.${value.id}`
                         )
                       )
                       .join(", ")
@@ -108,7 +104,7 @@ function UserFilter() {
               </Grid>
               <Grid size={{ xs: 12 }}>
                 <Button variant="contained" type="submit">
-                  {t("admin-panel-users:filter.actions.apply")}
+                  {t("admin-panel-regions:filter.actions.apply")}
                 </Button>
               </Grid>
             </Grid>
@@ -116,10 +112,10 @@ function UserFilter() {
         </Container>
       </Popover>
       <Button aria-describedby={id} variant="contained" onClick={handleClick}>
-        {t("admin-panel-users:filter.actions.filter")}
+        {t("admin-panel-regions:filter.actions.filter")}
       </Button>
     </FormProvider>
   );
 }
 
-export default UserFilter;
+export default RegionFilter;

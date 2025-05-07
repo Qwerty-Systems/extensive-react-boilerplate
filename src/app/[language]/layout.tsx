@@ -24,7 +24,7 @@ import ConfirmDialogProvider from "@/components/confirm-dialog/confirm-dialog-pr
 import InitColorSchemeScript from "@/components/theme/init-color-scheme-script";
 import KeycloakProvider from "@/services/social-auth/keycloak/keycloak-provider";
 import Notistack from "@/components/third-party/Notistack";
-
+import ClientProviders from "../../services/locale/locale-provider";
 // Client-side providers wrapper
 const AuthProviders = ({ children }: { children: React.ReactNode }) => (
   <KeycloakProvider>
@@ -76,7 +76,7 @@ export default async function RootLayout(props: {
                 <AuthProviders>
                   <Notistack>
                     <ResponsiveAppBar />
-                    {children}
+                    <ClientProviders>{children}</ClientProviders>
                     <ToastContainer position="bottom-left" hideProgressBar />
                   </Notistack>
                 </AuthProviders>

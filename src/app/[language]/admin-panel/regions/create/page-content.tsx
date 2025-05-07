@@ -11,247 +11,312 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
 import { useSnackbar } from "@/hooks/use-snackbar";
 import Link from "@/components/link";
-import FormAvatarInput from "@/components/form/avatar-input/form-avatar-input";
-import { FileEntity } from "@/services/api/types/file-entity";
 import useLeavePage from "@/services/leave-page/use-leave-page";
 import Box from "@mui/material/Box";
 import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
 import { useTranslation } from "@/services/i18n/client";
-import { usePostUserService } from "@/services/api/services/users";
+import { usePostRegionService } from "@/services/api/services/regions";
 import { useRouter } from "next/navigation";
-import { Role, RoleEnum } from "@/services/api/types/role";
 import FormSelectInput from "@/components/form/select/form-select";
+import { Tenant } from "@/services/api/types/tenant";
+import FormDaysSelector from "@/components/form/days-selector/form-days-selector";
+import Paper from "@mui/material/Paper";
+import LoadingButton from "@mui/lab/LoadingButton";
+import SaveIcon from "@mui/icons-material/Save";
+import FormMultipleSelectExtendedInput from "@/components/form/multiple-select-extended/form-multiple-select-extended";
+import FormTimeInput from "@/components/form/time-input/form-time-input";
+import { useGetTenantsQuery } from "../../tenants/queries/queries";
+import { useState } from "react";
+import { RoleEnum } from "@/services/api/types/role";
 
-type CreateFormData = {
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  passwordConfirmation: string;
-  photo?: FileEntity;
-  role: Role;
-};
+interface CreateFormData {
+  name: string;
+  tenantId: string;
+  serviceTypes: string[];
+  zipCodes: string;
+  operatingHours: {
+    days: string[];
+    startTime: string;
+    endTime: string;
+  };
+}
 
 const useValidationSchema = () => {
-  const { t } = useTranslation("admin-panel-users-create");
+  const { t } = useTranslation("admin-panel-regions-create");
 
   return yup.object().shape({
-    email: yup
-      .string()
-      .email(t("admin-panel-users-create:inputs.email.validation.invalid"))
-      .required(
-        t("admin-panel-users-create:inputs.firstName.validation.required")
-      ),
-    firstName: yup
+    name: yup
       .string()
       .required(
-        t("admin-panel-users-create:inputs.firstName.validation.required")
+        t("admin-panel-regions-create:inputs.name.validation.required")
       ),
-    lastName: yup
+    tenantId: yup
       .string()
       .required(
-        t("admin-panel-users-create:inputs.lastName.validation.required")
+        t("admin-panel-regions-create:inputs.tenant.validation.required")
       ),
-    password: yup
+    serviceTypes: yup
+      .array()
+      .of(yup.string().required()) // Add element validation
+      .required() // Mark array as required
+      .min(
+        1,
+        t("admin-panel-regions-create:inputs.serviceTypes.validation.required")
+      ),
+    zipCodes: yup
       .string()
-      .min(6, t("admin-panel-users-create:inputs.password.validation.min"))
       .required(
-        t("admin-panel-users-create:inputs.password.validation.required")
-      ),
-    passwordConfirmation: yup
-      .string()
-      .oneOf(
-        [yup.ref("password")],
-        t(
-          "admin-panel-users-create:inputs.passwordConfirmation.validation.match"
-        )
+        t("admin-panel-regions-create:inputs.zipCodes.validation.required")
       )
-      .required(
-        t(
-          "admin-panel-users-create:inputs.passwordConfirmation.validation.required"
-        )
+      .test(
+        "valid-zip-codes",
+        t("admin-panel-regions-create:inputs.zipCodes.validation.invalid"),
+        (value) =>
+          !!value && value.split(",").every((zip) => /^\d+$/.test(zip.trim()))
       ),
-    role: yup
-      .object()
-      .shape({
-        id: yup.mixed<string | number>().required(),
-        name: yup.string(),
-      })
-      .required(t("admin-panel-users-create:inputs.role.validation.required")),
+    operatingHours: yup.object().shape({
+      days: yup
+        .array()
+        .of(yup.string().required()) // Add element validation
+        .required() // Mark array as required
+        .min(
+          1,
+          t("admin-panel-regions-create:inputs.days.validation.required")
+        ),
+      startTime: yup
+        .string()
+        .required(
+          t("admin-panel-regions-create:inputs.startTime.validation.required")
+        ),
+      endTime: yup
+        .string()
+        .required(
+          t("admin-panel-regions-create:inputs.endTime.validation.required")
+        ),
+    }),
   });
 };
 
-function CreateUserFormActions() {
-  const { t } = useTranslation("admin-panel-users-create");
+function CreateRegionFormActions() {
+  const { t } = useTranslation("admin-panel-regions-create");
   const { isSubmitting, isDirty } = useFormState();
   useLeavePage(isDirty);
 
   return (
-    <Button
+    <LoadingButton
       variant="contained"
       color="primary"
       type="submit"
-      disabled={isSubmitting}
+      loading={isSubmitting}
+      loadingPosition="start"
+      startIcon={<SaveIcon />}
     >
-      {t("admin-panel-users-create:actions.submit")}
-    </Button>
+      {isSubmitting
+        ? t("admin-panel-regions-create:actions.submitting")
+        : t("admin-panel-regions-create:actions.submit")}
+    </LoadingButton>
   );
 }
 
-function FormCreateUser() {
+function FormCreateRegion() {
   const router = useRouter();
-  const fetchPostUser = usePostUserService();
-  const { t } = useTranslation("admin-panel-users-create");
+  const fetchPostRegion = usePostRegionService();
+  const { t } = useTranslation("admin-panel-regions-create");
   const validationSchema = useValidationSchema();
-
+  const { data: tenants } = useGetTenantsQuery();
   const { enqueueSnackbar } = useSnackbar();
-
+  const [serviceTypesSearch, setServiceTypesSearch] = useState("");
   const methods = useForm<CreateFormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
-      email: "",
-      firstName: "",
-      lastName: "",
-      password: "",
-      passwordConfirmation: "",
-      role: {
-        id: RoleEnum.USER,
+      name: "",
+      tenantId: "",
+      serviceTypes: [],
+      zipCodes: "",
+      operatingHours: {
+        days: [],
+        startTime: "09:00",
+        endTime: "17:00",
       },
-      photo: undefined,
     },
   });
 
   const { handleSubmit, setError } = methods;
 
   const onSubmit = handleSubmit(async (formData) => {
-    const { data, status } = await fetchPostUser(formData);
+    const payload = {
+      ...formData,
+      tenantId: formData.tenantId,
+      zipCodes: formData.zipCodes.split(",").map((zip: string) => zip.trim()),
+      serviceTypes: formData.serviceTypes,
+    };
+
+    const { data, status } = await fetchPostRegion(payload);
+
     if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
-      (Object.keys(data.errors) as Array<keyof CreateFormData>).forEach(
-        (key) => {
-          setError(key, {
-            type: "manual",
-            message: t(
-              `admin-panel-users-create:inputs.${key}.validation.server.${data.errors[key]}`
-            ),
-          });
-        }
-      );
+      Object.entries(data.errors).forEach(([field, error]) => {
+        setError(field as keyof CreateFormData, {
+          type: "manual",
+          message: t(
+            `admin-panel-regions-create:inputs.${field}.validation.server.${error}`
+          ),
+        });
+      });
       return;
     }
+
     if (status === HTTP_CODES_ENUM.CREATED) {
-      enqueueSnackbar(t("admin-panel-users-create:alerts.user.success"), {
+      enqueueSnackbar(t("admin-panel-regions-create:alerts.region.success"), {
         variant: "success",
       });
-      router.push("/admin-panel/users");
+      router.push("/admin-panel/regions");
     }
   });
 
   return (
     <FormProvider {...methods}>
-      <Container maxWidth="xs">
-        <form onSubmit={onSubmit} autoComplete="create-new-user">
-          <Grid container spacing={2} mb={3} mt={3}>
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="h6">
-                {t("admin-panel-users-create:title")}
-              </Typography>
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <FormAvatarInput<CreateFormData>
-                name="photo"
-                testId="photo"
-                helperText={""}
-              />
-            </Grid>
+      <Container maxWidth="md">
+        <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
+          <form onSubmit={onSubmit}>
+            <Grid container spacing={3}>
+              <Grid sx={{ xs: 12 }}>
+                <Typography variant="h4" component="h1" gutterBottom>
+                  {t("admin-panel-regions-create:title")}
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  {t("admin-panel-regions-create:subtitle")}
+                </Typography>
+              </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<CreateFormData>
-                name="email"
-                testId="new-user-email"
-                autoComplete="new-user-email"
-                label={t("admin-panel-users-create:inputs.email.label")}
-              />
-            </Grid>
+              {/* Basic Information Section */}
+              <Grid sx={{ xs: 12 }}>
+                <Typography variant="h6" gutterBottom>
+                  {t("admin-panel-regions-create:sections.basic")}
+                </Typography>
+              </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<CreateFormData>
-                name="password"
-                type="password"
-                testId="new-user-password"
-                autoComplete="new-user-password"
-                label={t("admin-panel-users-create:inputs.password.label")}
-              />
-            </Grid>
+              <Grid sx={{ xs: 12, md: 6 }}>
+                <FormTextInput<CreateFormData>
+                  name="name"
+                  label={t("admin-panel-regions-create:inputs.name.label")}
+                  // fullWidth
+                />
+              </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<CreateFormData>
-                name="passwordConfirmation"
-                testId="new-user-password-confirmation"
-                label={t(
-                  "admin-panel-users-create:inputs.passwordConfirmation.label"
-                )}
-                type="password"
-              />
-            </Grid>
+              <Grid sx={{ xs: 12, md: 6 }}>
+                <FormSelectInput<CreateFormData, Tenant>
+                  name="tenantId"
+                  label={t("admin-panel-regions-create:inputs.tenant.label")}
+                  options={
+                    tenants?.pages.flatMap((page: any) => page.data) || []
+                  }
+                  keyValue="id"
+                  renderOption={(option) => option.name}
+                  // fullWidth
+                />
+              </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<CreateFormData>
-                name="firstName"
-                testId="first-name"
-                label={t("admin-panel-users-create:inputs.firstName.label")}
-              />
-            </Grid>
+              {/* Service Information Section */}
+              <Grid sx={{ xs: 12 }}>
+                <Typography variant="h6" gutterBottom>
+                  {t("admin-panel-regions-create:sections.service")}
+                </Typography>
+              </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <FormTextInput<CreateFormData>
-                name="lastName"
-                testId="last-name"
-                label={t("admin-panel-users-create:inputs.lastName.label")}
-              />
-            </Grid>
+              <Grid sx={{ xs: 12, md: 6 }}>
+                <FormMultipleSelectExtendedInput
+                  name="serviceTypes"
+                  label={t(
+                    "admin-panel-regions-create:inputs.serviceTypes.label"
+                  )}
+                  options={[
+                    { value: "delivery", label: t("services.delivery") },
+                    { value: "pickup", label: t("services.pickup") },
+                    {
+                      value: "installation",
+                      label: t("services.installation"),
+                    },
+                  ]}
+                  keyExtractor={(option) => option.value}
+                  renderSelected={(selected) =>
+                    selected.map((s) => s.label).join(", ")
+                  }
+                  renderOption={(option) => option.label}
+                  isSearchable
+                  search={serviceTypesSearch} // Add this
+                  onSearchChange={setServiceTypesSearch} // Update this
+                  searchLabel={t("common:search")}
+                  searchPlaceholder={t("common:searchPlaceholder")}
+                />
+              </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <FormSelectInput<CreateFormData, Pick<Role, "id">>
-                name="role"
-                testId="role"
-                label={t("admin-panel-users-create:inputs.role.label")}
-                options={[
-                  {
-                    id: RoleEnum.ADMIN,
-                  },
-                  {
-                    id: RoleEnum.USER,
-                  },
-                ]}
-                keyValue="id"
-                renderOption={(option) =>
-                  t(`admin-panel-users-create:inputs.role.options.${option.id}`)
-                }
-              />
-            </Grid>
+              <Grid sx={{ xs: 12, md: 6 }}>
+                <FormTextInput<CreateFormData>
+                  name="zipCodes"
+                  label={t("admin-panel-regions-create:inputs.zipCodes.label")}
+                  helperText={t(
+                    "admin-panel-regions-create:inputs.zipCodes.helperText"
+                  )}
+                  // fullWidth
+                />
+              </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <CreateUserFormActions />
-              <Box ml={1} component="span">
-                <Button
-                  variant="contained"
-                  color="inherit"
-                  LinkComponent={Link}
-                  href="/admin-panel/users"
-                >
-                  {t("admin-panel-users-create:actions.cancel")}
-                </Button>
-              </Box>
+              {/* Operating Hours Section */}
+              <Grid sx={{ xs: 12 }}>
+                <Typography variant="h6" gutterBottom>
+                  {t("admin-panel-regions-create:sections.operatingHours")}
+                </Typography>
+              </Grid>
+
+              <Grid sx={{ xs: 12, md: 4 }}>
+                <FormDaysSelector
+                  name="operatingHours.days"
+                  label={t("admin-panel-regions-create:inputs.days.label")}
+                />
+              </Grid>
+
+              <Grid sx={{ xs: 6, md: 4 }}>
+                <FormTimeInput
+                  name="operatingHours.startTime"
+                  label={t("admin-panel-regions-create:inputs.startTime.label")}
+                  fullWidth
+                />
+              </Grid>
+
+              <Grid sx={{ xs: 6, md: 4 }}>
+                <FormTimeInput
+                  name="operatingHours.endTime"
+                  label={t("admin-panel-regions-create:inputs.endTime.label")}
+                  fullWidth
+                />
+              </Grid>
+
+              {/* Form Actions */}
+              <Grid sx={{ xs: 12, mt: 4 }}>
+                <Box display="flex" gap={2}>
+                  <CreateRegionFormActions />
+                  <Button
+                    variant="outlined"
+                    color="inherit"
+                    LinkComponent={Link}
+                    href="/admin-panel/regions"
+                  >
+                    {t("admin-panel-regions-create:actions.cancel")}
+                  </Button>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </form>
+          </form>
+        </Paper>
       </Container>
     </FormProvider>
   );
 }
 
-function CreateUser() {
-  return <FormCreateUser />;
+function CreateRegion() {
+  return <FormCreateRegion />;
 }
 
-export default withPageRequiredAuth(CreateUser);
+export default withPageRequiredAuth(CreateRegion, {
+  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER],
+});
