@@ -7,14 +7,13 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { useMemo, useState } from "react";
-import { useGetRegionsQuery } from "./queries/queries";
-import { Region } from "@/services/api/types/region";
+import { useGetResidencesQuery } from "./queries/queries";
+import { Residence } from "@/services/api/types/residence";
 import Link from "@/components/link";
 import useConfirmDialog from "@/components/confirm-dialog/use-confirm-dialog";
-import { useDeleteRegionService } from "@/services/api/services/regions";
 import removeDuplicatesFromArrayObjects from "@/services/helpers/remove-duplicates-from-array-of-objects";
 import { useQueryClient } from "@tanstack/react-query";
-import RegionFilter from "./region-filter";
+import ResidenceFilter from "./residence-filter";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SortEnum } from "@/services/api/types/sort-type";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
@@ -25,15 +24,16 @@ import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Tenant } from "@/services/api/types/tenant";
+import { useDeleteResidenceService } from "@/services/api/services/residence";
+import Chip from "@mui/material/Chip";
+import MuiLink from "@mui/material/Link";
+type ResidenceKeys = keyof Residence;
 
-type RegionKeys = keyof Region;
-
-function Actions({ region }: { region: Region }) {
+function Actions({ residence }: { residence: Residence }) {
   const { confirmDialog } = useConfirmDialog();
-  const fetchRegionDelete = useDeleteRegionService();
+  const fetchDelete = useDeleteResidenceService();
   const queryClient = useQueryClient();
-  const { t } = useTranslation("admin-panel-regions");
+  const { t } = useTranslation("admin-panel-residences");
 
   const handleDelete = async () => {
     const isConfirmed = await confirmDialog({
@@ -47,18 +47,21 @@ function Actions({ region }: { region: Region }) {
       const sort = searchParams.get("sort");
 
       const previousData = queryClient.getQueryData<any>([
-        "regions",
+        "residences",
         { sort, filter },
       ]);
-      queryClient.setQueryData(["regions", { sort, filter }], {
+
+      queryClient.setQueryData(["residences", { sort, filter }], {
         ...previousData,
         pages: previousData?.pages.map((page: any) => ({
           ...page,
-          data: page?.data.filter((item: Tenant) => item.id !== region.id),
+          data: page?.data.filter(
+            (item: Residence) => item.id !== residence.id
+          ),
         })),
       });
 
-      await fetchRegionDelete({ id: region.id! });
+      await fetchDelete({ id: residence.id });
     }
   };
 
@@ -68,12 +71,13 @@ function Actions({ region }: { region: Region }) {
         <IconButton
           size="small"
           LinkComponent={Link}
-          href={`/admin-panel/regions/edit/${region.id}`}
+          href={`/admin-panel/residences/edit/${residence.id}`}
           color="primary"
         >
           <EditIcon fontSize="small" />
         </IconButton>
       </Tooltip>
+
       <Tooltip title={t("actions.delete")}>
         <IconButton size="small" onClick={handleDelete} color="error">
           <DeleteIcon fontSize="small" />
@@ -83,13 +87,16 @@ function Actions({ region }: { region: Region }) {
   );
 }
 
-function Regions() {
-  const { t } = useTranslation("admin-panel-regions");
+function Residences() {
+  const { t } = useTranslation("admin-panel-residences");
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const [sortModel, setSortModel] = useState<GridSortModel>([
-    { field: "createdAt", sort: "desc" },
+    {
+      field: "id",
+      sort: "desc",
+    },
   ]);
 
   const filter = useMemo(() => {
@@ -98,11 +105,11 @@ function Regions() {
   }, [searchParams]);
 
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useGetRegionsQuery({
+    useGetResidencesQuery({
       filter,
       sort: {
         order: (sortModel[0]?.sort?.toUpperCase() as SortEnum) || SortEnum.DESC,
-        orderBy: (sortModel[0]?.field as RegionKeys) || "createdAt",
+        orderBy: (sortModel[0]?.field as ResidenceKeys) || "id",
       },
     });
 
@@ -113,88 +120,158 @@ function Regions() {
       "sort",
       JSON.stringify({
         order: newModel[0]?.sort?.toUpperCase() || SortEnum.DESC,
-        orderBy: newModel[0]?.field || "createdAt",
+        orderBy: newModel[0]?.field || "id",
       })
     );
     router.replace(window.location.pathname + "?" + searchParams.toString());
   };
 
   const result = useMemo(() => {
-    const allData = data?.pages.flatMap((page) => page?.data) || [];
-    return removeDuplicatesFromArrayObjects<Region>(allData as Region[], "id");
+    const allData = data?.pages.flatMap((page: any) => page?.data) || [];
+    return removeDuplicatesFromArrayObjects<Residence>(
+      allData as Residence[],
+      "id"
+    );
   }, [data]);
-  console.log("result", result);
+  console.log(result);
   const columns: GridColDef[] = [
+    // {
+    //   field: "id",
+    //   headerName: t("table.column1"), // ID
+    //   width: 120,
+    // },
     {
       field: "name",
-      headerName: t("table.column2"),
+      headerName: t("table.column2"), // Residence Name
+      width: 220,
+      renderCell: (params) => (
+        <Typography fontWeight="bold" noWrap>
+          {params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: "region",
+      headerName: t("table.column3"), // Location
       flex: 1,
       minWidth: 200,
+      renderCell: (params: any) => (
+        <MuiLink
+          component={Link}
+          href={`/admin-panel/regions/${params.row.region?.id}`}
+          underline="hover"
+          sx={{ fontWeight: 500 }}
+        >
+          {params.row.region?.name || "-"}
+        </MuiLink>
+      ),
     },
     {
-      field: "tenant",
-      headerName: t("table.column3"),
-      valueGetter: (params: any) => (params?.row?.tenant as Tenant)?.name,
+      field: "type",
+      headerName: t("table.column4"), // Type
+      width: 150,
+      valueGetter: (params: any) => params || "-",
+    },
+    {
+      field: "charge",
+      headerName: t("table.column5"), // Add this translation key
+      width: 150,
+      valueFormatter: (params: any) =>
+        new Intl.NumberFormat("en-KE", {
+          style: "currency",
+          currency: "KES",
+          maximumFractionDigits: 0,
+        }).format(params),
+    },
+    {
+      field: "occupants",
+      headerName: t("table.column6"), // Occupants
       flex: 1,
       minWidth: 200,
-    },
-    {
-      field: "serviceTypes",
-      headerName: t("table.column4"),
-      valueGetter: (params: any) => params?.row?.serviceTypes?.join(", "),
-      flex: 1,
-      minWidth: 250,
-    },
-    {
-      field: "zipCodes",
-      headerName: t("table.column5"),
-      valueGetter: (params: any) => params?.row?.zipCodes?.join(", "),
-      flex: 1,
-      minWidth: 200,
-    },
-    {
-      field: "operatingHours",
-      headerName: t("table.column6"),
-      valueGetter: (params: any) => {
-        const oh = params?.row?.operatingHours;
-        return oh ? `${oh.days?.join(", ")} ${oh.startTime}-${oh.endTime}` : "";
+      renderCell: (params: any) => {
+        const occupants = params.row.occupants || [];
+        const count = occupants.length;
+
+        return (
+          <Tooltip
+            title={
+              <Box>
+                {occupants.slice(0, 5).map((occ: any) => (
+                  <Typography key={occ.id} variant="body2">
+                    {occ.firstName} {occ.lastName}
+                  </Typography>
+                ))}
+                {count > 5 && (
+                  <Typography variant="body2" fontStyle="italic">
+                    +{count - 5} more
+                  </Typography>
+                )}
+              </Box>
+            }
+          >
+            <MuiLink
+              component={Link}
+              href={`/admin-panel/occupants?residenceId=${params.row.id}`}
+              underline="hover"
+            >
+              <Chip
+                label={`${count} Occupant${count !== 1 ? "s" : ""}`}
+                clickable
+              />
+            </MuiLink>
+          </Tooltip>
+        );
       },
-      flex: 1,
-      minWidth: 300,
+    },
+    {
+      field: "isActive",
+      headerName: t("table.column7"), // e.g. "Status"
+      width: 120,
+      renderCell: (params) => (
+        <Chip
+          label={params.value ? "Active" : "Inactive"}
+          color={params.value ? "success" : "default"}
+          size="small"
+        />
+      ),
     },
     {
       field: "actions",
       headerName: "",
       width: 120,
-      renderCell: (params: any) => <Actions region={params?.row} />,
+      renderCell: (params) => <Actions residence={params.row as Residence} />,
       sortable: false,
+      filterable: false,
     },
   ];
 
   return (
     <Container maxWidth="xl">
       <Grid container spacing={3} pt={3}>
-        <Grid sx={{ xs: 12 }} spacing={3}>
-          <Grid>
+        <Grid container spacing={3} sx={{ xs: 12 }}>
+          <Grid sx={{ xs: 12 }}>
             <Typography variant="h3">{t("title")}</Typography>
           </Grid>
-          <Grid container sx={{ xs: "auto" }} spacing={2}>
-            <Grid>
-              <RegionFilter />
-            </Grid>
-            <Grid>
-              <Button
-                variant="contained"
-                LinkComponent={Link}
-                href="/admin-panel/regions/create"
-                color="success"
-              >
-                {t("actions.create")}
-              </Button>
+          <Grid>
+            <Grid container spacing={2}>
+              <Grid>
+                <ResidenceFilter />
+              </Grid>
+              <Grid>
+                <Button
+                  variant="contained"
+                  LinkComponent={Link}
+                  href="/admin-panel/residences/create"
+                  color="success"
+                >
+                  {t("actions.create")}
+                </Button>
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
-        <Grid sx={{ xs: 12, mb: 2 }}>
+
+        <Grid sx={{ xs: 12 }} mb={2}>
           <DataGrid
             rows={result}
             columns={columns}
@@ -235,6 +312,4 @@ function Regions() {
   );
 }
 
-export default withPageRequiredAuth(Regions, {
-  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER],
-});
+export default withPageRequiredAuth(Residences, { roles: [RoleEnum.ADMIN] });
