@@ -2,23 +2,23 @@
 
 const uiElements = {
   id: "group-ui-elements",
-  title: "Users",
+  title: "Users Management",
   icon: "Home",
   type: "group",
   children: [
     {
       id: "components",
-      title: "Tenants",
+      title: "Users",
       type: "item",
-      icon: "Home",
-      url: "/admin-panel/tenants",
+      icon: "Contacts",
+      url: "/admin-panel/users",
     },
     {
       id: "components",
-      title: "Users",
+      title: "Agents",
       type: "item",
-      icon: "Home",
-      url: "/admin-panel/users",
+      icon: "Badge",
+      url: "/admin-panel/agents",
     },
   ],
 };

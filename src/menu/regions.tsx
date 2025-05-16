@@ -11,7 +11,14 @@ const pages = {
       title: "Regions",
       type: "item",
       url: "/admin-panel/regions",
-      icon: "IconBrandChrome",
+      icon: "ShareLocation",
+    },
+    {
+      id: "components",
+      title: "Residence",
+      type: "item",
+      icon: "MapsHomeWork",
+      url: "/admin-panel/residence",
     },
   ],
 };

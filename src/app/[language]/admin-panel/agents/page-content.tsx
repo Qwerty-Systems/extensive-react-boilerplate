@@ -15,7 +15,6 @@ import useConfirmDialog from "@/components/confirm-dialog/use-confirm-dialog";
 import { useDeleteUsersService } from "@/services/api/services/users";
 import removeDuplicatesFromArrayObjects from "@/services/helpers/remove-duplicates-from-array-of-objects";
 import { useQueryClient } from "@tanstack/react-query";
-import UserFilter from "./user-filter";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SortEnum } from "@/services/api/types/sort-type";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
@@ -27,7 +26,9 @@ import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-
+import UserFilter from "../users/user-filter";
+import Chip from "@mui/material/Chip";
+import MuiLink from "@mui/material/Link";
 type UsersKeys = keyof User;
 
 function Actions({ user }: { user: User }) {
@@ -35,13 +36,13 @@ function Actions({ user }: { user: User }) {
   const { confirmDialog } = useConfirmDialog();
   const fetchUserDelete = useDeleteUsersService();
   const queryClient = useQueryClient();
-  const { t: tUsers } = useTranslation("admin-panel-users");
+  const { t: tUsers } = useTranslation("admin-panel-agents");
   const canDelete = user.id !== authUser?.id;
 
   const handleDelete = async () => {
     const isConfirmed = await confirmDialog({
-      title: tUsers("admin-panel-users:confirm.delete.title"),
-      message: tUsers("admin-panel-users:confirm.delete.message"),
+      title: tUsers("admin-panel-agents:confirm.delete.title"),
+      message: tUsers("admin-panel-agents:confirm.delete.message"),
     });
 
     if (isConfirmed) {
@@ -68,7 +69,7 @@ function Actions({ user }: { user: User }) {
 
   return (
     <Box display="flex" gap={1}>
-      <Tooltip title={tUsers("admin-panel-users:actions.edit")}>
+      <Tooltip title={tUsers("admin-panel-agents:actions.edit")}>
         <IconButton
           size="small"
           LinkComponent={Link}
@@ -79,7 +80,7 @@ function Actions({ user }: { user: User }) {
         </IconButton>
       </Tooltip>
       {canDelete && (
-        <Tooltip title={tUsers("admin-panel-users:actions.delete")}>
+        <Tooltip title={tUsers("admin-panel-agents:actions.delete")}>
           <IconButton size="small" onClick={handleDelete} color="error">
             <DeleteIcon fontSize="small" />
           </IconButton>
@@ -90,7 +91,7 @@ function Actions({ user }: { user: User }) {
 }
 
 function Users() {
-  const { t: tUsers } = useTranslation("admin-panel-users");
+  const { t: tUsers } = useTranslation("admin-panel-agents");
   const { t: tRoles } = useTranslation("admin-panel-roles");
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -130,10 +131,10 @@ function Users() {
   };
 
   const result = useMemo(() => {
-    const allData = data?.pages.flatMap((page) => page?.data) || [];
+    const allData = data?.pages.flatMap((page: any) => page?.data) || [];
     return removeDuplicatesFromArrayObjects<User>(allData as User[], "id");
   }, [data]);
-
+  console.log("result", result);
   const columns: GridColDef[] = [
     {
       field: "avatar",
@@ -150,12 +151,12 @@ function Users() {
     },
     {
       field: "id",
-      headerName: tUsers("admin-panel-users:table.column1"),
+      headerName: tUsers("admin-panel-agents:table.column1"),
       width: 120,
     },
     {
       field: "name",
-      headerName: tUsers("admin-panel-users:table.column2"),
+      headerName: tUsers("admin-panel-agents:table.column2"),
       width: 200,
       valueGetter: (params: any) =>
         `${params?.row?.firstName} ${params?.row?.lastName}`,
@@ -173,7 +174,7 @@ function Users() {
     },
     {
       field: "email",
-      headerName: tUsers("admin-panel-users:table.column3"),
+      headerName: tUsers("admin-panel-agents:table.column3"),
       flex: 1,
       minWidth: 250,
       renderCell: (params: any) => (
@@ -190,9 +191,49 @@ function Users() {
     },
     {
       field: "role",
-      headerName: tUsers("admin-panel-users:table.column4"),
+      headerName: tUsers("admin-panel-agents:table.column4"),
       width: 150,
       valueGetter: (params: any) => tRoles(`role.${params?.name}`),
+    },
+    {
+      field: "regions",
+      headerName: tUsers("admin-panel-agents:table.column5"), // Occupants
+      flex: 1,
+      minWidth: 200,
+      renderCell: (params: any) => {
+        const regions = params.row.regions || [];
+        const count = regions.length;
+
+        return (
+          <Tooltip
+            title={
+              <Box>
+                {regions.slice(0, 5).map((region: any) => (
+                  <Typography key={region.id} variant="body2">
+                    {region?.name}
+                  </Typography>
+                ))}
+                {count > 5 && (
+                  <Typography variant="body2" fontStyle="italic">
+                    +{count - 5} more
+                  </Typography>
+                )}
+              </Box>
+            }
+          >
+            <MuiLink
+              component={Link}
+              href={`/admin-panel/regions?regionId=${params.row.id}`}
+              underline="hover"
+            >
+              <Chip
+                label={`${count} Region${count !== 1 ? "s" : ""}`}
+                clickable
+              />
+            </MuiLink>
+          </Tooltip>
+        );
+      },
     },
     {
       field: "actions",
@@ -210,7 +251,7 @@ function Users() {
         <Grid container spacing={3} size={{ xs: 12 }}>
           <Grid size="grow">
             <Typography variant="h3">
-              {tUsers("admin-panel-users:title")}
+              {tUsers("admin-panel-agents:title")}
             </Typography>
           </Grid>
           <Grid container size="auto" wrap="nowrap" spacing={2}>
@@ -224,7 +265,7 @@ function Users() {
                 href="/admin-panel/users/create"
                 color="success"
               >
-                {tUsers("admin-panel-users:actions.create")}
+                {tUsers("admin-panel-agents:actions.create")}
               </Button>
             </Grid>
           </Grid>
@@ -244,7 +285,7 @@ function Users() {
                     disabled={!hasNextPage || isFetchingNextPage}
                     variant="outlined"
                   >
-                    {tUsers("admin-panel-users:loadMore")}
+                    {tUsers("admin-panel-agents:loadMore")}
                   </Button>
                   {isFetchingNextPage && (
                     <CircularProgress size={24} sx={{ ml: 2 }} />
