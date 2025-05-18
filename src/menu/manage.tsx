@@ -11,7 +11,14 @@ const manage = {
       title: "Dashboard",
       type: "item",
       url: "/admin-panel",
-      icon: "dashboard",
+      icon: "Dashboard",
+    },
+    {
+      id: "components",
+      title: "Tenants",
+      type: "item",
+      icon: "AdminPanelSettings",
+      url: "/admin-panel/tenants",
     },
   ],
 };

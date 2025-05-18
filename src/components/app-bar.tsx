@@ -46,11 +46,16 @@ enum SectionKeys {
 type DownloadLinks = Record<SectionKeys, string> & { default: string };
 
 const APP_DOWNLOAD_LINKS: DownloadLinks = {
-  [SectionKeys.MARKETPLACE]: "https://marketplace-app-download.com",
-  [SectionKeys.RECYCLERS]: "https://recyclers-app-download.com",
-  [SectionKeys.WASTE_COLLECTORS]: "https://waste-collectors-app-download.com",
-  [SectionKeys.COMMUNITY_GROUPS]: "https://community-groups-app-download.com",
-  default: "https://default-app-download.com",
+  [SectionKeys.MARKETPLACE]:
+    "https://play.google.com/store/apps/details?id=co.ke.sakataka.sakataka&pcampaignid=web_share",
+  [SectionKeys.RECYCLERS]:
+    "https://play.google.com/store/apps/details?id=co.ke.sakataka.sakataka&pcampaignid=web_share",
+  [SectionKeys.WASTE_COLLECTORS]:
+    "https://play.google.com/store/apps/details?id=co.ke.sakataka.sakataka&pcampaignid=web_share",
+  [SectionKeys.COMMUNITY_GROUPS]:
+    "https://play.google.com/store/apps/details?id=co.ke.sakataka.sakataka&pcampaignid=web_share",
+  default:
+    "https://play.google.com/store/apps/details?id=co.ke.sakataka.sakataka&pcampaignid=web_share",
 };
 
 const validSections = Object.values(SectionKeys);

@@ -1,23 +1,22 @@
 {
-  "title": "Regions",
+  "title": "Agents",
   "table": {
     "column1": "ID",
     "column2": "Name",
-    "column3": "Tenant",
-    "column4": "serviceTypes",
-    "column5": "zipCodes",
-    "column6": "operatingHours"
+    "column3": "Email",
+    "column4": "Role",
+    "column5": "Regions"
   },
   "actions": {
-    "add": "Add Region",
+    "add": "Add Agent",
     "edit": "Edit",
     "delete": "Delete",
-    "create": "Create Region"
+    "create": "Create Agent"
   },
   "confirm": {
     "delete": {
-      "title": "Delete Region",
-      "message": "Are you sure you want to delete this region?"
+      "title": "Delete Agent",
+      "message": "Are you sure you want to delete this user?"
     }
   },
   "filter": {
@@ -30,7 +29,7 @@
         "label": "Role",
         "options": {
           "1": "Admin",
-          "2": "Region"
+          "2": "Agent"
         }
       }
     }
