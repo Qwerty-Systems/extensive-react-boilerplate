@@ -1,6 +1,4 @@
 "use client";
-import PropTypes from "prop-types";
-
 // @mui
 import { styled } from "@mui/material/styles";
 import Fade from "@mui/material/Fade";
@@ -121,5 +119,3 @@ export default function Notistack({ children }: any) {
     </StyledSnackbarProvider>
   );
 }
-
-Notistack.propTypes = { children: PropTypes.node };

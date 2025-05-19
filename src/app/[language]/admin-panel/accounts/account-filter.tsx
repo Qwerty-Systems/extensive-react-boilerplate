@@ -1,51 +1,50 @@
 "use client";
 
 import FormMultipleSelectInput from "@/components/form/multiple-select/form-multiple-select";
-import { Role, RoleEnum } from "@/services/api/types/role";
+import { AccountFilterType } from "./accounts-filter-types";
+import {
+  AccountTypeEnum,
+  NotificationChannelEnum,
+} from "@/utils/enum/account-type.enum";
 import { useTranslation } from "@/services/i18n/client";
-import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
-import Popover from "@mui/material/Popover";
+// eslint-disable-next-line no-restricted-imports
+import {
+  Button,
+  Container,
+  Grid,
+  Popover,
+  FormControlLabel,
+  Checkbox,
+} from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { AccountFilterType } from "./accounts-filter-types";
 
-type AccountFilterFormData = AccountFilterType;
+type FormData = AccountFilterType;
 
-function AccountFilter() {
+export default function AccountFilter() {
   const { t } = useTranslation("admin-panel-accounts");
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const methods = useForm<AccountFilterFormData>({
+  const methods = useForm<FormData>({
     defaultValues: {
-      roles: [],
+      types: [],
+      notificationChannel: [],
+      active: undefined,
     },
   });
-
-  const { handleSubmit, reset } = methods;
+  const { handleSubmit, reset, register, getValues } = methods;
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const open = Boolean(anchorEl);
   const id = open ? "account-filter-popover" : undefined;
 
   useEffect(() => {
     const filter = searchParams.get("filter");
     if (filter) {
-      handleClose();
-      const filterParsed = JSON.parse(filter);
-      reset(filterParsed);
+      setAnchorEl(null);
+      reset(JSON.parse(filter));
     }
   }, [searchParams, reset]);
 
@@ -55,74 +54,87 @@ function AccountFilter() {
         id={id}
         open={open}
         anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
-        <Container
-          sx={{
-            minWidth: 300,
-          }}
-        >
+        <Container sx={{ minWidth: 320, p: 2 }}>
           <form
             onSubmit={handleSubmit((data) => {
-              const searchParams = new URLSearchParams(window.location.search);
-              searchParams.set("filter", JSON.stringify(data));
-              router.push(
-                window.location.pathname + "?" + searchParams.toString()
-              );
+              const params = new URLSearchParams(window.location.search);
+              params.set("filter", JSON.stringify(data));
+              router.push(window.location.pathname + "?" + params.toString());
             })}
           >
-            <Grid container spacing={2} mb={3} mt={3}>
-              <Grid size={{ xs: 12 }}>
-                <FormMultipleSelectInput<
-                  AccountFilterFormData,
-                  Pick<Role, "id">
-                >
-                  name="roles"
-                  testId="roles"
-                  label={t("admin-panel-accounts:filter.inputs.role.label")}
-                  options={[
-                    {
-                      id: RoleEnum.ADMIN,
-                    },
-                    {
-                      id: RoleEnum.USER,
-                    },
-                  ]}
+            <Grid container spacing={2}>
+              <Grid sx={{ xs: 12 }}>
+                <FormMultipleSelectInput<FormData, { id: AccountTypeEnum }>
+                  name="types"
+                  label={t("filter.inputs.types.label", "Account Types")}
+                  options={Object.values(AccountTypeEnum).map((type) => ({
+                    id: type,
+                  }))}
                   keyValue="id"
-                  renderOption={(option) =>
-                    t(
-                      `admin-panel-accounts:filter.inputs.role.options.${option.id}`
-                    )
+                  renderOption={(opt) => t(`accountTypes.${opt.id}`, opt.id)}
+                  renderValue={(vals) =>
+                    vals.map((v) => t(`accountTypes.${v.id}`, v.id)).join(", ")
                   }
-                  renderValue={(values) =>
-                    values
-                      .map((value) =>
-                        t(
-                          `admin-panel-accounts:filter.inputs.role.options.${value.id}`
-                        )
-                      )
+                />
+              </Grid>
+
+              <Grid sx={{ xs: 12 }}>
+                <FormMultipleSelectInput<
+                  FormData,
+                  { id: NotificationChannelEnum }
+                >
+                  name="notificationChannel"
+                  label={t(
+                    "filter.inputs.channel.label",
+                    "Notification Channels"
+                  )}
+                  options={Object.values(NotificationChannelEnum).map((ch) => ({
+                    id: ch,
+                  }))}
+                  keyValue="id"
+                  renderOption={(opt) =>
+                    t(`notificationChannels.${opt.id}`, opt.id)
+                  }
+                  renderValue={(vals) =>
+                    vals
+                      .map((v) => t(`notificationChannels.${v.id}`, v.id))
                       .join(", ")
                   }
                 />
               </Grid>
-              <Grid size={{ xs: 12 }}>
+
+              <Grid sx={{ xs: 12 }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      {...register("active")}
+                      defaultChecked={getValues("active") ?? false}
+                    />
+                  }
+                  label={t("filter.inputs.active.label", "Active")}
+                />
+              </Grid>
+
+              <Grid sx={{ xs: 12 }}>
                 <Button variant="contained" type="submit">
-                  {t("admin-panel-accounts:filter.actions.apply")}
+                  {t("filter.actions.apply", "Apply")}
                 </Button>
               </Grid>
             </Grid>
           </form>
         </Container>
       </Popover>
-      <Button aria-describedby={id} variant="contained" onClick={handleClick}>
-        {t("admin-panel-accounts:filter.actions.filter")}
+
+      <Button
+        aria-describedby={id}
+        variant="outlined"
+        onClick={(e) => setAnchorEl(e.currentTarget)}
+      >
+        {t("filter.actions.filter", "Filter")}
       </Button>
     </FormProvider>
   );
 }
-
-export default AccountFilter;
