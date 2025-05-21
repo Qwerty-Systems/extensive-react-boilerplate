@@ -24,6 +24,7 @@ import { isFacebookAuthEnabled } from "@/services/social-auth/facebook/facebook-
 import { IS_SIGN_UP_ENABLED } from "@/services/auth/config";
 import { isKeycloakAuthEnabled } from "@/services/social-auth/keycloak/keycloak-config";
 import { useSearchParams } from "next/navigation";
+import { useSnackbar } from "@/hooks/use-snackbar";
 
 type SignInFormData = {
   email: string;
@@ -70,6 +71,7 @@ function Form() {
   const validationSchema = useValidationSchema();
   const searchParams = useSearchParams();
   const from = searchParams.get("from");
+  const { enqueueSnackbar } = useSnackbar();
   console.log("from", from);
 
   const methods = useForm<SignInFormData>({
@@ -84,7 +86,7 @@ function Form() {
 
   const onSubmit = handleSubmit(async (formData) => {
     const { data, status } = await fetchAuthLogin(formData);
-
+    console.log("status", status);
     if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
       (Object.keys(data.errors) as Array<keyof SignInFormData>).forEach(
         (key) => {
@@ -96,7 +98,6 @@ function Form() {
           });
         }
       );
-
       return;
     }
 
@@ -110,6 +111,20 @@ function Form() {
         // "local"
       );
       setUser(data.user);
+    }
+    if (status === HTTP_CODES_ENUM.INTERNAL_SERVER_ERROR) {
+      if (status === HTTP_CODES_ENUM.INTERNAL_SERVER_ERROR) {
+        enqueueSnackbar(t("errors:somethingWrong"), {
+          variant: "error",
+          autoHideDuration: 5000,
+          position: "top-right",
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+      }
     }
   });
 
