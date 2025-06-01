@@ -10,13 +10,17 @@ const nextConfig = {
       "i18next-browser-languagedetector",
     ],
     workerThreads: true,
-    serverComponentsMemoryLeak: true,
   },
   compress: false, // Disable for better memory analysis
   webpack: (config) => {
     config.snapshot = {
       ...(config.snapshot || {}),
       managedPaths: [/^(.+?[\\/]node_modules[\\/])(?!i18next|react-i18next)/],
+    };
+    config.cache = true;
+    config.optimization.splitChunks = {
+      chunks: "all",
+      maxSize: 200000, // 200KB per chunk
     };
     return config;
   },

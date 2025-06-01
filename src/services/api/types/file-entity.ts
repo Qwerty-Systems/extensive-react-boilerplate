@@ -1,4 +1,4 @@
 export type FileEntity = {
-  id: string;
-  path: string;
+  id?: string;
+  path?: string;
 };
