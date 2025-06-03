@@ -1,13 +1,20 @@
-import { Address, Config } from "./other";
 import { Tenant } from "./tenant";
 
 export interface Setting {
-  config?: Config;
+  config?: SettingConfig;
   settingsType?: string;
   subjectType?: string;
   tenant?: Tenant;
-  user?: Address;
-  id?: Address;
-  createdAt?: Date;
-  updatedAt?: Date;
+  user?: string;
+  id?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+export interface SettingConfig {
+  currency?: string;
+  notificationPreferences?: NotificationPreferences;
+}
+export interface NotificationPreferences {
+  email?: boolean;
+  sms?: boolean;
 }

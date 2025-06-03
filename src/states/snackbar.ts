@@ -73,7 +73,7 @@ function useGetSnackbar(): { snackbar: SnackbarState | undefined } {
 function openSnackbar(snackbar: Partial<SnackbarState>) {
   mutate<SnackbarState>(
     endpoints.key,
-    (currentSnackbar) => {
+    (currentSnackbar: SnackbarState) => {
       const safeSnackbar = currentSnackbar || initialState;
       return {
         ...safeSnackbar,
@@ -98,7 +98,7 @@ function openSnackbar(snackbar: Partial<SnackbarState>) {
 function closeSnackbar() {
   mutate<SnackbarState>(
     endpoints.key,
-    (currentSnackbar) => ({
+    (currentSnackbar: any) => ({
       ...(currentSnackbar || initialState),
       open: false,
     }),
@@ -109,7 +109,7 @@ function closeSnackbar() {
 function handlerIncrease(maxStack: number) {
   mutate<SnackbarState>(
     endpoints.key,
-    (currentSnackbar) => ({
+    (currentSnackbar: any) => ({
       ...(currentSnackbar || initialState),
       maxStack,
     }),
@@ -120,7 +120,7 @@ function handlerIncrease(maxStack: number) {
 function handlerDense(dense: boolean) {
   mutate<SnackbarState>(
     endpoints.key,
-    (currentSnackbar) => ({
+    (currentSnackbar: any) => ({
       ...(currentSnackbar || initialState),
       dense,
     }),
@@ -131,7 +131,7 @@ function handlerDense(dense: boolean) {
 function handlerIconVariants(iconVariant: string) {
   mutate<SnackbarState>(
     endpoints.key,
-    (currentSnackbar) => ({
+    (currentSnackbar: any) => ({
       ...(currentSnackbar || initialState),
       iconVariant,
       hideIconVariant: iconVariant === "hide",

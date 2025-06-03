@@ -8,9 +8,11 @@ import {
 } from "./services/i18n/config";
 import { APP_DEFAULT_PATH } from "@/config";
 import { AUTH_TOKEN_KEY } from "./services/auth/config";
+
 acceptLanguage.languages([...languages]);
 
 const PUBLIC_FILE = /\.(.*)$/;
+const ONBOARDING_ROUTES = ["/onboarding/tenant", "/onboarding/user"];
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|auth/|icons/).*)"],
@@ -21,8 +23,22 @@ function checkAuth(req: NextRequest): boolean {
   return !!token;
 }
 
+function decodeToken(token: string): any {
+  try {
+    const base64Payload = token.split(".")[1];
+    const payload = Buffer.from(base64Payload, "base64").toString();
+    return JSON.parse(payload);
+  } catch (e) {
+    console.error("Token decoding error:", e);
+    return null;
+  }
+}
+
+function isAdminRole(roleName: string): boolean {
+  return ["Admin", "PlatformOwner"].includes(roleName);
+}
+
 export function middleware(req: NextRequest) {
-  console.log("Middleware triggered for:", req.nextUrl.pathname);
   // Skip static files and API routes
   if (
     req.nextUrl.pathname.startsWith("/_next") ||
@@ -66,29 +82,64 @@ export function middleware(req: NextRequest) {
     pathname === `/${pathLanguage}/market` ||
     pathname === `/${pathLanguage}/collectors` ||
     pathname === `/${pathLanguage}/recycle` ||
-    pathname === `/${pathLanguage}/community`; // Example: home page is public
+    pathname === `/${pathLanguage}/community`;
   const isProtectedRoute = !isAuthRoute && !isPublicRoute;
-  console.log(
-    "isAuthenticated",
-    isAuthenticated,
-    "isProtectedRoute",
-    isProtectedRoute
-  );
+
   // Handle protected routes
   if (isProtectedRoute && !isAuthenticated) {
     return NextResponse.redirect(new URL(`/${pathLanguage}/sign-in`, req.url));
   }
 
-  // Prevent authenticated users from accessing auth routes
-  const targetPath = `/${pathLanguage}${APP_DEFAULT_PATH}`;
+  // Handle authenticated users
+  if (isAuthenticated) {
+    const token = req.cookies.get(AUTH_TOKEN_KEY)?.value;
+    let user = null;
+    let tenant = null;
 
-  // Handle authenticated users trying to access auth routes
-  if (!isProtectedRoute && isAuthenticated) {
-    console.log("should redirect ");
-    return NextResponse.redirect(new URL(targetPath, req.url));
-  }
-  if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL(targetPath, req.url));
+    if (token) {
+      const decoded = decodeToken(token);
+      user = decoded?.user;
+      tenant = decoded?.tenant;
+    }
+
+    // Check if user needs onboarding
+    if (user) {
+      const isAdmin = isAdminRole(user.role?.name);
+      const isOnboardingRoute = ONBOARDING_ROUTES.some((route) =>
+        pathname.includes(`/${pathLanguage}${route}`)
+      );
+
+      const targetPath = `/${pathLanguage}${APP_DEFAULT_PATH}`;
+
+      // Redirect away from auth routes
+      if (isAuthRoute) {
+        return NextResponse.redirect(new URL(targetPath, req.url));
+      }
+
+      // Handle tenant onboarding for admins
+      if (isAdmin && !tenant?.fullyOnboarded && !isOnboardingRoute) {
+        return NextResponse.redirect(
+          new URL(`/${pathLanguage}/onboarding/tenant`, req.url)
+        );
+      }
+
+      // Handle user onboarding for regular users
+      if (!isAdmin && !user.fullyOnboarded && !isOnboardingRoute) {
+        return NextResponse.redirect(
+          new URL(`/${pathLanguage}/onboarding/user`, req.url)
+        );
+      }
+
+      // Redirect away from onboarding if completed
+      if (isOnboardingRoute) {
+        if (
+          (isAdmin && tenant?.fullyOnboarded) ||
+          (!isAdmin && user.fullyOnboarded)
+        ) {
+          return NextResponse.redirect(new URL(targetPath, req.url));
+        }
+      }
+    }
   }
 
   // Handle language cookie from referer

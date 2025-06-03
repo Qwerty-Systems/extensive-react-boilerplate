@@ -1,17 +1,17 @@
 import { Tenant } from "./tenant";
 
 export interface Region {
-  zipCodes?: string[] | string;
+  zipCodes?: string[];
   operatingHours?: OperatingHours;
   serviceTypes?: string[];
   centroidLon?: number;
   centroidLat?: number;
-  boundary?: Boundary;
+  boundary?: GeoJSONPolygon;
   name?: string;
   tenant?: Tenant;
   id?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Boundary {
@@ -23,4 +23,8 @@ export interface OperatingHours {
   days?: string[];
   startTime?: string;
   endTime?: string;
+}
+export interface GeoJSONPolygon {
+  type?: "Polygon";
+  coordinates?: number[][][];
 }

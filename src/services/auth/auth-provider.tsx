@@ -1,6 +1,7 @@
 "use client";
 
 import { User } from "@/services/api/types/user";
+import { Tenant } from "@/services/api/types/tenant";
 import {
   PropsWithChildren,
   useCallback,
@@ -21,21 +22,33 @@ import {
   getTokensInfo,
   setTokensInfo as setTokensInfoToStorage,
 } from "./auth-tokens-info";
-// import { useKeycloak } from "@react-keycloak/web";
+import useLanguage from "@/services/i18n/use-language";
 
 function AuthProvider(props: PropsWithChildren<{}>) {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [tenant, setTenant] = useState<Tenant | null>(null);
   const [authMethod, setAuthMethod] = useState<"local" | "keycloak" | null>(
     null
   );
+  const [onboardingState, setOnboardingState] = useState({
+    userOnboarded: false,
+    tenantOnboarded: false,
+  });
+
   const fetchBase = useFetch();
+  const language = useLanguage();
 
   const setTokensInfo = useCallback((tokensInfo: TokensInfo) => {
     setTokensInfoToStorage(tokensInfo);
 
     if (!tokensInfo) {
       setUser(null);
+      setTenant(null);
+      setOnboardingState({
+        userOnboarded: false,
+        tenantOnboarded: false,
+      });
     }
   }, []);
 
@@ -47,8 +60,12 @@ function AuthProvider(props: PropsWithChildren<{}>) {
         method: "POST",
       });
     }
+
     setTokensInfo(null);
-  }, [setTokensInfo, fetchBase]);
+
+    // Force full redirect to clear state
+    window.location.href = `/${language}/sign-in`;
+  }, [setTokensInfo, fetchBase, language]);
 
   const loadData = useCallback(async () => {
     const tokens = getTokensInfo();
@@ -58,19 +75,24 @@ function AuthProvider(props: PropsWithChildren<{}>) {
         const response = await fetchBase(AUTH_ME_URL, {
           method: "GET",
         });
-        console.log("response me ", response);
+
         if (response.status === HTTP_CODES_ENUM.UNAUTHORIZED) {
           logOut();
           return;
         }
 
         const data = await response.json();
+        setUser(data.user);
+        setTenant(data.tenant);
 
-        console.log("user data me ", data);
-        setUser(data);
+        // Update onboarding state
+        setOnboardingState({
+          userOnboarded: data.user?.fullyOnboarded || false,
+          tenantOnboarded: data.tenant?.fullyOnboarded || false,
+        });
       }
     } finally {
-      setIsLoaded(true);
+      setIsInitialized(true);
     }
   }, [fetchBase, logOut]);
 
@@ -78,22 +100,35 @@ function AuthProvider(props: PropsWithChildren<{}>) {
     loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    if (user && tenant) {
+      setOnboardingState({
+        userOnboarded: user.fullyOnboarded || false,
+        tenantOnboarded: tenant.fullyOnboarded || false,
+      });
+    }
+  }, [user, tenant]);
+
   const contextValue = useMemo(
     () => ({
-      isLoaded,
+      isInitialized,
+      isLoaded: isInitialized,
       user,
+      tenant,
       authMethod,
+      onboardingState,
     }),
-    [isLoaded, user, authMethod]
+    [isInitialized, user, tenant, authMethod, onboardingState]
   );
 
   const contextActionsValue = useMemo(
     () => ({
       setUser,
+      setTenant,
       logOut,
       setAuthMethod,
     }),
-    [logOut, setAuthMethod]
+    [logOut]
   );
 
   const contextTokensValue = useMemo(

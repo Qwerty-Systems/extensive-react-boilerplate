@@ -5,9 +5,10 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import useLanguage from "../i18n/use-language";
 import { RoleEnum } from "../api/types/role";
 import LoadingSpinner from "@/components/loading-spinner";
-import UnauthorizedScreen from "@/components/unauthorized-screen";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorFallback from "@/components/error-fallback";
+import { usePathname } from "next/navigation";
+import { APP_DEFAULT_PATH } from "@/config";
 
 type PropsType = {
   params?: { [key: string]: string | string[] | undefined };
@@ -22,24 +23,31 @@ function isRole(role: string): role is RoleEnum {
   return Object.values(RoleEnum).includes(role as RoleEnum);
 }
 
+function isAdminRole(roleName: string): boolean {
+  return ["Admin", "platform_owner"].includes(roleName);
+}
+
 function withPageRequiredAuth(
   Component: FunctionComponent<PropsType>,
   options?: OptionsType
 ) {
   return function WithPageRequiredAuth(props: PropsType) {
-    const { user, isLoaded } = useAuth();
+    const { user, tenant, isInitialized, onboardingState } = useAuth();
     const router = useRouter();
     const language = useLanguage();
+    const pathname = usePathname();
     const [isChecking, setIsChecking] = useState(true);
 
     useEffect(() => {
-      if (!isLoaded) return;
+      if (!isInitialized) return;
 
       const checkAuthorization = () => {
         try {
           // User is not authenticated
           if (!user) {
-            const returnTo = encodeURIComponent(window.location.pathname);
+            const returnTo = encodeURIComponent(
+              window.location.pathname + window.location.search
+            );
             router.replace(`/${language}/sign-in?returnTo=${returnTo}`);
             return;
           }
@@ -53,11 +61,55 @@ function withPageRequiredAuth(
 
           // Check if user has required role
           const hasValidRole = options?.roles
-            ? options.roles.includes(userRole)
+            ? options.roles.includes(userRole as RoleEnum)
             : true;
-          console.log("hasValidRole", hasValidRole);
+
           if (!hasValidRole) {
             router.replace(`/${language}/403-unauthorized`);
+            return;
+          }
+
+          // Redirect root path to default app path
+          if (pathname === `/${language}/`) {
+            router.replace(`/${language}${APP_DEFAULT_PATH}`);
+            return;
+          }
+
+          // Onboarding redirection logic
+          const isAdmin = isAdminRole(userRole);
+          const isOnboardingRoute =
+            pathname.includes("/onboarding/tenant") ||
+            pathname.includes("/onboarding/user");
+
+          const targetPath = `/${language}${APP_DEFAULT_PATH}`;
+
+          // Skip onboarding redirection for these routes
+          const isAllowedRoute =
+            isOnboardingRoute || pathname.includes("/sign-out");
+
+          if (!isAllowedRoute) {
+            // Tenant onboarding for admins
+            if (isAdmin && !onboardingState.tenantOnboarded) {
+              router.replace(`/${language}/onboarding/tenant`);
+              return;
+            }
+
+            // User onboarding for regular users
+            if (!isAdmin && !onboardingState.userOnboarded) {
+              router.replace(`/${language}/onboarding/user`);
+              return;
+            }
+          }
+
+          // Redirect away from onboarding if completed
+          if (isOnboardingRoute) {
+            if (
+              (isAdmin && onboardingState.tenantOnboarded) ||
+              (!isAdmin && onboardingState.userOnboarded)
+            ) {
+              router.replace(targetPath);
+              return;
+            }
           }
         } catch (error) {
           console.error("Authorization check failed:", error);
@@ -69,9 +121,17 @@ function withPageRequiredAuth(
 
       setIsChecking(true);
       checkAuthorization();
-    }, [user, isLoaded, router, language]);
+    }, [
+      user,
+      tenant,
+      isInitialized,
+      onboardingState,
+      router,
+      language,
+      pathname,
+    ]);
 
-    if (!isLoaded || isChecking) {
+    if (!isInitialized || isChecking) {
       return <LoadingSpinner fullScreen />;
     }
 
@@ -84,11 +144,7 @@ function withPageRequiredAuth(
         FallbackComponent={ErrorFallback}
         onReset={() => router.refresh()}
       >
-        {options?.roles?.includes(user?.role?.name as RoleEnum) ? (
-          <Component {...props} />
-        ) : (
-          <UnauthorizedScreen />
-        )}
+        <Component {...props} />
       </ErrorBoundary>
     );
   };
