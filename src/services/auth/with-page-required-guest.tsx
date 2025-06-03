@@ -11,7 +11,7 @@ type PropsType = {
 };
 
 function isAdminRole(roleName: string): boolean {
-  return ["Admin", "platform_owner"].includes(roleName);
+  return ["Admin", "PlatformOwner"].includes(roleName);
 }
 
 function withPageRequiredGuest(Component: FunctionComponent<PropsType>) {

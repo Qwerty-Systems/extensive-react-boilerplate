@@ -53,5 +53,6 @@
     "Follow the steps below to onboard your tenant successfully.",
   "tenantOnboardingSuccessTitle": "Onboarding Successful",
   "completionMessage":
-    "Your tenant has been successfully onboarded! You can now start using the application with your new tenant settings."
+    "Your tenant has been successfully onboarded! You can now start using the application with your new tenant settings.",
+  "skipButton": "Skip"
 }

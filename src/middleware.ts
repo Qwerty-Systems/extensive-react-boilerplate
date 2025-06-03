@@ -35,7 +35,7 @@ function decodeToken(token: string): any {
 }
 
 function isAdminRole(roleName: string): boolean {
-  return ["admin", "platform_owner"].includes(roleName);
+  return ["Admin", "PlatformOwner"].includes(roleName);
 }
 
 export function middleware(req: NextRequest) {

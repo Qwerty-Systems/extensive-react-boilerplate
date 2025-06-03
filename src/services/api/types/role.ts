@@ -2,7 +2,7 @@ import { Tenant } from "./tenant";
 
 export enum RoleEnum {
   ADMIN = "Admin",
-  PLATFORM_OWNER = "Platform Owner",
+  PLATFORM_OWNER = "PlatformOwner",
   AGENT = "Agent",
   USER = "User",
   CUSTOMER = "Customer",

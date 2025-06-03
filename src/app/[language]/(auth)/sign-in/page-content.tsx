@@ -90,8 +90,13 @@ function Form() {
 
   const onSubmit = handleSubmit(async (formData) => {
     const { data, status } = await fetchAuthLogin(formData);
-    console.log("status", status);
-    if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
+    console.log("status 888", data);
+    // Handle validation errors if present in the response
+    if (
+      data &&
+      "errors" in data &&
+      status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY
+    ) {
       (Object.keys(data.errors) as Array<keyof SignInFormData>).forEach(
         (key) => {
           setError(key, {
@@ -102,9 +107,23 @@ function Form() {
           });
         }
       );
+      const x: any = data;
+      console.log("x", x.message);
+      const message = JSON.stringify(x.errors); /**t(
+        JSON.stringify(x.errors) || "sign-in:errors.validationFailed"
+      );**/
+      enqueueSnackbar(message, {
+        variant: "error",
+        autoHideDuration: 5000,
+        position: "top-right",
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
       return;
     }
-
     if (status === HTTP_CODES_ENUM.OK) {
       setTokensInfo(
         {
