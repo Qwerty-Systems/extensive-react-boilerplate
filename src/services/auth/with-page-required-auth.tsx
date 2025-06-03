@@ -9,7 +9,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import ErrorFallback from "@/components/error-fallback";
 import { usePathname } from "next/navigation";
 import { APP_DEFAULT_PATH } from "@/config";
-
+import { ALLOW_ONBOARDING } from "../api/config";
 type PropsType = {
   params?: { [key: string]: string | string[] | undefined };
   searchParams?: { [key: string]: string | string[] | undefined };
@@ -24,7 +24,7 @@ function isRole(role: string): role is RoleEnum {
 }
 
 function isAdminRole(roleName: string): boolean {
-  return ["Admin", "platform_owner"].includes(roleName);
+  return ["Admin", "PlatformOwner"].includes(roleName);
 }
 
 function withPageRequiredAuth(
@@ -42,7 +42,9 @@ function withPageRequiredAuth(
       if (!isInitialized) return;
 
       const checkAuthorization = () => {
+        console.log(" ###########checkAuthorization .......");
         try {
+          console.log("user", user);
           // User is not authenticated
           if (!user) {
             const returnTo = encodeURIComponent(
@@ -86,29 +88,30 @@ function withPageRequiredAuth(
           // Skip onboarding redirection for these routes
           const isAllowedRoute =
             isOnboardingRoute || pathname.includes("/sign-out");
+          if (ALLOW_ONBOARDING) {
+            if (!isAllowedRoute) {
+              // Tenant onboarding for admins
+              if (isAdmin && !onboardingState.tenantOnboarded) {
+                router.replace(`/${language}/onboarding/tenant`);
+                return;
+              }
 
-          if (!isAllowedRoute) {
-            // Tenant onboarding for admins
-            if (isAdmin && !onboardingState.tenantOnboarded) {
-              router.replace(`/${language}/onboarding/tenant`);
-              return;
+              // User onboarding for regular users
+              if (!isAdmin && !onboardingState.userOnboarded) {
+                router.replace(`/${language}/onboarding/user`);
+                return;
+              }
             }
 
-            // User onboarding for regular users
-            if (!isAdmin && !onboardingState.userOnboarded) {
-              router.replace(`/${language}/onboarding/user`);
-              return;
-            }
-          }
-
-          // Redirect away from onboarding if completed
-          if (isOnboardingRoute) {
-            if (
-              (isAdmin && onboardingState.tenantOnboarded) ||
-              (!isAdmin && onboardingState.userOnboarded)
-            ) {
-              router.replace(targetPath);
-              return;
+            // Redirect away from onboarding if completed
+            if (isOnboardingRoute) {
+              if (
+                (isAdmin && onboardingState.tenantOnboarded) ||
+                (!isAdmin && onboardingState.userOnboarded)
+              ) {
+                router.replace(targetPath);
+                return;
+              }
             }
           }
         } catch (error) {

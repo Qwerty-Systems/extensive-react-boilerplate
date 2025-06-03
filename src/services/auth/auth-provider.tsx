@@ -23,6 +23,7 @@ import {
   setTokensInfo as setTokensInfoToStorage,
 } from "./auth-tokens-info";
 import useLanguage from "@/services/i18n/use-language";
+import { AUTH_TOKEN_KEY } from "./config";
 
 function AuthProvider(props: PropsWithChildren<{}>) {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -62,6 +63,7 @@ function AuthProvider(props: PropsWithChildren<{}>) {
     }
 
     setTokensInfo(null);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
 
     // Force full redirect to clear state
     window.location.href = `/${language}/sign-in`;
@@ -108,7 +110,28 @@ function AuthProvider(props: PropsWithChildren<{}>) {
       });
     }
   }, [user, tenant]);
+  //Session Timeout:
+  useEffect(() => {
+    const timeout = setTimeout(
+      () => {
+        if (user) logOut();
+      },
+      60 * 60 * 1000
+    ); // 1 hour
 
+    return () => clearTimeout(timeout);
+  }, [user, logOut]);
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === AUTH_TOKEN_KEY) {
+        if (!event.newValue) logOut();
+        else loadData();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [logOut, loadData]);
   const contextValue = useMemo(
     () => ({
       isInitialized,

@@ -4,6 +4,7 @@ import useAuth from "./use-auth";
 import React, { FunctionComponent, useEffect } from "react";
 import useLanguage from "@/services/i18n/use-language";
 import { APP_DEFAULT_PATH } from "@/config";
+import { ALLOW_ONBOARDING } from "../api/config";
 
 type PropsType = {
   params?: { [key: string]: string | string[] | undefined };
@@ -33,6 +34,7 @@ function withPageRequiredGuest(Component: FunctionComponent<PropsType>) {
       if (!isInitialized) return;
 
       if (user) {
+        console.log("@@@   user", user);
         const userRole = user?.role?.name;
         // Onboarding redirection logic
         const isAdmin = isAdminRole(userRole ?? "");
@@ -45,29 +47,30 @@ function withPageRequiredGuest(Component: FunctionComponent<PropsType>) {
         // Skip onboarding redirection for these routes
         const isAllowedRoute =
           isOnboardingRoute || pathname.includes("/sign-out");
+        if (ALLOW_ONBOARDING) {
+          if (!isAllowedRoute) {
+            // Tenant onboarding for admins
+            if (isAdmin && !onboardingState.tenantOnboarded) {
+              router.replace(`/${language}/onboarding/tenant`);
+              return;
+            }
 
-        if (!isAllowedRoute) {
-          // Tenant onboarding for admins
-          if (isAdmin && !onboardingState.tenantOnboarded) {
-            router.replace(`/${language}/onboarding/tenant`);
-            return;
+            // User onboarding for regular users
+            if (!isAdmin && !onboardingState.userOnboarded) {
+              router.replace(`/${language}/onboarding/user`);
+              return;
+            }
           }
 
-          // User onboarding for regular users
-          if (!isAdmin && !onboardingState.userOnboarded) {
-            router.replace(`/${language}/onboarding/user`);
-            return;
-          }
-        }
-
-        // Redirect away from onboarding if completed
-        if (isOnboardingRoute) {
-          if (
-            (isAdmin && onboardingState.tenantOnboarded) ||
-            (!isAdmin && onboardingState.userOnboarded)
-          ) {
-            router.replace(targetPath);
-            return;
+          // Redirect away from onboarding if completed
+          if (isOnboardingRoute) {
+            if (
+              (isAdmin && onboardingState.tenantOnboarded) ||
+              (!isAdmin && onboardingState.userOnboarded)
+            ) {
+              router.replace(targetPath);
+              return;
+            }
           }
         }
         // Redirect root path to default app path
