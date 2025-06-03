@@ -3,8 +3,8 @@ import { Tenant } from "./tenant";
 
 export interface KycSubmission {
   verifiedBy?: number;
-  verifiedAt?: Date;
-  submittedAt?: Date;
+  verifiedAt?: string;
+  submittedAt?: string;
   status?: string;
   documentData?: DocumentData;
   documentNumber?: string;
@@ -13,6 +13,6 @@ export interface KycSubmission {
   tenant?: Tenant;
   user?: string;
   id?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
 }

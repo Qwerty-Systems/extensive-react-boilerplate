@@ -2,31 +2,6 @@ import { TokensInfo } from "./auth-context";
 import Cookies from "js-cookie";
 import { AUTH_TOKEN_KEY } from "./config";
 
-export const LOCAL_TOKEN_KEY = "local-token";
-export const KEYCLOAK_TOKEN_KEY = "keycloak-token";
-
-// export const getTokensInfo = (method: "local" | "keycloak") => {
-//   const key = method === "local" ? AUTH_TOKEN_KEY : KEYCLOAK_TOKEN_KEY;
-//   // const data = localStorage.getItem(key);
-//   // return data ? JSON.parse(data) : null;
-//   return JSON.parse(Cookies.get(key) ?? "null") as TokensInfo;
-// };
-
-// export const setTokensInfoToStorage = (
-//   tokensInfo: TokensInfo | null,
-//   method: "local" | "keycloak"
-// ) => {
-//   const key = method === "local" ? AUTH_TOKEN_KEY : KEYCLOAK_TOKEN_KEY;
-//   // if (tokensInfo) localStorage.setItem(key, JSON.stringify(tokensInfo));
-//   // else localStorage.removeItem(key);
-
-//   if (tokensInfo) {
-//     Cookies.set(key, JSON.stringify(tokensInfo));
-//   } else {
-//     Cookies.remove(key);
-//   }
-// };
-
 export function getTokensInfo() {
   return JSON.parse(Cookies.get(AUTH_TOKEN_KEY) ?? "null") as TokensInfo;
 }

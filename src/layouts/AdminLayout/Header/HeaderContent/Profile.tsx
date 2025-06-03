@@ -39,6 +39,7 @@ import FormatTextdirectionLToRIcon from "@mui/icons-material/FormatTextdirection
 import useAuth from "@/services/auth/use-auth";
 import useAuthActions from "@/services/auth/use-auth-actions";
 import { useColorScheme } from "@mui/material/styles";
+import useLanguage from "@/services/i18n/use-language";
 
 /***************************  HEADER - PROFILE DATA  ***************************/
 
@@ -66,6 +67,7 @@ export default function ProfileSection() {
   const innerId = innerOpen ? "profile-inner-popper" : undefined;
   const buttonStyle = { borderRadius: 2, p: 1 };
   const { colorScheme, setMode } = useColorScheme();
+  const language = useLanguage();
   const profileData = {
     avatar: {
       src: user?.photo?.path || "/assets/images/users/avatar-1.png",
@@ -85,6 +87,7 @@ export default function ProfileSection() {
   const logoutAccount = () => {
     logOut();
     setAnchorEl(null);
+    window.location.href = `/${language}/`;
   };
 
   /*  const i18nHandler = (event: MouseEvent<HTMLDivElement>, key: any) => {

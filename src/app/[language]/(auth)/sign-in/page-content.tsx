@@ -23,8 +23,10 @@ import { isGoogleAuthEnabled } from "@/services/social-auth/google/google-config
 import { isFacebookAuthEnabled } from "@/services/social-auth/facebook/facebook-config";
 import { IS_SIGN_UP_ENABLED } from "@/services/auth/config";
 import { isKeycloakAuthEnabled } from "@/services/social-auth/keycloak/keycloak-config";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSnackbar } from "@/hooks/use-snackbar";
+import useLanguage from "@/services/i18n/use-language";
+import { APP_DEFAULT_PATH } from "@/config";
 
 type SignInFormData = {
   email: string;
@@ -64,7 +66,7 @@ function FormActions() {
 }
 
 function Form() {
-  const { setUser } = useAuthActions();
+  const { setUser, setTenant } = useAuthActions();
   const { setTokensInfo } = useAuthTokens();
   const fetchAuthLogin = useAuthLoginService();
   const { t } = useTranslation("sign-in");
@@ -72,6 +74,8 @@ function Form() {
   const searchParams = useSearchParams();
   const from = searchParams.get("from");
   const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
+  const language = useLanguage();
   console.log("from", from);
 
   const methods = useForm<SignInFormData>({
@@ -110,7 +114,14 @@ function Form() {
         }
         // "local"
       );
+      console.log("data.user", data);
       setUser(data.user);
+      setTenant(data.user.tenant ?? null);
+      const urlParams = new URLSearchParams(window.location.search);
+      console.log(`APP_DEFAULT_PATH, /${language}${APP_DEFAULT_PATH}`);
+      const returnTo =
+        urlParams.get("returnTo") || `/${language}${APP_DEFAULT_PATH}`;
+      router.push(returnTo);
     }
     if (status === HTTP_CODES_ENUM.INTERNAL_SERVER_ERROR) {
       if (status === HTTP_CODES_ENUM.INTERNAL_SERVER_ERROR) {

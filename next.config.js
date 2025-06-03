@@ -17,6 +17,11 @@ const nextConfig = {
       ...(config.snapshot || {}),
       managedPaths: [/^(.+?[\\/]node_modules[\\/])(?!i18next|react-i18next)/],
     };
+    config.cache = true;
+    config.optimization.splitChunks = {
+      chunks: "all",
+      maxSize: 200000, // 200KB per chunk
+    };
     return config;
   },
 };

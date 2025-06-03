@@ -25,6 +25,7 @@ import InitColorSchemeScript from "@/components/theme/init-color-scheme-script";
 import KeycloakProvider from "@/services/social-auth/keycloak/keycloak-provider";
 import Notistack from "@/components/third-party/Notistack";
 import ClientProviders from "../../services/locale/locale-provider";
+import TenantProvider from "../../services/tenant/tenant-context";
 // Client-side providers wrapper
 const AuthProviders = ({ children }: { children: React.ReactNode }) => (
   <KeycloakProvider>
@@ -74,11 +75,13 @@ export default async function RootLayout(props: {
             <StoreLanguageProvider>
               <ConfirmDialogProvider>
                 <AuthProviders>
-                  <Notistack>
-                    <ResponsiveAppBar />
-                    <ClientProviders>{children}</ClientProviders>
-                    <ToastContainer position="bottom-left" hideProgressBar />
-                  </Notistack>
+                  <TenantProvider>
+                    <Notistack>
+                      <ResponsiveAppBar />
+                      <ClientProviders>{children}</ClientProviders>
+                      <ToastContainer position="bottom-left" hideProgressBar />
+                    </Notistack>
+                  </TenantProvider>
                 </AuthProviders>
               </ConfirmDialogProvider>
             </StoreLanguageProvider>
