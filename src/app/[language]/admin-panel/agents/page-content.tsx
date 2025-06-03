@@ -311,4 +311,6 @@ function Users() {
   );
 }
 
-export default withPageRequiredAuth(Users, { roles: [RoleEnum.ADMIN] });
+export default withPageRequiredAuth(Users, {
+  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER],
+});

@@ -312,4 +312,6 @@ function Residences() {
   );
 }
 
-export default withPageRequiredAuth(Residences, { roles: [RoleEnum.ADMIN] });
+export default withPageRequiredAuth(Residences, {
+  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER],
+});

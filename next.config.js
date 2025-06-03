@@ -10,7 +10,6 @@ const nextConfig = {
       "i18next-browser-languagedetector",
     ],
     workerThreads: true,
-    serverComponentsMemoryLeak: true,
   },
   compress: false, // Disable for better memory analysis
   webpack: (config) => {
