@@ -46,6 +46,7 @@ function SelectInputRaw<T extends object>(
         size={props.size}
         value={props.value?.[props.keyValue]?.toString() ?? ""}
         label={props.label}
+        sx={{ minWidth: 200 }}
         inputProps={{
           readOnly: props.readOnly,
         }}

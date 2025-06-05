@@ -34,7 +34,6 @@ function withPageRequiredGuest(Component: FunctionComponent<PropsType>) {
       if (!isInitialized) return;
 
       if (user) {
-        console.log("@@@   user", user);
         const userRole = user?.role?.name;
         // Onboarding redirection logic
         const isAdmin = isAdminRole(userRole ?? "");
@@ -79,7 +78,15 @@ function withPageRequiredGuest(Component: FunctionComponent<PropsType>) {
           return;
         }
       }
-    }, [user, isInitialized, router, language]);
+    }, [
+      user,
+      isInitialized,
+      router,
+      language,
+      pathname,
+      onboardingState.tenantOnboarded,
+      onboardingState.userOnboarded,
+    ]);
 
     return !user && isInitialized ? <Component {...props} /> : null;
   };

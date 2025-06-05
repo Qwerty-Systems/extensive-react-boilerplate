@@ -5,6 +5,7 @@ const uiElements = {
   title: "Users Management",
   icon: "Home",
   type: "group",
+  roles: [],
   children: [
     {
       id: "components",
@@ -12,6 +13,7 @@ const uiElements = {
       type: "item",
       icon: "Contacts",
       url: "/admin-panel/users",
+      roles: [],
     },
     {
       id: "components",
@@ -19,6 +21,7 @@ const uiElements = {
       type: "item",
       icon: "Badge",
       url: "/admin-panel/agents",
+      roles: [],
     },
   ],
 };
