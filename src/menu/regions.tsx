@@ -5,6 +5,7 @@ const pages = {
   title: "Regions",
   icon: "IconDotsVertical",
   type: "group",
+  roles: ["Admin", "PlatformOwner"],
   children: [
     {
       id: "sample-page",
@@ -12,6 +13,7 @@ const pages = {
       type: "item",
       url: "/admin-panel/regions",
       icon: "ShareLocation",
+      roles: ["Admin", "PlatformOwner"],
     },
     {
       id: "components",
@@ -19,6 +21,7 @@ const pages = {
       type: "item",
       icon: "MapsHomeWork",
       url: "/admin-panel/residence",
+      roles: ["Admin", "PlatformOwner"],
     },
   ],
 };

@@ -73,8 +73,8 @@ function useGetSnackbar(): { snackbar: SnackbarState | undefined } {
 function openSnackbar(snackbar: Partial<SnackbarState>) {
   mutate<SnackbarState>(
     endpoints.key,
-    (currentSnackbar: SnackbarState) => {
-      const safeSnackbar = currentSnackbar || initialState;
+    (currentSnackbar?: SnackbarState) => {
+      const safeSnackbar = currentSnackbar ?? initialState;
       return {
         ...safeSnackbar,
         action: snackbar.action ?? safeSnackbar.action,
@@ -89,6 +89,11 @@ function openSnackbar(snackbar: Partial<SnackbarState>) {
         transition: snackbar.transition ?? safeSnackbar.transition,
         close: snackbar.close ?? safeSnackbar.close,
         actionButton: snackbar.actionButton ?? safeSnackbar.actionButton,
+        maxStack: snackbar.maxStack ?? safeSnackbar.maxStack,
+        dense: snackbar.dense ?? safeSnackbar.dense,
+        iconVariant: snackbar.iconVariant ?? safeSnackbar.iconVariant,
+        hideIconVariant:
+          snackbar.hideIconVariant ?? safeSnackbar.hideIconVariant,
       };
     },
     false

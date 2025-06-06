@@ -23,11 +23,11 @@ export default function ConfirmNewEmail() {
   const router = useRouter();
   const { t } = useTranslation("confirm-new-email");
   const { setUser } = useAuthActions();
-  const { user, isLoaded } = useAuth();
+  const { user, isInitialized } = useAuth();
 
   useEffect(() => {
     const confirm = async () => {
-      if (!isLoaded) return;
+      if (!isInitialized) return;
 
       const params = new URLSearchParams(window.location.search);
       const hash = params.get("hash");
@@ -68,7 +68,7 @@ export default function ConfirmNewEmail() {
     router,
     enqueueSnackbar,
     t,
-    isLoaded,
+    isInitialized,
     setUser,
     fetchAuthGetMe,
     user,

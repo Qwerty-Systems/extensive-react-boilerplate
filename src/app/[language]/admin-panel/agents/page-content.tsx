@@ -73,7 +73,7 @@ function Actions({ user }: { user: User }) {
         <IconButton
           size="small"
           LinkComponent={Link}
-          href={`/admin-panel/users/edit/${user.id}`}
+          href={`/admin-panel/agents/edit/${user.id}`}
           color="primary"
         >
           <EditIcon fontSize="small" />
@@ -95,6 +95,7 @@ function Users() {
   const { t: tRoles } = useTranslation("admin-panel-roles");
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { tenant } = useAuth();
 
   const [sortModel, setSortModel] = useState<GridSortModel>([
     {
@@ -110,7 +111,11 @@ function Users() {
 
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useGetUsersQuery({
-      filter,
+      filter: {
+        ...(filter || {}),
+        roles: [{ id: 5 }],
+        tenantId: tenant?.id,
+      },
       sort: {
         order: (sortModel[0]?.sort?.toUpperCase() as SortEnum) || SortEnum.DESC,
         orderBy: (sortModel[0]?.field as UsersKeys) || "id",
@@ -262,7 +267,7 @@ function Users() {
               <Button
                 variant="contained"
                 LinkComponent={Link}
-                href="/admin-panel/users/create"
+                href="/admin-panel/agents/create"
                 color="success"
               >
                 {tUsers("admin-panel-agents:actions.create")}

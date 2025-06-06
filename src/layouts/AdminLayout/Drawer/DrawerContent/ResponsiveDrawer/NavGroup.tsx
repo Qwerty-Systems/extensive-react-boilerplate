@@ -5,10 +5,34 @@ import Typography from "@mui/material/Typography";
 // @project
 import NavCollapse from "./NavCollapse";
 import NavItem from "./NavItem";
+import { AuthContext } from "@/services/auth/auth-context";
+import { useContext, useMemo } from "react";
 
 /***************************  RESPONSIVE DRAWER - GROUP  ***************************/
 
 export default function NavGroup({ item }: any) {
+  const { user } = useContext(AuthContext);
+
+  const filteredChildren = useMemo(() => {
+    const userRoles = user?.role?.name ? [user.role.name] : [];
+
+    const filterItems = (items: any[]): any[] => {
+      return items.filter((menuItem) => {
+        // Check if item has children (recursive)
+        if (menuItem.children) {
+          menuItem.children = filterItems(menuItem.children);
+          return menuItem.children.length > 0;
+        }
+        // Check role permissions
+        return (
+          !menuItem.roles ||
+          menuItem.roles.some((r: string) => userRoles.includes(r))
+        );
+      });
+    };
+
+    return item.children ? filterItems([...item.children]) : [];
+  }, [item.children, user]);
   const renderNavItem = (menuItem: any) => {
     // Render items based on the type
     // Create unique key by combining parent and child IDs
@@ -31,13 +55,15 @@ export default function NavGroup({ item }: any) {
     <List
       component="div"
       subheader={
-        <Typography
-          component="div"
-          variant="caption"
-          sx={{ mb: 0.75, color: "grey.700" }}
-        >
-          {item.title}
-        </Typography>
+        filteredChildren.length > 0 && (
+          <Typography
+            component="div"
+            variant="caption"
+            sx={{ mb: 0.75, color: "grey.700" }}
+          >
+            {item.title}
+          </Typography>
+        )
       }
       sx={{
         "&:not(:first-of-type)": {
@@ -47,7 +73,7 @@ export default function NavGroup({ item }: any) {
         },
       }}
     >
-      {item.children?.map((menuItem: any) => renderNavItem(menuItem))}
+      {filteredChildren.map(renderNavItem)}
     </List>
   );
 }

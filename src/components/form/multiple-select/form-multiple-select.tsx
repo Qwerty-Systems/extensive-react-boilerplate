@@ -23,6 +23,7 @@ type MultipleSelectInputProps<T extends object> = {
   error?: string;
   testId?: string;
   keyValue: keyof T;
+  fullWidth?: boolean;
   options: T[];
   renderValue: (option: T[]) => React.ReactNode;
   renderOption: (option: T) => React.ReactNode;
@@ -72,11 +73,13 @@ function MultipleSelectInputRaw<T extends object>(
 
           props.onChange(newValue);
         }}
+        fullWidth={props.fullWidth}
         onBlur={props.onBlur}
         data-testid={props.testId}
         renderValue={() => {
           return props.value ? props.renderValue(props.value) : undefined;
         }}
+        sx={{ minWidth: 200 }}
       >
         {props.options.map((option) => (
           <MenuItem
@@ -128,6 +131,7 @@ function FormMultipleSelectInput<
           error={fieldState.error?.message}
           disabled={props.disabled}
           readOnly={props.readOnly}
+          fullWidth={props.fullWidth}
           testId={props.testId}
           options={props.options}
           renderOption={props.renderOption}

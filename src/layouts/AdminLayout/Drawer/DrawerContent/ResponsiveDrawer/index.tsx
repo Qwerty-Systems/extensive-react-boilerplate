@@ -5,11 +5,21 @@ import Box from "@mui/material/Box";
 // @project
 import menuItems from "@/menu";
 import NavGroup from "./NavGroup";
+import { AuthContext } from "@/services/auth/auth-context";
+import { useContext, useMemo } from "react";
 
 /***************************  DRAWER CONTENT - RESPONSIVE DRAWER  ***************************/
 
 export default function ResponsiveDrawer() {
-  const navGroups = menuItems.items.map((item, index) => {
+  const { user } = useContext(AuthContext);
+  const filteredItems = useMemo(() => {
+    return menuItems.items.filter((item) => {
+      // Show item if no roles defined or user has required role
+      const userRoles = user?.role?.name ? [user.role.name] : [];
+      return !item.roles || item.roles.some((role) => userRoles.includes(role));
+    });
+  }, [user]);
+  const navGroups = filteredItems.map((item, index) => {
     switch (item.type) {
       case "group":
         return <NavGroup key={index} item={item} />;

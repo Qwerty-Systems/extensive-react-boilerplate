@@ -29,7 +29,10 @@ type CreateFormData = {
   password: string;
   passwordConfirmation: string;
   photo?: FileEntity;
-  role: Role;
+  role: {
+    id: string | number;
+    name?: string;
+  };
 };
 
 const useValidationSchema = () => {
@@ -124,7 +127,18 @@ function FormCreateUser() {
   const { handleSubmit, setError } = methods;
 
   const onSubmit = handleSubmit(async (formData) => {
-    const { data, status } = await fetchPostUser(formData);
+    // Ensure role.id is a number
+    const payload = {
+      ...formData,
+      role: {
+        ...formData.role,
+        id:
+          typeof formData.role.id === "string"
+            ? Number(formData.role.id)
+            : formData.role.id,
+      },
+    };
+    const { data, status } = await fetchPostUser(payload);
     if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
       (Object.keys(data.errors) as Array<keyof CreateFormData>).forEach(
         (key) => {
@@ -217,10 +231,10 @@ function FormCreateUser() {
                 label={t("admin-panel-users-create:inputs.role.label")}
                 options={[
                   {
-                    id: RoleEnum.ADMIN,
+                    id: Number(RoleEnum.ADMIN),
                   },
                   {
-                    id: RoleEnum.USER,
+                    id: Number(RoleEnum.USER),
                   },
                 ]}
                 keyValue="id"

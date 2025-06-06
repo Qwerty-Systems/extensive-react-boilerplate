@@ -60,7 +60,7 @@ export default function ProfileSection() {
     null
   );
   const { logOut } = useAuthActions();
-  const { user /* , isLoaded */ } = useAuth();
+  const { user } = useAuth();
   const open = Boolean(anchorEl);
   const innerOpen = Boolean(innerAnchorEl);
   const id = open ? "profile-action-popper" : undefined;
