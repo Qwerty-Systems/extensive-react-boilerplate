@@ -144,7 +144,7 @@ function MultipleImagePicker(props: MultipleImagePickerProps) {
                     />
                   </IconButton>
                   <Image
-                    src={item.path}
+                    src={item.path ?? ""}
                     alt="Uploaded image"
                     layout="fill"
                     objectFit="cover"

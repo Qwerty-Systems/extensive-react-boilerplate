@@ -22,6 +22,7 @@ type SelectInputProps<T extends object> = {
   error?: string;
   testId?: string;
   keyValue: keyof T;
+  fullWidth?: boolean;
   options: T[];
   size?: "small" | "medium";
   renderOption: (option: T) => React.ReactNode;
@@ -47,6 +48,8 @@ function SelectInputRaw<T extends object>(
         value={props.value?.[props.keyValue]?.toString() ?? ""}
         label={props.label}
         sx={{ minWidth: 200 }}
+        variant="outlined"
+        fullWidth={props.fullWidth}
         inputProps={{
           readOnly: props.readOnly,
         }}
@@ -115,6 +118,7 @@ function FormSelectInput<
           readOnly={props.readOnly}
           testId={props.testId}
           options={props.options}
+          fullWidth={props.fullWidth}
           renderOption={props.renderOption}
           keyValue={props.keyValue}
           size={props.size}

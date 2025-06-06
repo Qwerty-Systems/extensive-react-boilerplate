@@ -62,7 +62,7 @@ const validSections = Object.values(SectionKeys);
 
 const ResponsiveAppBar = () => {
   const { t } = useTranslation("common");
-  const { user, isLoaded } = useAuth();
+  const { user, isInitialized } = useAuth();
   const [anchorNav, setAnchorNav] = useState<HTMLElement | null>(null);
   const pathname = usePathname();
 
@@ -184,7 +184,7 @@ const ResponsiveAppBar = () => {
                     {t("common:navigation.downloadApp")}
                   </MenuItem>
 
-                  {isLoaded && !user
+                  {isInitialized && !user
                     ? [
                         <Divider key="auth-divider" />,
                         <MenuItem
@@ -238,10 +238,10 @@ const ResponsiveAppBar = () => {
                 >
                   {t("common:navigation.downloadApp")}
                 </Button>
-                {!isLoaded ? (
+                {!isInitialized ? (
                   <CircularProgress size={24} sx={{ ml: 2 }} />
                 ) : user ? (
-                  // Add user menu component here
+                  //TODO  Add user menu component here
                   <></>
                 ) : (
                   <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>

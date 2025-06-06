@@ -5,7 +5,7 @@ const uiElements = {
   title: "Finance",
   icon: "Home",
   type: "group",
-  roles: [],
+  roles: ["Admin", "PlatformOwner"],
   children: [
     {
       id: "components",
@@ -21,6 +21,7 @@ const uiElements = {
       type: "item",
       icon: "Badge",
       url: "/admin-panel/transactions",
+      roles: [],
     },
     {
       id: "components",
@@ -28,6 +29,7 @@ const uiElements = {
       type: "item",
       icon: "Badge",
       url: "/admin-panel/accounts-payable",
+      roles: [],
     },
     {
       id: "components",
@@ -35,6 +37,7 @@ const uiElements = {
       type: "item",
       icon: "Badge",
       url: "/admin-panel/accounts-receivable",
+      roles: [],
     },
     {
       id: "components",
@@ -42,6 +45,7 @@ const uiElements = {
       type: "item",
       icon: "Badge",
       url: "/admin-panel/discounts",
+      roles: [],
     },
     {
       id: "components",
@@ -49,6 +53,7 @@ const uiElements = {
       type: "item",
       icon: "Badge",
       url: "/admin-panel/exceptions",
+      roles: [],
     },
     {
       id: "components",
@@ -56,6 +61,7 @@ const uiElements = {
       type: "item",
       icon: "Badge",
       url: "/admin-panel/invoices",
+      roles: [],
     },
     {
       id: "components",
@@ -63,6 +69,7 @@ const uiElements = {
       type: "item",
       icon: "Badge",
       url: "/admin-panel/transactions",
+      roles: [],
     },
     {
       id: "components",
@@ -70,6 +77,7 @@ const uiElements = {
       type: "item",
       icon: "Badge",
       url: "/admin-panel/payments",
+      roles: [],
     },
     {
       id: "components",
@@ -77,6 +85,7 @@ const uiElements = {
       type: "item",
       icon: "Badge",
       url: "/admin-panel/payment-plans",
+      roles: ["Admin", "PlatformOwner"],
     },
   ],
 };

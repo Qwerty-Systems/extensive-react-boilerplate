@@ -5,7 +5,7 @@ const uiElements = {
   title: "Users Management",
   icon: "Home",
   type: "group",
-  roles: [],
+  roles: ["Admin", "PlatformOwner"],
   children: [
     {
       id: "components",
@@ -13,7 +13,15 @@ const uiElements = {
       type: "item",
       icon: "Contacts",
       url: "/admin-panel/users",
-      roles: [],
+      roles: ["Admin", "PlatformOwner"],
+    },
+    {
+      id: "components",
+      title: "Customers",
+      type: "item",
+      icon: "Badge",
+      url: "/admin-panel/customers",
+      roles: ["Admin", "PlatformOwner"],
     },
     {
       id: "components",
@@ -21,7 +29,7 @@ const uiElements = {
       type: "item",
       icon: "Badge",
       url: "/admin-panel/agents",
-      roles: [],
+      roles: ["Admin", "PlatformOwner"],
     },
   ],
 };

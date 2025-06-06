@@ -5,7 +5,7 @@ const manage = {
   title: "Manage",
   icon: "IconBrandAsana",
   type: "group",
-  roles: ["Admin", "PlatformOwner"],
+  roles: ["PlatformOwner"],
   children: [
     {
       id: "dashboard",
@@ -13,7 +13,7 @@ const manage = {
       type: "item",
       url: "/admin-panel",
       icon: "Dashboard",
-      roles: ["Admin", "PlatformOwner"],
+      roles: ["PlatformOwner"],
     },
     {
       id: "components",
@@ -21,7 +21,7 @@ const manage = {
       type: "item",
       icon: "AdminPanelSettings",
       url: "/admin-panel/tenants",
-      roles: ["Admin", "PlatformOwner"],
+      roles: ["PlatformOwner"],
     },
   ],
 };

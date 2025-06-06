@@ -86,10 +86,10 @@ function AccountFilter() {
                   label={t("admin-panel-accounts:filter.inputs.role.label")}
                   options={[
                     {
-                      id: RoleEnum.ADMIN,
+                      id: Number(RoleEnum.ADMIN),
                     },
                     {
-                      id: RoleEnum.USER,
+                      id: Number(RoleEnum.USER),
                     },
                   ]}
                   keyValue="id"

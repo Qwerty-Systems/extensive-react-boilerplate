@@ -1,16 +1,19 @@
 "use client";
 
 import FormMultipleSelectInput from "@/components/form/multiple-select/form-multiple-select";
-import { Role, RoleEnum } from "@/services/api/types/role";
 import { useTranslation } from "@/services/i18n/client";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Popover from "@mui/material/Popover";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { TenantFilterType } from "./tenant-filter-types";
+import { TenantType } from "@/services/api/types/tenant";
+import { SortEnum } from "@/services/api/types/sort-type";
+import removeDuplicatesFromArrayObjects from "@/services/helpers/remove-duplicates-from-array-of-objects";
+import { useGetTenantTypesQuery } from "./queries/queries";
 
 type TenantFilterFormData = TenantFilterType;
 
@@ -18,7 +21,6 @@ function TenantFilter() {
   const { t } = useTranslation("admin-panel-users");
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const methods = useForm<TenantFilterFormData>({
     defaultValues: {
       type: [],
@@ -26,7 +28,6 @@ function TenantFilter() {
   });
 
   const { handleSubmit, reset } = methods;
-
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -38,7 +39,21 @@ function TenantFilter() {
   };
 
   const open = Boolean(anchorEl);
-  const id = open ? "user-filter-popover" : undefined;
+  const id = open ? "tenant-filter-popover" : undefined;
+  const { data } = useGetTenantTypesQuery({
+    filter: undefined,
+    sort: {
+      order: SortEnum.ASC,
+      orderBy: "name",
+    },
+  });
+  const tenantTypes = useMemo(() => {
+    const allData = data?.pages.flatMap((page) => page?.data) || [];
+    return removeDuplicatesFromArrayObjects<TenantType>(
+      allData as unknown as TenantType[],
+      "id"
+    );
+  }, [data]);
 
   useEffect(() => {
     const filter = searchParams.get("filter");
@@ -61,52 +76,30 @@ function TenantFilter() {
           horizontal: "left",
         }}
       >
-        <Container
-          sx={{
-            minWidth: 300,
-          }}
-        >
+        <Container sx={{ minWidth: 300 }}>
           <form
             onSubmit={handleSubmit((data) => {
               const searchParams = new URLSearchParams(window.location.search);
               searchParams.set("filter", JSON.stringify(data));
-              router.push(
-                window.location.pathname + "?" + searchParams.toString()
-              );
+              router.push(`${window.location.pathname}?${searchParams}`);
             })}
           >
             <Grid container spacing={2} mb={3} mt={3}>
-              <Grid size={{ xs: 12 }}>
-                <FormMultipleSelectInput<TenantFilterFormData, Pick<Role, "id">>
+              <Grid sx={{ xs: 12 }}>
+                <FormMultipleSelectInput<
+                  TenantFilterFormData,
+                  Pick<TenantType, "code" | "name">
+                >
                   name="type"
-                  testId="type"
-                  label={t("admin-panel-users:filter.inputs.role.label")}
-                  options={[
-                    {
-                      id: RoleEnum.ADMIN,
-                    },
-                    {
-                      id: RoleEnum.USER,
-                    },
-                  ]}
-                  keyValue="id"
-                  renderOption={(option) =>
-                    t(
-                      `admin-panel-users:filter.inputs.role.options.${option.id}`
-                    )
-                  }
-                  renderValue={(values) =>
-                    values
-                      .map((value) =>
-                        t(
-                          `admin-panel-users:filter.inputs.role.options.${value.id}`
-                        )
-                      )
-                      .join(", ")
-                  }
+                  testId="tenant-type"
+                  label={t("admin-panel-users:filter.inputs.tenantType.label")}
+                  options={tenantTypes || []}
+                  keyValue="code"
+                  renderOption={(option) => option.name}
+                  renderValue={(values) => values.map((v) => v.name).join(", ")}
                 />
               </Grid>
-              <Grid size={{ xs: 12 }}>
+              <Grid sx={{ xs: 12 }}>
                 <Button variant="contained" type="submit">
                   {t("admin-panel-users:filter.actions.apply")}
                 </Button>
@@ -115,6 +108,7 @@ function TenantFilter() {
           </form>
         </Container>
       </Popover>
+
       <Button aria-describedby={id} variant="contained" onClick={handleClick}>
         {t("admin-panel-users:filter.actions.filter")}
       </Button>

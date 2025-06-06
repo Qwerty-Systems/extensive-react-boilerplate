@@ -44,9 +44,8 @@ type CreateTenantFormData = {
   name: string;
   type: { id: string };
   isActive?: boolean;
+  fullyOnboarded?: boolean;
 };
-
-// type BooleanOption = { /* value: boolean; */ label: string };
 
 const useValidationSchema = () => {
   const { t } = useTranslation("admin-panel-tenants-create");
@@ -142,6 +141,7 @@ function FormCreateTenant() {
   const { handleSubmit, setError } = methods;
 
   const onSubmit = handleSubmit(async (formData) => {
+    formData["fullyOnboarded"] = true; // Set fullyOnboarded to true by default
     const { data, status } = await fetchPostTenant(formData);
     if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
       (Object.keys(data.errors) as Array<keyof CreateTenantFormData>).forEach(
@@ -150,6 +150,7 @@ function FormCreateTenant() {
             type: "manual",
             message: t(`inputs.${key}.validation.server.${data.errors[key]}`),
           });
+          enqueueSnackbar(t("alerts.tenant.error"), { variant: "error" });
         }
       );
       return;
@@ -241,12 +242,13 @@ function FormCreateTenant() {
                   label={t("inputs.type.label")}
                   options={tenantTypes}
                   renderOption={(option) => option.name}
+                  size="medium"
                   // placeholder={t("inputs.type.placeholder")}
                 />
               </Grid>
 
-              <Grid sx={{ xs: 12, md: 6 }}>
-                {/* <FormSelectInput<CreateTenantFormData, BooleanOption>
+              {/*<Grid sx={{ xs: 12, md: 6 }}>
+                <FormSelectInput<CreateTenantFormData, BooleanOption>
                   name="isActive"
                   testId="tenant-isActive"
                   label={t("inputs.isActive.label")}
@@ -256,8 +258,8 @@ function FormCreateTenant() {
                   ]}
                   keyValue="label"
                   renderOption={(option) => option.label}
-                /> */}
-              </Grid>
+                />
+              </Grid>*/}
             </Grid>
 
             <Alert severity="info" sx={{ mt: 3, mb: 2 }}>

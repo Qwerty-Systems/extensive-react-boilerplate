@@ -1,6 +1,4 @@
 "use client";
-import PropTypes from "prop-types";
-
 // @mui
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -92,8 +90,3 @@ export default function Error500Page({ primaryBtn, heading }: any) {
     </Container>
   );
 }
-
-Error500Page.propTypes = {
-  primaryBtn: PropTypes.any,
-  heading: PropTypes.string,
-};

@@ -27,6 +27,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useDeleteResidenceService } from "@/services/api/services/residence";
 import Chip from "@mui/material/Chip";
 import MuiLink from "@mui/material/Link";
+import useAuth from "@/services/auth/use-auth";
 type ResidenceKeys = keyof Residence;
 
 function Actions({ residence }: { residence: Residence }) {
@@ -91,7 +92,7 @@ function Residences() {
   const { t } = useTranslation("admin-panel-residences");
   const searchParams = useSearchParams();
   const router = useRouter();
-
+  const { tenant } = useAuth();
   const [sortModel, setSortModel] = useState<GridSortModel>([
     {
       field: "id",
@@ -106,13 +107,16 @@ function Residences() {
 
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useGetResidencesQuery({
-      filter,
+      filter: {
+        ...(filter || {}),
+        tenantId: tenant?.id,
+      },
       sort: {
         order: (sortModel[0]?.sort?.toUpperCase() as SortEnum) || SortEnum.DESC,
         orderBy: (sortModel[0]?.field as ResidenceKeys) || "id",
       },
     });
-
+  console.log("Residences data:", data);
   const handleSortModelChange = (newModel: GridSortModel) => {
     setSortModel(newModel);
     const searchParams = new URLSearchParams(window.location.search);

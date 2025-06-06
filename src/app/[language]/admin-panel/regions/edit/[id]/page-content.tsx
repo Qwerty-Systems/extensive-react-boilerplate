@@ -42,7 +42,7 @@ type EditRegionFormData = {
   };
   serviceTypes?: string[];
   boundary?: {
-    type: string;
+    type: "Polygon";
     coordinates: Array<Array<number[]>>;
   };
   tenant?: {
@@ -157,7 +157,7 @@ function FormEditRegion() {
       },
       serviceTypes: [],
       boundary: {
-        type: "",
+        type: "Polygon",
         coordinates: [],
       },
       tenant: {

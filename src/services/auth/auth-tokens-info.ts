@@ -34,9 +34,9 @@ import { AUTH_TOKEN_KEY } from "./config";
 const TOKEN_EXPIRATION_DAYS = 7;
 
 export function getTokensInfo() {
-  return JSON.parse(Cookies.get(AUTH_TOKEN_KEY) ?? "null") as TokensInfo;
+  const token = Cookies.get(AUTH_TOKEN_KEY);
+  return token ? (JSON.parse(token) as TokensInfo) : null;
 }
-
 export function setTokensInfo(tokens: TokensInfo) {
   if (tokens) {
     Cookies.set(AUTH_TOKEN_KEY, JSON.stringify(tokens), {
@@ -46,7 +46,7 @@ export function setTokensInfo(tokens: TokensInfo) {
       secure: process.env.NODE_ENV === "production",
     });
   } else {
-    Cookies.remove(AUTH_TOKEN_KEY, { path: "/" });
+    Cookies.remove(AUTH_TOKEN_KEY);
   }
 }
 // const secureStorage = {

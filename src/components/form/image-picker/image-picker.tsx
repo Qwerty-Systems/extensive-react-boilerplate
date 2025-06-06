@@ -143,7 +143,7 @@ function ImagePicker(props: ImagePickerProps) {
                   />
                 </IconButton>
                 <Image
-                  src={props.value.path}
+                  src={props.value.path ?? ""}
                   alt=""
                   fill
                   style={{ objectFit: "cover" }}
