@@ -1,0 +1,125 @@
+{
+    "title": "Create New Agent",
+    "kycSection": {
+      "title": "KYC Details"
+    },
+    "settingsSection": {
+      "title": "Agent Settings"
+    },
+    "inputs": {
+      "firstName": {
+        "label": "First Name",
+        "validation": {
+          "required": "First name is required"
+        }
+      },
+      "lastName": {
+        "label": "Last Name",
+        "validation": {
+          "required": "Last name is required"
+        }
+      },
+      "email": {
+        "label": "Email",
+        "validation": {
+          "required": "Email is required",
+          "invalid": "Invalid email format"
+        }
+      },
+      "password": {
+        "label": "Password",
+        "validation": {
+          "required": "Password is required",
+          "min": "Password must be at least 6 characters"
+        }
+      },
+      "passwordConfirmation": {
+        "label": "Confirm Password",
+        "validation": {
+          "required": "Password confirmation is required",
+          "match": "Passwords must match"
+        }
+      },
+      "countryCode": {
+        "label": "Country Code"
+      },
+      "phoneNumber": {
+        "label": "Phone Number",
+        "validation": {
+          "invalid": "Invalid phone number format"
+        }
+      },
+      "regions": {
+        "label": "Assigned Regions",
+        "validation": {
+          "required": "At least one region must be selected"
+        }
+      },
+      "photo": {
+        "helperText": "Upload profile photo"
+      },
+      "kycDocumentNumber": {
+        "label": "Document Number",
+        "validation": {
+          "min": "Document number must be at least 5 characters"
+        }
+      },
+      "kycDocumentType": {
+        "label": "Document Type",
+        "validation": {
+          "required": "Document type is required"
+        }
+      },
+      "kycDocumentExpiryDate": {
+        "label": "Document Expiry Date",
+        "validation": {
+          "future": "Expiry date must be in the future"
+        }
+      },
+      "kycStatus": {
+        "label": "KYC Status",
+        "validation": {
+          "required": "KYC status is required"
+        }
+      },
+      "settingsCurrency": {
+        "label": "Currency",
+        "validation": {
+          "required": "Currency is required"
+        }
+      },
+      "settingsType": {
+        "label": "Settings Type",
+        "validation": {
+          "required": "Settings type is required"
+        }
+      }
+    },
+    "kycStatus": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "requiresUpdate": "Requires Update"
+    },
+    "settingsType": {
+      "userPreferences": "User Preferences",
+      "notification": "Notification",
+      "security": "Security"
+    },
+    "currency": {
+      "kes": "Kenyan Shilling (KES)",
+      "usd": "US Dollar (USD)",
+      "eur": "Euro (EUR)"
+    },
+    "actions": {
+      "submit": "Create Agent",
+      "cancel": "Cancel"
+    },
+    "alerts": {
+      "agent": {
+        "success": "Agent created successfully!",
+        "error": "Failed to create agent. Please try again."
+      }
+    }
+
+}

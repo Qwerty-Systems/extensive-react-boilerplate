@@ -1,0 +1,25 @@
+{
+  "brandName": "SakaTaka",
+  "title": "SakaTaka",
+  "company": {
+    "name": "SakaTaka",
+    "url": "https://sakataka.co.ke",
+    "socialLink": {
+      "linkedin": "https://www.linkedin.com/company/sakataka/",
+      "twitter":"https://x.com/sakataka___",
+      "instagram": "#",
+      "facebook": "#",
+      "youtube": "#",
+      "github": "#",
+      "dribble": "#",
+      "discord": "#",
+      "support": "https://support.sakataka.co.ke"
+    }
+  },
+  "logo": {
+    "main": "https://res.cloudinary.com/dihzljuvb/image/upload/v1743165004/SakaTaka/kata/rn47mlw7e3h8tp1h66hb.png",
+    "logoIcon": "https://res.cloudinary.com/dihzljuvb/image/upload/v1743165004/SakaTaka/kata/rn47mlw7e3h8tp1h66hb.png",
+    "logoFab": "https://res.cloudinary.com/dihzljuvb/image/upload/v1743165004/SakaTaka/kata/rn47mlw7e3h8tp1h66hb.png",
+    "logoWatermark": ""
+  }
+}

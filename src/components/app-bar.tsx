@@ -1,286 +1,273 @@
 "use client";
 import { useState } from "react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Menu from "@mui/material/Menu";
-import MenuIcon from "@mui/icons-material/Menu";
-import Container from "@mui/material/Container";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import Tooltip from "@mui/material/Tooltip";
-import MenuItem from "@mui/material/MenuItem";
-import useAuth from "@/services/auth/use-auth";
-import useAuthActions from "@/services/auth/use-auth-actions";
-import CircularProgress from "@mui/material/CircularProgress";
+import { styled } from "@mui/material/styles";
 import { useTranslation } from "@/services/i18n/client";
 import Link from "@/components/link";
-import { RoleEnum } from "@/services/api/types/role";
-import Divider from "@mui/material/Divider";
 import ThemeSwitchButton from "@/components/switch-theme-button";
 import { IS_SIGN_UP_ENABLED } from "@/services/auth/config";
+import MenuIcon from "@mui/icons-material/Menu";
+import Logo from "./logo";
+import { usePathname } from "next/navigation";
+import useAuth from "@/services/auth/use-auth";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
+import MenuItem from "@mui/material/MenuItem";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
+import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
 
-function ResponsiveAppBar() {
+const StyledAppBar = styled(AppBar)({
+  background: "transparent",
+  boxShadow: "none",
+});
+
+const StyledToolbar = styled(Toolbar)(({ theme }) => ({
+  minHeight: 56,
+  paddingTop: theme.spacing(1),
+  paddingBottom: theme.spacing(1),
+  [theme.breakpoints.down("sm")]: {
+    minHeight: 48,
+  },
+}));
+
+enum SectionKeys {
+  MARKETPLACE = "/market",
+  RECYCLERS = "/recycle",
+  WASTE_COLLECTORS = "collectors",
+  COMMUNITY_GROUPS = "community",
+}
+
+type DownloadLinks = Record<SectionKeys, string> & { default: string };
+
+const APP_DOWNLOAD_LINKS: DownloadLinks = {
+  [SectionKeys.MARKETPLACE]:
+    "https://play.google.com/store/apps/details?id=co.ke.sakataka.sakataka&pcampaignid=web_share",
+  [SectionKeys.RECYCLERS]:
+    "https://play.google.com/store/apps/details?id=co.ke.sakataka.sakataka&pcampaignid=web_share",
+  [SectionKeys.WASTE_COLLECTORS]:
+    "https://play.google.com/store/apps/details?id=co.ke.sakataka.sakataka&pcampaignid=web_share",
+  [SectionKeys.COMMUNITY_GROUPS]:
+    "https://play.google.com/store/apps/details?id=co.ke.sakataka.sakataka&pcampaignid=web_share",
+  default:
+    "https://play.google.com/store/apps/details?id=co.ke.sakataka.sakataka&pcampaignid=web_share",
+};
+
+const validSections = Object.values(SectionKeys);
+
+const ResponsiveAppBar = () => {
   const { t } = useTranslation("common");
-  const { user, isLoaded } = useAuth();
-  const { logOut } = useAuthActions();
-  const [anchorElementNav, setAnchorElementNav] = useState<null | HTMLElement>(
-    null
-  );
-  const [anchorElementUser, setAnchorElementUser] =
-    useState<null | HTMLElement>(null);
+  const { user, isInitialized } = useAuth();
+  const [anchorNav, setAnchorNav] = useState<HTMLElement | null>(null);
+  const pathname = usePathname();
+
+  const segments = pathname.split("/");
+  const lang = segments[1] || "en";
+  const currentSection = segments[2];
+  const fromParam = validSections.includes(currentSection as SectionKeys)
+    ? { from: currentSection }
+    : undefined;
+
+  const getAppDownloadLink = (): string => {
+    if (
+      currentSection &&
+      validSections.includes(currentSection as SectionKeys)
+    ) {
+      return APP_DOWNLOAD_LINKS[currentSection as SectionKeys];
+    }
+    return APP_DOWNLOAD_LINKS.default;
+  };
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElementNav(event.currentTarget);
-  };
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElementUser(event.currentTarget);
+    setAnchorNav(event.currentTarget);
   };
 
   const handleCloseNavMenu = () => {
-    setAnchorElementNav(null);
+    setAnchorNav(null);
   };
 
-  const handleCloseUserMenu = () => {
-    setAnchorElementUser(null);
-  };
+  const navItems = [
+    { key: "marketplace", path: SectionKeys.MARKETPLACE },
+    { key: "recyclers", path: SectionKeys.RECYCLERS },
+    { key: "wasteCollectors", path: SectionKeys.WASTE_COLLECTORS },
+    { key: "communityGroups", path: SectionKeys.COMMUNITY_GROUPS },
+  ];
 
-  return (
-    <AppBar position="static">
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: "none", md: "flex" },
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            {t("common:app-name")}
-          </Typography>
+  const desktopNav = (
+    <Stack
+      direction="row"
+      spacing={2}
+      sx={{
+        flexGrow: 1,
+        justifyContent: "center",
+        display: { xs: "none", md: "flex" },
+      }}
+    >
+      {navItems.map((item) => (
+        <Button
+          key={item.key}
+          component={Link}
+          href={`/${item.path}`}
+          sx={{ color: "inherit" }}
+        >
+          {t(`common:navigation.${item.key}`)}
+        </Button>
+      ))}
+    </Stack>
+  );
 
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
+  const mobileNavItems = navItems.map((item) => (
+    <MenuItem
+      key={item.key}
+      component={Link}
+      href={`/${item.path}`}
+      onClick={handleCloseNavMenu}
+    >
+      {t(`common:navigation.${item.key}`)}
+    </MenuItem>
+  ));
+
+  return pathname === `/${lang}` ||
+    pathname === `/${lang}/market` ||
+    pathname === `/${lang}/recycle` ||
+    pathname === `/${lang}/collectors` ||
+    pathname === `/${lang}/community` ? (
+    <Box sx={{ bgcolor: "grey.100" }}>
+      <StyledAppBar position="static">
+        <Container maxWidth="xl">
+          <StyledToolbar>
+            <Stack
+              direction="row"
+              alignItems="center"
+              sx={{ width: "100%", justifyContent: "space-between" }}
             >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElementNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              open={Boolean(anchorElementNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: "block", md: "none" },
-              }}
-            >
-              <MenuItem onClick={handleCloseNavMenu} component={Link} href="/">
-                <Typography textAlign="center">
-                  {t("common:navigation.home")}
-                </Typography>
-              </MenuItem>
+              <Box sx={{ display: { xs: "none", md: "flex" } }}>
+                <Logo to="/" />
+              </Box>
 
-              {!!user?.role &&
-                [RoleEnum.ADMIN].includes(Number(user?.role?.id)) && [
-                  <MenuItem
-                    key="users"
-                    onClick={handleCloseNavMenu}
-                    component={Link}
-                    href="/admin-panel/users"
-                  >
-                    <Typography textAlign="center">
-                      {t("common:navigation.users")}
-                    </Typography>
-                  </MenuItem>,
-                  // mobile-menu-items
-                ]}
-              {isLoaded &&
-                !user && [
-                  <Divider key="divider" />,
-                  <MenuItem
-                    key="sign-in"
-                    onClick={handleCloseNavMenu}
-                    component={Link}
-                    href="/sign-in"
-                  >
-                    <Typography textAlign="center">
-                      {t("common:navigation.signIn")}
-                    </Typography>
-                  </MenuItem>,
-                  IS_SIGN_UP_ENABLED ? (
-                    <MenuItem
-                      key="sign-up"
-                      onClick={handleCloseNavMenu}
-                      component={Link}
-                      href="/sign-up"
-                    >
-                      <Typography textAlign="center">
-                        {t("common:navigation.signUp")}
-                      </Typography>
-                    </MenuItem>
-                  ) : null,
-                ]}
-            </Menu>
-          </Box>
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            {t("common:app-name")}
-          </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            <Button
-              onClick={handleCloseNavMenu}
-              sx={{ my: 2, color: "white", display: "block" }}
-              component={Link}
-              href="/"
-            >
-              {t("common:navigation.home")}
-            </Button>
-
-            {!!user?.role &&
-              [RoleEnum.ADMIN].includes(Number(user?.role?.id)) && (
-                <>
-                  <Button
-                    onClick={handleCloseNavMenu}
-                    sx={{ my: 2, color: "white", display: "block" }}
-                    component={Link}
-                    href="/admin-panel/users"
-                  >
-                    {t("common:navigation.users")}
-                  </Button>
-                  {/* desktop-menu-items */}
-                </>
-              )}
-          </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              mr: 1,
-            }}
-          >
-            <ThemeSwitchButton />
-          </Box>
-
-          {!isLoaded ? (
-            <CircularProgress color="inherit" />
-          ) : user ? (
-            <>
-              <Box sx={{ flexGrow: 0 }}>
-                <Tooltip title="Profile menu">
-                  <IconButton
-                    onClick={handleOpenUserMenu}
-                    sx={{ p: 0 }}
-                    data-testid="profile-menu-item"
-                  >
-                    <Avatar
-                      alt={user?.firstName + " " + user?.lastName}
-                      src={user.photo?.path}
-                    />
-                  </IconButton>
-                </Tooltip>
+              <Box sx={{ display: { xs: "flex", md: "none" } }}>
+                <IconButton
+                  size="large"
+                  onClick={handleOpenNavMenu}
+                  color="inherit"
+                  aria-label="open navigation menu"
+                >
+                  <MenuIcon />
+                </IconButton>
                 <Menu
-                  sx={{ mt: 5.5 }}
-                  id="menu-appbar"
-                  anchorEl={anchorElementUser}
-                  anchorOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  open={Boolean(anchorElementUser)}
-                  onClose={handleCloseUserMenu}
+                  anchorEl={anchorNav}
+                  open={Boolean(anchorNav)}
+                  onClose={handleCloseNavMenu}
+                  sx={{ display: { xs: "block", md: "none" } }}
                 >
                   <MenuItem
-                    onClick={handleCloseUserMenu}
                     component={Link}
-                    href="/profile"
-                    data-testid="user-profile"
+                    href="/"
+                    onClick={handleCloseNavMenu}
                   >
-                    <Typography textAlign="center">
-                      {t("common:navigation.profile")}
-                    </Typography>
+                    {t("common:navigation.home")}
                   </MenuItem>
+                  {mobileNavItems}
+                  <Divider />
                   <MenuItem
-                    onClick={() => {
-                      logOut();
-                      handleCloseUserMenu();
-                    }}
-                    data-testid="logout-menu-item"
+                    component="a"
+                    href={getAppDownloadLink()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={handleCloseNavMenu}
                   >
-                    <Typography textAlign="center">
-                      {t("common:navigation.logout")}
-                    </Typography>
+                    {t("common:navigation.downloadApp")}
                   </MenuItem>
+
+                  {isInitialized && !user
+                    ? [
+                        <Divider key="auth-divider" />,
+                        <MenuItem
+                          key="sign-in"
+                          component={Link}
+                          href={{ pathname: "/sign-in", query: fromParam }}
+                          onClick={handleCloseNavMenu}
+                        >
+                          {t("common:navigation.signIn")}
+                        </MenuItem>,
+                        IS_SIGN_UP_ENABLED && (
+                          <MenuItem
+                            key="sign-up"
+                            component={Link}
+                            href={{ pathname: "/sign-up", query: fromParam }}
+                            onClick={handleCloseNavMenu}
+                          >
+                            {t("common:navigation.signUp")}
+                          </MenuItem>
+                        ),
+                      ]
+                    : null}
                 </Menu>
               </Box>
-            </>
-          ) : (
-            <Box sx={{ flexGrow: 0, display: { xs: "none", md: "flex" } }}>
-              <Button
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: "white", display: "block" }}
+
+              <Typography
+                variant="h6"
                 component={Link}
-                href="/sign-in"
+                href="/"
+                sx={{
+                  flexGrow: 1,
+                  display: { xs: "flex", md: "none" },
+                  textDecoration: "none",
+                  color: "inherit",
+                }}
               >
-                {t("common:navigation.signIn")}
-              </Button>
-              {IS_SIGN_UP_ENABLED && (
+                {t("common:app-name")}
+              </Typography>
+
+              {desktopNav}
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <ThemeSwitchButton />
                 <Button
-                  onClick={handleCloseNavMenu}
-                  sx={{ my: 2, color: "white", display: "block" }}
-                  component={Link}
-                  href="/sign-up"
+                  variant="contained"
+                  color="secondary"
+                  href={getAppDownloadLink()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ display: { xs: "none", md: "flex" } }}
                 >
-                  {t("common:navigation.signUp")}
+                  {t("common:navigation.downloadApp")}
                 </Button>
-              )}
-            </Box>
-          )}
-        </Toolbar>
-      </Container>
-    </AppBar>
-  );
-}
+                {!isInitialized ? (
+                  <CircularProgress size={24} sx={{ ml: 2 }} />
+                ) : user ? (
+                  //TODO  Add user menu component here
+                  <></>
+                ) : (
+                  <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
+                    <Button
+                      component={Link}
+                      href={`/sign-in${fromParam ? `?from=${fromParam.from}` : ""}`}
+                    >
+                      {t("common:navigation.signIn")}
+                    </Button>
+                    {IS_SIGN_UP_ENABLED && (
+                      <Button
+                        component={Link}
+                        href={`/sign-up${fromParam ? `?from=${fromParam.from}` : ""}`}
+                      >
+                        {t("common:navigation.signUp")}
+                      </Button>
+                    )}
+                  </Box>
+                )}
+              </Box>
+            </Stack>
+          </StyledToolbar>
+        </Container>
+      </StyledAppBar>
+    </Box>
+  ) : null;
+};
+
 export default ResponsiveAppBar;

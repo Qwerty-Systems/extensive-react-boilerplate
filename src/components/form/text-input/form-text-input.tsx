@@ -20,12 +20,15 @@ type TextInputProps = {
   disabled?: boolean;
   readOnly?: boolean;
   error?: string;
+  helperText?: string;
+  placeholder?: string;
   testId?: string;
   autoComplete?: string;
   inputComponent?: React.ElementType<InputBaseComponentProps>;
   multiline?: boolean;
   minRows?: number;
   maxRows?: number;
+  fullWidth?: boolean;
   size?: "small" | "medium";
 };
 
@@ -34,6 +37,8 @@ const TextInput = forwardRef<
   TextInputProps & {
     name: string;
     value: string;
+    helperText?: string;
+    placeholder?: string;
     onChange: (
       value: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => void;
@@ -61,10 +66,11 @@ const TextInput = forwardRef<
       autoFocus={props.autoFocus}
       type={props.type === "password" && isShowPassword ? "text" : props.type}
       variant="outlined"
-      fullWidth
+      fullWidth={props.fullWidth}
       error={!!props.error}
       data-testid={props.testId}
-      helperText={props.error}
+      helperText={props.helperText}
+      placeholder={props.placeholder}
       disabled={props.disabled}
       autoComplete={props.autoComplete}
       multiline={props.multiline}
@@ -113,6 +119,7 @@ function FormTextInput<
           label={props.label}
           autoFocus={props.autoFocus}
           type={props.type}
+          placeholder={props.placeholder}
           error={fieldState.error?.message}
           disabled={props.disabled}
           readOnly={props.readOnly}
@@ -122,6 +129,13 @@ function FormTextInput<
           maxRows={props.maxRows}
           inputComponent={props.inputComponent}
           size={props.size}
+          fullWidth={props.fullWidth}
+          autoComplete={props.autoComplete}
+          helperText={fieldState.error?.message || props.helperText}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          value={field.value}
+          ref={field.ref as React.Ref<HTMLDivElement | null> | undefined}
         />
       )}
     />

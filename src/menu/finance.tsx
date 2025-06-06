@@ -1,0 +1,93 @@
+/***************************  MENU ITEMS - APPLICATIONS  ***************************/
+
+const uiElements = {
+  id: "group-ui-elements",
+  title: "Finance",
+  icon: "Home",
+  type: "group",
+  roles: ["Admin", "PlatformOwner"],
+  children: [
+    {
+      id: "components",
+      title: "Chart of Accounts",
+      type: "item",
+      icon: "AccountBalanceWallet",
+      url: "/admin-panel/accounts",
+      roles: [],
+    },
+    {
+      id: "components",
+      title: "Accounts payable",
+      type: "item",
+      icon: "Badge",
+      url: "/admin-panel/transactions",
+      roles: [],
+    },
+    {
+      id: "components",
+      title: "Accounts Payable",
+      type: "item",
+      icon: "Badge",
+      url: "/admin-panel/accounts-payable",
+      roles: [],
+    },
+    {
+      id: "components",
+      title: "Accounts Receivable",
+      type: "item",
+      icon: "Badge",
+      url: "/admin-panel/accounts-receivable",
+      roles: [],
+    },
+    {
+      id: "components",
+      title: "Discounts",
+      type: "item",
+      icon: "Badge",
+      url: "/admin-panel/discounts",
+      roles: [],
+    },
+    {
+      id: "components",
+      title: "Exceptions",
+      type: "item",
+      icon: "Badge",
+      url: "/admin-panel/exceptions",
+      roles: [],
+    },
+    {
+      id: "components",
+      title: "Invoices",
+      type: "item",
+      icon: "Badge",
+      url: "/admin-panel/invoices",
+      roles: [],
+    },
+    {
+      id: "components",
+      title: "Transactions",
+      type: "item",
+      icon: "Badge",
+      url: "/admin-panel/transactions",
+      roles: [],
+    },
+    {
+      id: "components",
+      title: "Payments",
+      type: "item",
+      icon: "Badge",
+      url: "/admin-panel/payments",
+      roles: [],
+    },
+    {
+      id: "components",
+      title: "Payment Plans",
+      type: "item",
+      icon: "Badge",
+      url: "/admin-panel/payment-plans",
+      roles: ["Admin", "PlatformOwner"],
+    },
+  ],
+};
+
+export default uiElements;
