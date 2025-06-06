@@ -19,9 +19,6 @@ import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
 import Box from "@mui/material/Box";
 
-// @third-party
-import { enqueueSnackbar } from "notistack";
-
 // @project
 import { ThemeI18n } from "@/config";
 import MainCard from "@/components/cards/MainCard";
@@ -40,7 +37,7 @@ import useAuth from "@/services/auth/use-auth";
 import useAuthActions from "@/services/auth/use-auth-actions";
 import { useColorScheme } from "@mui/material/styles";
 import useLanguage from "@/services/i18n/use-language";
-
+import { useSnackbar } from "@/hooks/use-snackbar";
 /***************************  HEADER - PROFILE DATA  ***************************/
 
 const languageList = [
@@ -54,7 +51,7 @@ const languageList = [
 export default function ProfileSection() {
   /* const theme = useTheme(); */
   const { i18n } = useConfig();
-
+  const { enqueueSnackbar } = useSnackbar();
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [innerAnchorEl, setInnerAnchorEl] = useState<HTMLDivElement | null>(
     null

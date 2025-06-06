@@ -330,7 +330,7 @@ export default function Chart1() {
             label: "Visits",
           },
         ]}
-        slotProps={{ legend: { hidden: true } }}
+        //TODO slotProps={{ legend: { hidden: true } }}
         sx={{
           "& .MuiLineElement-root": { strokeDasharray: "0", strokeWidth: 2 },
           "& .MuiChartsAxis-left .MuiChartsAxis-label": {

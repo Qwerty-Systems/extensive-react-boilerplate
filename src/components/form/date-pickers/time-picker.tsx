@@ -76,7 +76,7 @@ function TimePickerInputRaw(
             },
           },
         }}
-        onAccept={props.onChange}
+        //onAccept={props.onChange}
         views={props.views}
         format={props.format}
         data-testid={props.testId}

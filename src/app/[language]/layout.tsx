@@ -22,21 +22,20 @@ import GoogleAuthProvider from "@/services/social-auth/google/google-auth-provid
 import FacebookAuthProvider from "@/services/social-auth/facebook/facebook-auth-provider";
 import ConfirmDialogProvider from "@/components/confirm-dialog/confirm-dialog-provider";
 import InitColorSchemeScript from "@/components/theme/init-color-scheme-script";
-import KeycloakProvider from "@/services/social-auth/keycloak/keycloak-provider";
-import Notistack from "@/components/third-party/Notistack";
+// import KeycloakProvider from "@/services/social-auth/keycloak/keycloak-provider";
 import ClientProviders from "../../services/locale/locale-provider";
 import TenantProvider from "../../services/tenant/tenant-context";
 // Client-side providers wrapper
 const AuthProviders = ({ children }: { children: React.ReactNode }) => (
-  <KeycloakProvider>
-    <AuthProvider>
-      <GoogleAuthProvider>
-        <FacebookAuthProvider>
-          <LeavePageProvider>{children}</LeavePageProvider>
-        </FacebookAuthProvider>
-      </GoogleAuthProvider>
-    </AuthProvider>
-  </KeycloakProvider>
+  // <KeycloakProvider>
+  <AuthProvider>
+    <GoogleAuthProvider>
+      <FacebookAuthProvider>
+        <LeavePageProvider>{children}</LeavePageProvider>
+      </FacebookAuthProvider>
+    </GoogleAuthProvider>
+  </AuthProvider>
+  // </KeycloakProvider>
 );
 
 type Props = {
@@ -76,11 +75,9 @@ export default async function RootLayout(props: {
               <ConfirmDialogProvider>
                 <AuthProviders>
                   <TenantProvider>
-                    <Notistack>
-                      <ResponsiveAppBar />
-                      <ClientProviders>{children}</ClientProviders>
-                      <ToastContainer position="bottom-left" hideProgressBar />
-                    </Notistack>
+                    <ResponsiveAppBar />
+                    <ClientProviders>{children}</ClientProviders>
+                    <ToastContainer position="bottom-left" hideProgressBar />
                   </TenantProvider>
                 </AuthProviders>
               </ConfirmDialogProvider>
