@@ -1,7 +1,7 @@
 "use client";
 
 import FormMultipleSelectInput from "@/components/form/multiple-select/form-multiple-select";
-import { Role, RoleEnum } from "@/services/api/types/role";
+import FormSelectInput from "@/components/form/select/form-select";
 import { useTranslation } from "@/services/i18n/client";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { AccountFilterType } from "./accounts-filter-types";
+import { AccountTypeEnum } from "@/services/api/services/accounts";
 
 type AccountFilterFormData = AccountFilterType;
 
@@ -21,7 +22,9 @@ function AccountFilter() {
 
   const methods = useForm<AccountFilterFormData>({
     defaultValues: {
-      roles: [],
+      type: [],
+      active: undefined,
+      tenantId: "",
     },
   });
 
@@ -61,11 +64,7 @@ function AccountFilter() {
           horizontal: "left",
         }}
       >
-        <Container
-          sx={{
-            minWidth: 300,
-          }}
-        >
+        <Container sx={{ minWidth: 300, py: 2 }}>
           <form
             onSubmit={handleSubmit((data) => {
               const searchParams = new URLSearchParams(window.location.search);
@@ -75,51 +74,51 @@ function AccountFilter() {
               );
             })}
           >
-            <Grid container spacing={2} mb={3} mt={3}>
-              <Grid size={{ xs: 12 }}>
+            <Grid container spacing={2}>
+              <Grid sx={{ xs: 12 }}>
                 <FormMultipleSelectInput<
                   AccountFilterFormData,
-                  Pick<Role, "id">
+                  { value: AccountTypeEnum; label: string }
                 >
-                  name="roles"
-                  testId="roles"
-                  label={t("admin-panel-accounts:filter.inputs.role.label")}
-                  options={[
-                    {
-                      id: Number(RoleEnum.ADMIN),
-                    },
-                    {
-                      id: Number(RoleEnum.USER),
-                    },
-                  ]}
-                  keyValue="id"
-                  renderOption={(option) =>
-                    t(
-                      `admin-panel-accounts:filter.inputs.role.options.${option.id}`
-                    )
-                  }
-                  renderValue={(values) =>
-                    values
-                      .map((value) =>
-                        t(
-                          `admin-panel-accounts:filter.inputs.role.options.${value.id}`
-                        )
-                      )
-                      .join(", ")
+                  name="type"
+                  label={t("filter.type")}
+                  options={Object.values(AccountTypeEnum).map((type) => ({
+                    value: type,
+                    label: t(`account.types.${type}`),
+                  }))}
+                  keyValue="value"
+                  renderOption={(option) => option.label}
+                  renderValue={(selected) =>
+                    selected.map((s) => s.label).join(", ")
                   }
                 />
               </Grid>
-              <Grid size={{ xs: 12 }}>
-                <Button variant="contained" type="submit">
-                  {t("admin-panel-accounts:filter.actions.apply")}
+              <Grid sx={{ xs: 12 }}>
+                <FormSelectInput<
+                  AccountFilterFormData,
+                  { value: boolean; label: string }
+                >
+                  name="active"
+                  label={t("filter.status")}
+                  options={[
+                    { value: true, label: t("status.active") },
+                    { value: false, label: t("status.inactive") },
+                  ]}
+                  keyValue="value"
+                  renderOption={(option) => option.label}
+                />
+              </Grid>
+              <Grid sx={{ xs: 12 }}>
+                <Button fullWidth variant="contained" type="submit">
+                  {t("actions.apply")}
                 </Button>
               </Grid>
             </Grid>
           </form>
         </Container>
       </Popover>
-      <Button aria-describedby={id} variant="contained" onClick={handleClick}>
-        {t("admin-panel-accounts:filter.actions.filter")}
+      <Button aria-describedby={id} variant="outlined" onClick={handleClick}>
+        {t("actions.filter")}
       </Button>
     </FormProvider>
   );

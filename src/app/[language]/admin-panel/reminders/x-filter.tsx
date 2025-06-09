@@ -7,7 +7,7 @@ import Popover from "@mui/material/Popover";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { XFilterType } from "./x-filter-types";
+import { XFilterType } from "./reminder-filter-types";
 
 type XFilterFormData = XFilterType;
 

@@ -1,12 +1,13 @@
-import { Role } from "@/services/api/types/role";
+import { Account, AccountTypeEnum } from "@/services/api/services/accounts";
 import { SortEnum } from "@/services/api/types/sort-type";
-import { User } from "@/services/api/types/user";
 
 export type AccountFilterType = {
-  roles?: Role[];
+  type?: AccountTypeEnum[];
+  active?: boolean;
+  tenantId?: string;
 };
 
 export type AccountSortType = {
-  orderBy: keyof User;
+  orderBy: keyof Account;
   order: SortEnum;
 };
