@@ -6,6 +6,7 @@ import { InfinityPaginationType } from "../types/infinity-pagination";
 import { SortEnum } from "../types/sort-type";
 import { RequestConfigType } from "./types/request-config";
 import { Tenant } from "../types/tenant";
+import { VendorBill } from "./vendor-bills";
 
 export type Vendor = {
   id: string;

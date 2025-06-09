@@ -6,7 +6,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   PaymentMethodFilterType,
   PaymentMethodSortType,
-} from "../payment-method-filter-types";
+} from "../../payment-methods/payment-method-filter-types";
 
 export const paymentMethodsQueryKeys = createQueryKeys(["payment-methods"], {
   list: () => ({
