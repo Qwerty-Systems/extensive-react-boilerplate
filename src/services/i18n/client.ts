@@ -62,3 +62,39 @@ export function useTranslation(namespace: string, options?: object) {
 
   return originalInstance;
 }
+// export function useTranslation(namespace: string) {
+//   const language = useLanguage();
+//   const { setLanguage } = useStoreLanguageActions();
+//   const { t, i18n, ready } = useOriginalTranslation(namespace);
+//   const [isLoading, setLoading] = useState(false);
+//   const [initialLoad, setInitialLoad] = useState(!ready);
+
+//   useEffect(() => {
+//     if (!initialLoad && ready) {
+//       setInitialLoad(false);
+//     }
+//   }, [ready]);
+
+//   useEffect(() => {
+//     if (runsOnServerSide || i18n.resolvedLanguage === language) return;
+
+//     const changeLanguage = async () => {
+//       setLoading(true);
+//       try {
+//         await i18n.changeLanguage(language);
+//         setLanguage(language);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     changeLanguage();
+//   }, [language, i18n, setLanguage]);
+
+//   return {
+//     t,
+//     i18n,
+//     isLoading: isLoading || !ready,
+//     ready: !isLoading && ready,
+//   };
+// }

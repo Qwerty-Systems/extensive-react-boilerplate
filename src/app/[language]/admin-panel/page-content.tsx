@@ -1,27 +1,27 @@
 "use client";
 
+import AnalyticsOverviewCard from "@/components/charts/AnalyticsOverviewCard";
+import AnalyticsOverviewChart from "@/components/charts/AnalyticsOverviewChart";
 import { RoleEnum } from "@/services/api/types/role";
 import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
-import { useTranslation } from "@/services/i18n/client";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
 
-function AdminPanel() {
-  const { t } = useTranslation("admin-panel-home");
-
+function DashboardPanel() {
   return (
-    <Container maxWidth="md">
-      <Grid container spacing={3} wrap="nowrap" pt={3}>
-        <Grid>
-          <Typography variant="h3" gutterBottom>
-            {t("title")}
-          </Typography>
-          <Typography>{t("description")}</Typography>
+    <Container>
+      <Grid container spacing={{ xs: 2, md: 3 }}>
+        <Grid size={12}>
+          <AnalyticsOverviewCard />
+        </Grid>
+        <Grid size={12}>
+          <AnalyticsOverviewChart />
         </Grid>
       </Grid>
     </Container>
   );
 }
 
-export default withPageRequiredAuth(AdminPanel, { roles: [RoleEnum.ADMIN] });
+export default withPageRequiredAuth(DashboardPanel, {
+  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER],
+});

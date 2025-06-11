@@ -1,0 +1,65 @@
+{
+  "title": "Create Region",
+  "subtitle": "Fill in the information below to create a new region.",
+  "sections": {
+    "basic": "Basic Information",
+    "service": "Service Information",
+    "operatingHours": "Operating Hours"
+  },
+  "actions": {
+    "submit": "Save",
+    "submitting": "Saving...",
+    "cancel": "Cancel"
+  },
+  "inputs": {
+    "name": {
+      "label": "Region Name",
+      "validation": {
+        "required": "Region name is required"
+      }
+    },
+    "tenant": {
+      "label": "Tenant",
+      "validation": {
+        "required": "Tenant is required"
+      }
+    },
+    "serviceTypes": {
+      "label": "Service Types",
+      "validation": {
+        "required": "At least one service type is required"
+      }
+    },
+    "zipCodes": {
+      "label": "Zip Codes",
+      "helperText": "Comma-separated zip codes (e.g. 12345, 67890)",
+      "validation": {
+        "required": "Zip codes are required",
+        "invalid": "One or more zip codes are invalid"
+      }
+    },
+    "days": {
+      "label": "Operating Days",
+      "validation": {
+        "required": "At least one operating day is required"
+      }
+    },
+    "startTime": {
+      "label": "Start Time",
+      "validation": {
+        "required": "Start time is required"
+      }
+    },
+    "endTime": {
+      "label": "End Time",
+      "validation": {
+        "required": "End time is required"
+      }
+    }
+  },
+  "alerts": {
+    "region": {
+      "success": "Region has been created successfully"
+    }
+  }
+}

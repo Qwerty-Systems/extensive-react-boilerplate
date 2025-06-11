@@ -1,9 +1,18 @@
+import { Tenant } from "./tenant";
+
 export enum RoleEnum {
-  ADMIN = 1,
-  USER = 2,
+  ADMIN = "Admin",
+  PLATFORM_OWNER = "PlatformOwner",
+  AGENT = "Agent",
+  USER = "User",
+  CUSTOMER = "Customer",
+  MANAGER = "Manager",
+  FINANCE = "Finance",
+  GUEST = "Guest",
 }
 
-export type Role = {
-  id: number | string;
+export interface Role {
+  tenant?: Tenant;
+  id?: number;
   name?: string;
-};
+}

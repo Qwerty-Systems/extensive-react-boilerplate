@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
+import { Metadata } from "next";
 import { getServerTranslation } from "@/services/i18n";
-import AdminPanel from "./page-content";
+import DashboardPanel from "./page-content";
 
 type Props = {
   params: Promise<{ language: string }>;
@@ -15,6 +15,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   };
 }
 
-export default function Page() {
-  return <AdminPanel />;
+export default function DashboardPages() {
+  return <DashboardPanel />;
 }

@@ -31,7 +31,10 @@ type EditUserFormData = {
   firstName: string;
   lastName: string;
   photo?: FileEntity;
-  role: Role;
+  role: {
+    id: string | number;
+    name?: string;
+  };
 };
 
 type ChangeUserPasswordFormData = {
@@ -135,14 +138,13 @@ function FormEditUser() {
   const { t } = useTranslation("admin-panel-users-edit");
   const validationSchema = useValidationEditUserSchema();
   const { enqueueSnackbar } = useSnackbar();
-
   const methods = useForm<EditUserFormData>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
       email: "",
       firstName: "",
       lastName: "",
-      role: undefined,
+      role: { id: "", name: "" },
       photo: undefined,
     },
   });
@@ -152,10 +154,17 @@ function FormEditUser() {
   const onSubmit = handleSubmit(async (formData) => {
     const isEmailDirty = methods.getFieldState("email").isDirty;
     const { data, status } = await fetchPatchUser({
-      id: userId,
+      id: parseInt(userId),
       data: {
         ...formData,
         email: isEmailDirty ? formData.email : undefined,
+        role: {
+          ...formData.role,
+          id:
+            typeof formData.role.id === "string"
+              ? Number(formData.role.id)
+              : formData.role.id,
+        },
       },
     });
     if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
@@ -181,15 +190,15 @@ function FormEditUser() {
 
   useEffect(() => {
     const getInitialDataForEdit = async () => {
-      const { status, data: user } = await fetchGetUser({ id: userId });
+      const { status, data: user } = await fetchGetUser({
+        id: parseInt(userId),
+      });
 
       if (status === HTTP_CODES_ENUM.OK) {
         reset({
-          email: user?.email ?? "",
-          firstName: user?.firstName ?? "",
-          lastName: user?.lastName ?? "",
           role: {
-            id: Number(user?.role?.id),
+            id: user?.role?.id ? Number(user?.role?.id) : "",
+            name: user?.role?.name ?? "",
           },
           photo: user?.photo,
         });
@@ -210,7 +219,11 @@ function FormEditUser() {
               </Typography>
             </Grid>
             <Grid size={{ xs: 12 }}>
-              <FormAvatarInput<EditUserFormData> name="photo" testId="photo" />
+              <FormAvatarInput<EditUserFormData>
+                name="photo"
+                testId="photo"
+                helperText={""}
+              />
             </Grid>
 
             <Grid size={{ xs: 12 }}>
@@ -244,10 +257,19 @@ function FormEditUser() {
                 label={t("admin-panel-users-edit:inputs.role.label")}
                 options={[
                   {
-                    id: RoleEnum.ADMIN,
+                    id: Number(RoleEnum.ADMIN),
                   },
                   {
-                    id: RoleEnum.USER,
+                    id: Number(RoleEnum.USER),
+                  },
+                  {
+                    id: Number(RoleEnum.AGENT),
+                  },
+                  {
+                    id: Number(RoleEnum.CUSTOMER),
+                  },
+                  {
+                    id: Number(RoleEnum.MANAGER),
                   },
                 ]}
                 keyValue="id"
@@ -297,7 +319,7 @@ function FormChangePasswordUser() {
 
   const onSubmit = handleSubmit(async (formData) => {
     const { data, status } = await fetchPatchUser({
-      id: userId,
+      id: parseInt(userId),
       data: formData,
     });
     if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {

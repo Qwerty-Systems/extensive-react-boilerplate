@@ -28,5 +28,8 @@
       }
     }
   },
-  "or": "OR"
+  "or": "OR",
+  "errors": {
+    "somethingWrong": "Something went wrong try again later"
+  }
 }

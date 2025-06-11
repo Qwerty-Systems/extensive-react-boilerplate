@@ -25,9 +25,11 @@ type DatePickerFieldProps = {
   autoFocus?: boolean;
   readOnly?: boolean;
   label: string;
+  fullWidth?: boolean;
   testId?: string;
   error?: string;
   defaultValue?: ValueDateType;
+  disablePast?: boolean;
 };
 const DatePickerInput = forwardRef(DatePickerInputRaw) as never as (
   props: DatePickerFieldProps & {
@@ -44,6 +46,7 @@ function DatePickerInputRaw(
     value: ValueDateType;
     onChange: (value: ValueDateType) => void;
     onBlur: () => void;
+    disablePast?: boolean;
   },
   ref?: ForwardedRef<HTMLDivElement | null>
 ) {
@@ -67,16 +70,18 @@ function DatePickerInputRaw(
           textField: {
             helperText: props.error,
             error: !!props.error,
+            fullWidth: props.fullWidth,
             InputProps: {
               readOnly: props.readOnly,
             },
           },
         }}
-        onAccept={props.onChange}
+        //TODO onAccept={props.onChange}
         minDate={props.minDate}
         maxDate={props.maxDate}
         views={props.views}
         data-testid={props.testId}
+        disablePast={props.disablePast}
       />
     </LocalizationProvider>
   );
@@ -105,7 +110,9 @@ function FormDatePickerInput<
             testId={props.testId}
             minDate={props.minDate}
             maxDate={props.maxDate}
+            fullWidth={props.fullWidth}
             error={fieldState.error?.message}
+            disablePast={props.disablePast}
           />
         );
       }}

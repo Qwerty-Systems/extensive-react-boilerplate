@@ -72,7 +72,7 @@ function DateTimePickerInputRaw(
             },
           },
         }}
-        onAccept={props.onChange}
+        //onAccept={props.onChange}
         minDate={props.minDate}
         maxDate={props.maxDate}
         views={props.views}

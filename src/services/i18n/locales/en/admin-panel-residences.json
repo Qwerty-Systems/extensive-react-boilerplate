@@ -1,0 +1,42 @@
+{
+  "title": "Residences",
+  "table": {
+    "column1": "ID",
+    "column2": "Name",
+    "column3": "Region",
+    "column4": "Type",
+    "column5": "Charge",
+    "column6": "Occupants",
+    "column7": "Status"
+  },
+  "actions": {
+    "add": "Add Residence",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create Residence"
+  },
+  "confirm": {
+    "delete": {
+      "title": "Delete Residence",
+      "message": "Are you sure you want to delete this region?"
+    }
+  },
+  "filter": {
+    "actions": {
+      "filter": "Filter",
+      "apply": "Apply"
+    },
+    "inputs": {
+      "type": {
+        "options": {
+          "APARTMENT": "APARTMENT",
+          "HOUSE": "HOUSE",
+          "DUPLEX": "APARTMENT",
+          "CONDO": "CONDO",
+          "TOWNHOUSE": "APARTMENT",
+          "OTHER": "OTHER"
+        }
+      }
+    }
+  }
+}

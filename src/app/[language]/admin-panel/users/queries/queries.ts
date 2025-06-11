@@ -34,22 +34,34 @@ export const useGetUsersQuery = ({
     queryKey: usersQueryKeys.list().sub.by({ sort, filter }).key,
     initialPageParam: 1,
     queryFn: async ({ pageParam, signal }) => {
-      const { status, data } = await fetch(
-        {
-          page: pageParam,
-          limit: 10,
-          filters: filter,
-          sort: sort ? [sort] : undefined,
-        },
-        {
-          signal,
-        }
-      );
+      try {
+        const { status, data } = await fetch(
+          {
+            page: pageParam,
+            limit: 10,
+            filters: filter,
+            sort: sort ? [sort] : undefined,
+          },
+          { signal }
+        );
 
-      if (status === HTTP_CODES_ENUM.OK) {
-        return {
-          data: data.data,
-          nextPage: data.hasNextPage ? pageParam + 1 : undefined,
+        if (status === HTTP_CODES_ENUM.OK) {
+          return {
+            data: data.data,
+            nextPage: data.hasNextPage ? pageParam + 1 : undefined,
+          };
+        } else {
+          // Throw a structured error for non-OK responses
+          throw {
+            status,
+            message: `Request failed with status ${status}`,
+          };
+        }
+      } catch (error: any) {
+        // Handle errors from fetch or wrapperFetchJsonResponse
+        throw {
+          status: error?.response?.status || 500,
+          message: error.message || "An unknown error occurred",
         };
       }
     },

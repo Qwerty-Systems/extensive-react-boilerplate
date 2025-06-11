@@ -24,6 +24,7 @@ type AvatarInputProps = {
   onBlur: () => void;
   value?: FileEntity;
   disabled?: boolean;
+  helperText?: string;
   testId?: string;
 };
 
@@ -191,6 +192,7 @@ function FormAvatarInput<
   props: Pick<ControllerProps<TFieldValues, TName>, "name" | "defaultValue"> & {
     disabled?: boolean;
     testId?: string;
+    helperText: string;
   }
 ) {
   return (
@@ -205,6 +207,7 @@ function FormAvatarInput<
           error={fieldState.error?.message}
           disabled={props.disabled}
           testId={props.testId}
+          helperText={props.helperText}
         />
       )}
     />

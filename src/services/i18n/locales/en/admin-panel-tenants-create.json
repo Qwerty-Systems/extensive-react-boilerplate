@@ -1,0 +1,65 @@
+{
+  "title": "Create Tenant",
+  "actions": {
+    "submit": "Save",
+    "cancel": "Cancel"
+  },
+  "inputs": {
+    "name": {
+      "label": "Tenant Name",
+      "validation": {
+        "required": "Tenant name is required"
+      }
+    },
+    "domain": {
+      "label": "Domain",
+      "validation": {
+        "required": "Domain is required"
+      }
+    },
+    "schemaName": {
+      "label": "Schema Name",
+      "validation": {
+        "required": "Schema name is required"
+      }
+    },
+    "primaryPhone": {
+      "label": "Primary Phone",
+      "validation": {
+        "required": "Primary phone is required"
+      }
+    },
+    "primaryEmail": {
+      "label": "Primary Email",
+      "validation": {
+        "required": "Primary email is required",
+        "invalid": "Primary email is invalid",
+        "server": {
+          "emailAlreadyExists": "Primary email already exists"
+        }
+      }
+    },
+    "type": {
+      "label": "Tenant Type",
+      "validation": {
+        "required": "Tenant type is required"
+      }
+    },
+    "isActive": {
+      "label": "Status"
+    },
+    "logo": {
+      "label": "Logo"
+    },
+    "<system>": "Do not remove this property"
+  },
+  "options": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "alerts": {
+    "tenant": {
+      "success": "Tenant has been created successfully"
+    }
+  }
+}

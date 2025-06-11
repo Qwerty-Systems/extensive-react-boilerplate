@@ -1,0 +1,58 @@
+{
+  "title": "Tenant Onboarding",
+  "description":
+    "This is the tenant onboarding page. Here you can set up your tenant's initial configuration and preferences.",
+  "welcomeMessage": "Welcome to the tenant onboarding process!",
+  "step1": {
+    "title": "Step 1: Basic Information",
+    "description":
+      "Please provide the basic information for your tenant, such as name and contact details."
+  },
+  "step2": {
+    "title": "Step 2: Preferences",
+    "description":
+      "Set your tenant's preferences, including language, timezone, and notification settings."
+  },
+  "step3": {
+    "title": "Step 3: Review and Confirm",
+    "description":
+      "Review the information you have provided and confirm to complete the onboarding process."
+  },
+  "step4": {
+    "title": "Step 4: Completion",
+    "description":
+      "Congratulations! You have completed the tenant onboarding process."
+  },
+  "errorMessage":
+    "An error occurred during the onboarding process. Please try again later or contact support if the issue persists.",
+  "successMessage": "Your tenant has been successfully onboarded!",
+  "retryButton": "Retry",
+  "contactSupportButton": "Contact Support",
+  "nextButton": "Next",
+  "previousButton": "Previous",
+  "finishButton": "Finish",
+  "cancelButton": "Cancel",
+  "loadingMessage": "Loading tenant onboarding data, please wait...",
+  "tenantNamePlaceholder": "Enter tenant name",
+  "contactEmailPlaceholder": "Enter contact email",
+  "languagePlaceholder": "Select language",
+  "timezonePlaceholder": "Select timezone",
+  "notificationSettings": {
+    "title": "Notification Settings",
+    "emailNotifications": "Email Notifications",
+    "smsNotifications": "SMS Notifications",
+    "pushNotifications": "Push Notifications"
+  },
+  "confirmationMessage":
+    "Are you sure you want to complete the onboarding process? This action cannot be undone.",
+  "confirmButton": "Confirm",
+  "cancelConfirmationButton": "Cancel Confirmation",
+  "backToHomeButton": "Back to Home",
+  "tenantOnboardingTitle": "Tenant Onboarding Process",
+  "tenantOnboardingDescription":
+    "Follow the steps below to onboard your tenant successfully.",
+  "tenantOnboardingSuccessTitle": "Onboarding Successful",
+  "completionMessage":
+    "Your tenant has been successfully onboarded! You can now start using the application with your new tenant settings.",
+  "skipButton": "Skip"
+}

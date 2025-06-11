@@ -217,6 +217,7 @@ function FormBasicInfo() {
               <FormAvatarInput<EditProfileBasicInfoFormData>
                 name="photo"
                 testId="photo"
+                helperText={""}
               />
             </Grid>
 

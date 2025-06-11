@@ -84,3 +84,4 @@ npm run dev
 ## Support
 
 If you seek consulting, support, or wish to collaborate, please get in touch with us via [boilerplates@brocoders.com](boilerplates@brocoders.com) or feel free to ask us on [GitHub Discussions](https://github.com/brocoders/extensive-react-boilerplate/discussions). We are totally open to any suggestions and improvements.
+npm run generate:resource:relational -- --name ResourceName
