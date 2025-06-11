@@ -49,6 +49,7 @@ export enum UserProviderEnum {
 //   deletedAt??:Date;
 // }
 export interface User {
+  phone: string;
   fullyOnboarded?: boolean;
   phoneNumber?: string;
   countryCode?: string;

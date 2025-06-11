@@ -4,6 +4,7 @@ import useConfig from "@/hooks/useConfig";
 import {
   createTheme,
   ThemeProvider as MuiThemeProvider,
+  responsiveFontSizes,
 } from "@mui/material/styles";
 import { useMemo, PropsWithChildren } from "react";
 import palette from "./palette";
@@ -32,7 +33,7 @@ function ThemeProvider({ children }: PropsWithChildren<{}>) {
 
   const themePalette = useMemo(() => palette(mode), [mode]);
 
-  const themeDefault = createTheme({
+  let theme = createTheme({
     cssVariables: {
       colorSchemeSelector: "class",
     },
@@ -48,16 +49,28 @@ function ThemeProvider({ children }: PropsWithChildren<{}>) {
     },
     direction: themeDirection,
     palette: themePalette,
+    shape: {
+      borderRadius: 8,
+    },
+    transitions: {
+      duration: {
+        short: 250,
+        standard: 300,
+        complex: 375,
+      },
+    },
     customShadows: {},
   });
 
-  // create duplicate theme due to responsive typography and fontFamily
-  const theme = createTheme({
-    ...themeDefault,
-    typography: typography(themeDefault),
-    customShadows: Shadows(themeDefault),
+  // Add typography and responsive fonts
+  theme = createTheme(theme, {
+    typography: typography(theme),
+    components: componentsOverride(theme),
+    customShadows: Shadows(theme),
   });
 
+  // Enable responsive font sizes
+  theme = responsiveFontSizes(theme);
   theme.components = componentsOverride(theme);
 
   return (

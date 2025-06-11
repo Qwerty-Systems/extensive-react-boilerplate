@@ -14,6 +14,7 @@ import Slider from "react-slick";
 import ContainerWrapper from "@/components/ContainerWrapper";
 
 import { SECTION_COMMON_PY } from "@/utils/constant";
+import GraphicsImage from "../GraphicsImage";
 
 /***************************  CLIENTELE - 3  ***************************/
 
@@ -114,14 +115,13 @@ export default function Clientele3({ title, clienteleList }: Clientele3Props) {
                 >
                   <Chip
                     label={
-                      <></>
                       //TTODO: Uncomment this when you have the GraphicsImage component ready
-                      // <GraphicsImage
-                      //   nestedChildren={item.nestedChildren || null}
-                      //   image={item.image || ""}
-                      //   sx={item.sx || {}}
-                      //   cardMediaProps={item.cardMediaProps || {}}
-                      // />
+                      <GraphicsImage
+                        nestedChildren={item.nestedChildren || null}
+                        image={item.image || ""}
+                        sx={item.sx || {}}
+                        cardMediaProps={item.cardMediaProps || {}}
+                      />
                     }
                     sx={{
                       bgcolor: "grey.100",

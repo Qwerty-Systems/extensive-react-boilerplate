@@ -1,96 +1,79 @@
+// NavItem.tsx
 import { useEffect } from "react";
-
-// @next
 import { usePathname } from "next/navigation";
-
-// @mui
-import { useTheme } from "@mui/material/styles";
+import { handlerActiveItem, handlerDrawerOpen } from "@/states/menu";
+import DynamicIcon from "@/components/DynamicIcon";
+// eslint-disable-next-line no-restricted-imports
+import Link from "next/link";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-
-// @project
-import {
-  handlerActiveItem,
-  handlerDrawerOpen,
-  useGetMenuMaster,
-} from "@/states/menu";
-import DynamicIcon from "@/components/DynamicIcon";
-import Link from "@mui/material/Link";
-
-/***************************  RESPONSIVE DRAWER - ITEM  ***************************/
-
-interface NavItemProps {
-  item: {
-    id: string;
-    url: string;
-    title: string;
-    icon?: string;
-    target?: string;
-    disabled?: boolean;
-  };
+import { NavItemType } from "./menuUtils";
+import * as MuiIcons from "@mui/icons-material";
+export default function NavItem({
+  item,
+  level = 0,
+}: {
+  item: NavItemType;
   level?: number;
-}
-
-export default function NavItem({ item, level = 0 }: NavItemProps) {
+}) {
   const theme = useTheme();
-  const { menuMaster } = useGetMenuMaster();
-  const openItem = menuMaster?.openedItem ?? null;
-
   const downMD = useMediaQuery(theme.breakpoints.down("md"));
-
-  // Active menu item on page load
   const pathname = usePathname();
+  const isActive = pathname === item.url;
 
   useEffect(() => {
-    if (pathname === item.url) handlerActiveItem(item.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+    if (isActive) handlerActiveItem(item.id);
+  }, [isActive, item.id]);
 
-  const iconcolor = theme.palette.text.primary;
-
-  const itemHandler = () => {
+  const handleClick = () => {
     if (downMD) handlerDrawerOpen(false);
   };
 
   return (
-    <ListItemButton
-      id={`${item.id}-btn`}
-      component={Link}
-      href={item.url}
-      {...(item?.target && { target: "_blank" })}
-      selected={openItem === item.id}
-      disabled={item.disabled}
-      onClick={itemHandler}
-      sx={{
-        color: "text.primary",
-        ...(level === 0 && {
-          my: 0.25,
-          "&.Mui-selected.Mui-focusVisible": { bgcolor: "primary.light" },
-        }),
-        ...(level > 0 && {
+    <Link href={item.url || "#"} passHref legacyBehavior>
+      <ListItemButton
+        component="a"
+        selected={isActive}
+        onClick={handleClick}
+        sx={{
+          borderRadius: 1,
+          mx: 1,
+          mb: 0.5,
+          pl: 2 + level * 2, // Indentation based on level
           "&.Mui-selected": {
+            backgroundColor: "primary.light",
             color: "primary.main",
-            bgcolor: "transparent",
-            "&:hover": { bgcolor: "action.hover" },
-            "&.Mui-focusVisible": { bgcolor: "action.focus" },
-            "& .MuiTypography-root": { fontWeight: 600 },
+            "&:hover": {
+              backgroundColor: "primary.lighter",
+            },
+            "& .MuiListItemIcon-root": {
+              color: "primary.main",
+            },
           },
-        }),
-      }}
-    >
-      {level === 0 && (
-        <ListItemIcon>
-          <DynamicIcon
-            name={(item.icon as any) ?? "Menu"}
-            color={iconcolor}
-            size={18}
-            // stroke={1.5}
-          />
+        }}
+      >
+        {/* Always show icon regardless of level */}
+        <ListItemIcon sx={{ minWidth: 36 }}>
+          {item.icon && (
+            <DynamicIcon
+              name={item.icon as keyof typeof MuiIcons}
+              size={20}
+              color={isActive ? "primary.main" : "text.secondary"}
+            />
+          )}
         </ListItemIcon>
-      )}
-      <ListItemText primary={item.title} sx={{ mb: "-1px" }} />
-    </ListItemButton>
+        <ListItemText
+          primary={item.title}
+          primaryTypographyProps={{
+            variant: "body2",
+            fontWeight: isActive ? 600 : 500,
+            color: isActive ? "primary.main" : "text.primary",
+          }}
+        />
+      </ListItemButton>
+    </Link>
   );
 }

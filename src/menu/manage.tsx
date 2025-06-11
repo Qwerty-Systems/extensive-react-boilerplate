@@ -4,7 +4,7 @@ const manage = {
   id: "group-manage",
   title: "Manage",
   icon: "IconBrandAsana",
-  type: "group",
+  type: "collapse",
   roles: ["PlatformOwner"],
   children: [
     {

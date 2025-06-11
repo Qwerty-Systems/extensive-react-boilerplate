@@ -3,21 +3,27 @@ import Grid from "@mui/material/Grid";
 import ContainerWrapper from "@/components/ContainerWrapper";
 import Hero from "@/components/hero/Hero";
 import Stack from "@mui/material/Stack";
-import { Benefit } from "@/components/benefit";
+// import { Benefit } from "@/components/benefit";
 import Feature18 from "@/components/feature/Feature18";
 import Feature21 from "@/components/feature/Feature21";
 import { Cta4, Cta5 } from "@/components/cta";
 import { DynamicComponentType } from "@/enum";
 import { Clientele3 } from "@/components/clientele";
-import Faq6 from "@/components/faq/Faq6"; // Adjust the path based on your project structure
+import Faq6 from "@/components/faq/Faq6";
 import branding from "@/branding.json";
 import Typography from "@mui/material/Typography";
 import { Footer7 } from "@/components/footer";
+import Box from "@mui/material/Box";
 
 function DescriptionLine() {
   return (
     <Typography variant="body2" sx={{ color: "text.secondary" }}>
-      Want to contribute? Our community is here to help. Learn more about{" "}
+      SakaTaka connects every player in the waste value chain. Waste collectors
+      get the tools to serve communities better. Residents get reliable service
+      and easy communication. Recyclers get consistent material supply.
+      Communities get cleaner environments. When everyone&apos;s connected
+      through one platform, waste stops being a problem and starts being an
+      opportunity. Built in Kenya, designed for impact across Africa and beyond.{" "}
       {/* <Link href={branding.company.socialLink.discord} passHref>
         <MuiLink
           variant="caption"
@@ -34,62 +40,94 @@ function DescriptionLine() {
 
 export default function Home(/* props: Props */) {
   const linkProps = { target: "_blank", rel: "noopener noreferrer" };
-  const hero = {
-    headLine: "Powering Waste Collectors, Cleaning Up Communities",
+  const hero: any = {
+    headLine: (
+      <>
+        Waste Collection
+        <br />
+        <Box component="span" sx={{ color: "#FFC107" }}>
+          That Actually Works
+        </Box>
+      </>
+    ),
     captionLine:
-      "SakaKata gives waste collectors and community groups the tools to streamline operations, track payments, and scale sustainably—because waste management shouldn’t be messy",
-    // primaryBtn: {
-    //   children: "Download the App (For Garbage Collectors)",
-    //   href: "/",
-    // },
-    videoSrc:
-      "https://www.youtube.com/embed/JrhLKkqwZ5s" /* "https://d2elhhoq00m1pj.cloudfront.net/saasable-intro.mp4" */,
+      "Powerful tools for waste collectors, community groups and recyclers. Better operations, clearer payments, real growth - because managing waste should be the easy part.",
+    primaryBtn: {
+      children: "Download App",
+      href: "https://play.google.com/store/apps/details?id=co.ke.sakataka.sakataka&pcampaignid=web_share",
+    },
+    videoSrc: "/assets/videos/intro-thumbnail.mp4",
     videoThumbnail: "/assets/videos/thumbnails/intro-thumbnail.png",
     listData: [],
   };
 
-  const benefit = {
-    heading: "What We’ve Built (So Far!)",
-    caption: "",
-    blockDetail: [
-      {
-        animationDelay: 0.1,
-        counter: "Smart Payment Tracking",
-        defaultUnit: "+",
-        caption: "No more cash disputes. Stay organized, get paid.",
-      },
-      {
-        animationDelay: 0.2,
-        counter: "Automated Reports",
-        defaultUnit: "+",
-        caption: "Transparency that builds trust and wins contracts.",
-      },
-      {
-        animationDelay: 0.2,
-        counter: "Community Engagement",
-        defaultUnit: "+",
-        caption: "Empower communities to take charge of their waste.",
-      },
-      {
-        animationDelay: 0.2,
-        counter: "Data-Driven Insights",
-        defaultUnit: "+",
-        caption: "Make informed decisions with real-time data.",
-      },
-    ],
-  };
+  // const benefit = {
+  //   heading: "What You Get",
+  //   caption: "",
+  //   blockDetail: [
+  //     {
+  //       animationDelay: 0.1,
+  //       counter: "Agent Management",
+  //       defaultUnit: "+",
+  //       caption:
+  //         "Our dedicated Agent App allows garbage collection agents to easily update and track which households have paid for their monthly waste collection services. Each agent uses the app in the field to mark payments in real time. This feature ensures up-to-date records, improves service efficiency, and gives companies full visibility into collections across different areas..",
+  //     },
+  //     {
+  //       animationDelay: 0.2,
+  //       counter: "Business Management",
+  //       defaultUnit: "+",
+  //       caption:
+  //         "Complete inventory tracking for equipment, supplies, and materials. Financial management tools to track expenses, revenue, and profitability. Everything you need to run your operation like a real business..",
+  //     },
+  //     {
+  //       animationDelay: 0.2,
+  //       counter: "Collection That Works",
+  //       defaultUnit: "+",
+  //       caption:
+  //         "Schedule pickups, assign routes, track progress in real-time. Digital database of all your clients with their collection history and preferences. Turn collection day chaos into something you can actually manage, with updates that happen as the work gets done.",
+  //     },
+  //     {
+  //       animationDelay: 0.2,
+  //       counter: "Simple Payment System",
+  //       defaultUnit: "+",
+  //       caption:
+  //         "Handle invoices, mobile money, and cash payments all in one place. Plus automatic reminders that keep money flowing without the awkward conversations.",
+  //     },
+  //     {
+  //       animationDelay: 0.2,
+  //       counter: "Clear Insights",
+  //       defaultUnit: "+",
+  //       caption:
+  //         "Actionable reports for decision-makers, timely alerts so nobody misses pickups or payments. See what's working, spot problems early, make better choices.",
+  //     },
+  //     {
+  //       animationDelay: 0.2,
+  //       counter: "Recycling Marketplace",
+  //       defaultUnit: "+",
+  //       caption:
+  //         "Connect with buyers, track valuable materials, turn waste streams into additional revenue. Yesterday's trash becomes a real income source.",
+  //     },
+  //     {
+  //       animationDelay: 0.2,
+  //       counter: "Instant Communication",
+  //       defaultUnit: "+",
+  //       caption:
+  //         "Send updates to all your clients instantly—schedule changes, payment reminders, service announcements. Plus customers can notify you immediately when problems arise, so you can respond fast.",
+  //     },
+  //   ],
+  // };
 
   const feature18 = {
-    heading: "What’s Next? Buckle Up.",
+    heading: "What You Get.",
     caption:
       "We’re on a mission to revolutionize waste management. Join us as we build a platform that empowers waste collectors and communities.",
     topics: [
       {
         icon: "tabler-sparkles",
-        title: "Recycling Marketplace",
-        title2: "Connecting Waste Collectors with Buyers",
+        title: "Agent Management",
+        title2: "Agent Management ",
         description:
-          "A platform to connect waste collectors with buyers for recycling materials.",
+          "Our dedicated Agent App allows garbage collection agents to easily update and track which households have paid for their monthly waste collection services. Each agent uses the app in the field to mark payments in real time. This feature ensures up-to-date records, improves service efficiency, and gives companies full visibility into collections across different areas.",
         image: "/assets/images/graphics/default/admin-dashboard.png",
         list: [
           { primary: "" },
@@ -102,10 +140,10 @@ export default function Home(/* props: Props */) {
       },
       {
         icon: "tabler-palette",
-        title: "Household Signups",
-        title2: "Streamlined Registration",
+        title: "Business Management",
+        title2: "Business Management",
         description:
-          "A user-friendly interface for households to sign up for waste collection services.",
+          "Complete inventory tracking for equipment, supplies, and materials. Financial management tools to track expenses, revenue, and profitability. Everything you need to run your operation like a real business.",
         image: "/assets/images/graphics/default/admin-dashboard-2.png",
         list: [
           { primary: "" },
@@ -118,10 +156,74 @@ export default function Home(/* props: Props */) {
       },
       {
         icon: "tabler-rocket",
-        title: "Carbon Credit Tracking",
-        title2: "Track Your Impact",
+        title: "Collection That Works",
+        title2: "Collection That Works",
         description:
-          "A feature to track and manage carbon credits earned through recycling efforts.",
+          "Schedule pickups, assign routes, track progress in real-time. Digital database of all your clients with their collection history and preferences. Turn collection day chaos into something you can actually manage, with updates that happen as the work gets done.",
+        image: "/assets/images/graphics/default/admin-dashboard-3.png",
+        list: [
+          { primary: "" },
+          { primary: "" },
+          { primary: "" },
+          { primary: "" },
+        ],
+        actionBtn: { children: "Start Now", href: "/", ...linkProps },
+        actionBtn2: { children: "More info", href: "/", ...linkProps },
+      },
+      {
+        icon: "tabler-sparkles",
+        title: "Simple Payment System",
+        title2: "Simple Payment System",
+        description:
+          "Handle invoices, mobile money, and cash payments all in one place. Plus automatic reminders that keep money flowing without the awkward conversations.",
+        image: "/assets/images/graphics/default/admin-dashboard.png",
+        list: [
+          { primary: "" },
+          { primary: "" },
+          { primary: "" },
+          { primary: "" },
+        ],
+        actionBtn: { children: "Start Now", href: "/", ...linkProps },
+        actionBtn2: { children: "More info", href: "/", ...linkProps },
+      },
+      {
+        icon: "tabler-palette",
+        title: "Clear Insights",
+        title2: "Clear Insights",
+        description:
+          "Actionable reports for decision-makers, timely alerts so nobody misses pickups or payments. See what's working, spot problems early, make better choices.",
+        image: "/assets/images/graphics/default/admin-dashboard-2.png",
+        list: [
+          { primary: "" },
+          { primary: "" },
+          { primary: "" },
+          { primary: "" },
+        ],
+        actionBtn: { children: "Start Now", href: "/", ...linkProps },
+        actionBtn2: { children: "More info", href: "/", ...linkProps },
+      },
+      {
+        icon: "tabler-rocket",
+        title: "Recycling Marketplace",
+        title2: "Recycling Marketplace",
+        description:
+          "Connect with buyers, track valuable materials, turn waste streams into additional revenue. Yesterday's trash becomes a real income source.",
+        image: "/assets/images/graphics/default/admin-dashboard-3.png",
+        list: [
+          { primary: "" },
+          { primary: "" },
+          { primary: "" },
+          { primary: "" },
+        ],
+        actionBtn: { children: "Start Now", href: "/", ...linkProps },
+        actionBtn2: { children: "More info", href: "/", ...linkProps },
+      },
+      {
+        icon: "tabler-rocket",
+        title: "Instant Communication",
+        title2: "Instant Communication",
+        description:
+          "Send updates to all your clients instantly—schedule changes, payment reminders, service announcements. Plus customers can notify you immediately when problems arise, so you can respond fast.",
         image: "/assets/images/graphics/default/admin-dashboard-3.png",
         list: [
           { primary: "" },
@@ -135,20 +237,20 @@ export default function Home(/* props: Props */) {
     ],
   };
   const feature21 = {
-    heading: `For Waste Collectors & Community Game Changers`,
+    heading: `Partners in Clean Communities`,
     caption:
-      "SakaTata is designed for waste collectors and community groups. We’re building a platform that empowers you to streamline operations, track payments, and scale sustainably.",
+      "Working with forward-thinking waste companies and community groups.",
     image: "/assets/images/graphics/hosting/dashboard-light.png",
-    primaryBtn: {
-      children: "Find out more",
-      href: "/",
-      ...linkProps,
-    },
-    secondaryBtn: {
-      children: "Start Now",
-      href: "/",
-      ...linkProps,
-    },
+    // primaryBtn: {
+    //   children: "Find out more",
+    //   href: "/",
+    //   ...linkProps,
+    // },
+    // secondaryBtn: {
+    //   children: "Start Now",
+    //   href: "/",
+    //   ...linkProps,
+    // },
     features: [
       {
         animationDelay: 0.1,
@@ -158,9 +260,9 @@ export default function Home(/* props: Props */) {
     ],
   };
   const cta4 = {
-    headLine: "Why Choose Us?",
+    headLine: "Want the inside scoop on new features?",
     primaryBtn: {
-      children: "Read Our story",
+      children: "Stay Connected",
       href: "/",
       target: "_blank",
       rel: "noopener noreferrer",
@@ -188,7 +290,8 @@ export default function Home(/* props: Props */) {
     clientContent: "Join our journey!",
   };
   const clientele = {
-    title: "SakaTata is Trusted by Leading Brands",
+    title:
+      "Working with forward-thinking waste companies and community groups.",
     clienteleList: [
       {
         image: {
@@ -222,12 +325,13 @@ export default function Home(/* props: Props */) {
   const cta5 = {
     label: "About Us",
     heading: "We’re on a mission to revolutionize waste management.",
-    caption: "",
+    caption: "Powering The Waste Ecosystem",
     primaryBtn: {
       children: "Join our journey!",
       href: branding.company.socialLink.discord,
       target: "_blank",
       rel: "noopener noreferrer",
+      color: "secondary",
     },
     description: <DescriptionLine />,
     saleData: {
@@ -453,7 +557,13 @@ export default function Home(/* props: Props */) {
   };
 
   return (
-    <ContainerWrapper sx={undefined}>
+    <ContainerWrapper
+      sx={{
+        background: "linear-gradient(135deg, #008037 0%, #00a044 100%)",
+        ml: 0,
+        mr: 0,
+      }}
+    >
       <Stack sx={{ py: 1, gap: { xs: 3, sm: 4, md: 5 } }}></Stack>
       <Grid
         container
@@ -467,39 +577,21 @@ export default function Home(/* props: Props */) {
           <Hero
             headLine={hero.headLine}
             captionLine={hero.captionLine}
-            /* primaryBtn={hero.primaryBtn} */
+            primaryBtn={hero.primaryBtn}
             videoSrc={hero.videoSrc}
             videoThumbnail={hero.videoThumbnail}
             listData={hero.listData}
           />
 
-          <Benefit
+          {/* <Benefit
             heading={benefit.heading}
             caption={benefit.caption}
             blockDetail={benefit.blockDetail}
-          />
+          /> */}
           <Feature18
             heading={feature18.heading}
             caption={feature18.caption}
             topics={feature18.topics}
-          />
-          <Feature21
-            heading={feature21.heading}
-            caption={feature21.caption}
-            image={feature21.image}
-            features={feature21.features}
-            primaryBtn={feature21.primaryBtn}
-            secondaryBtn={feature21.secondaryBtn}
-          />
-          <Cta4
-            headLine={cta4.headLine}
-            primaryBtn={cta4.primaryBtn}
-            profileGroups={cta4.profileGroups}
-            clientContent={cta4.clientContent}
-          />
-          <Clientele3
-            title={clientele.title}
-            clienteleList={clientele.clienteleList}
           />
           <Cta5
             heading={cta5.heading}
@@ -510,6 +602,25 @@ export default function Home(/* props: Props */) {
             description={cta5.description}
             saleData={cta5.saleData}
           />
+          <Feature21
+            heading={feature21.heading}
+            caption={feature21.caption}
+            image={feature21.image}
+            features={feature21.features}
+            primaryBtn={/* feature21.primaryBtn */ null}
+            secondaryBtn={/* feature21.secondaryBtn */ null}
+          />
+          <Clientele3
+            title={clientele.title}
+            clienteleList={clientele.clienteleList}
+          />
+          <Cta4
+            headLine={cta4.headLine}
+            primaryBtn={cta4.primaryBtn}
+            profileGroups={cta4.profileGroups}
+            clientContent={cta4.clientContent}
+          />
+
           <Faq6
             heading={faq.heading}
             caption={faq.caption}

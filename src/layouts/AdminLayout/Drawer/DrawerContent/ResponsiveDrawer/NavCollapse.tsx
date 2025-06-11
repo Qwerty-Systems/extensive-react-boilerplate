@@ -1,139 +1,118 @@
+// NavCollapse.tsx
 import { useState } from "react";
-
-// @next
 import { usePathname } from "next/navigation";
-
-// @mui
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import DynamicIcon from "@/components/DynamicIcon";
+import NavItem from "./NavItem";
+import { NavItemType } from "./menuUtils";
 import { useTheme } from "@mui/material/styles";
-import Collapse from "@mui/material/Collapse";
-import List from "@mui/material/List";
+import useMenuCollapse from "@/hooks/useMenuCollapse";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import Typography from "@mui/material/Typography";
-
-// @project
-import NavItem from "./NavItem";
-import DynamicIcon from "@/components/DynamicIcon";
-import useMenuCollapse from "@/hooks/useMenuCollapse";
-
-// @assets
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
 import * as MuiIcons from "@mui/icons-material";
-// @style
-const verticalDivider = {
-  "&:after": {
-    content: "''",
-    position: "absolute",
-    left: 16,
-    top: -2,
-    height: `calc(100% + 2px)`,
-    width: "1px",
-    opacity: 1,
-    bgcolor: "divider",
-  },
-};
-
-/***************************  COLLAPSE - LOOP  ***************************/
-
-function NavCollapseLoop({ item }: { item: NavItemType }) {
-  return item.children?.map((childItem) => {
-    // Create unique key by combining parent and child IDs
-    const uniqueKey = `${item.id}-${childItem.id}`;
-
-    switch (childItem.type) {
-      case "collapse":
-        return <NavCollapse key={uniqueKey} item={childItem} level={1} />;
-      case "item":
-        return <NavItem key={uniqueKey} item={childItem} level={1} />;
-      default:
-        return (
-          <Typography key={uniqueKey} variant="h6" color="error" align="center">
-            Fix - Collapse or Item
-          </Typography>
-        );
-    }
-  });
-}
-
-/***************************  RESPONSIVE DRAWER - COLLAPSE  ***************************/
-// Define valid icon names type based on MUI icons
-type MuiIconName = keyof typeof MuiIcons;
-
-interface NavItemType {
-  id: string;
-  url: string;
-  title: string;
-  icon?: MuiIconName;
-  type: "collapse" | "item";
-  children?: NavItemType[];
-}
-
-export default function NavCollapse({
-  item,
-  level = 0,
-}: {
-  item: NavItemType;
-  level?: number;
-}) {
+import List from "@mui/material/List";
+import Box from "@mui/material/Box";
+import Collapse from "@mui/material/Collapse";
+export default function NavCollapse({ item }: { item: NavItemType | any }) {
   const theme = useTheme();
-
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(null);
-
-  // Active item collapse on page load with sub-levels
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const [_selected, setSelected] = useState<string | any>(null);
+
+  const isActive = pathname.includes(item.url || "");
+  const hasChildren = item.children && item.children.length > 0;
 
   useMenuCollapse(item, pathname, false, setSelected, setOpen, undefined);
 
-  const handleClick = () => {
-    setOpen(!open);
-  };
+  const handleClick = () => setOpen(!open);
 
-  const iconcolor = theme.palette.text.primary;
+  const iconColor =
+    open || isActive
+      ? theme.palette.primary.main
+      : theme.palette.text.secondary;
 
   return (
     <>
       <ListItemButton
-        id={`${item.id}-btn`}
-        selected={open || selected === item.id}
+        selected={open || isActive}
+        onClick={handleClick}
         sx={{
+          borderRadius: 1,
+          mx: 1,
           my: 0.25,
-          color: "text.primary",
           "&.Mui-selected": {
-            color: "text.primary",
-            "&.Mui-focusVisible": { bgcolor: "primary.light" },
+            backgroundColor: "action.selected",
+            "&:hover": {
+              backgroundColor: "action.hover",
+            },
           },
         }}
-        onClick={handleClick}
       >
-        {level === 0 && (
-          <ListItemIcon>
+        {/* Always show icon */}
+        <ListItemIcon sx={{ minWidth: 36 }}>
+          {item.icon && (
             <DynamicIcon
-              name={item.icon || "Home"}
-              color={iconcolor}
-              size={18}
-              // stroke={1.5}
+              name={item.icon as keyof typeof MuiIcons}
+              size={20}
+              color={iconColor}
             />
-          </ListItemIcon>
-        )}
-        <ListItemText primary={item.title} sx={{ mb: "-1px" }} />
-        {open ? (
-          <ExpandLessIcon fontSize="small" />
-        ) : (
-          <ExpandMoreIcon fontSize="small" />
-        )}
+          )}
+        </ListItemIcon>
+
+        <ListItemText
+          primary={item.title}
+          primaryTypographyProps={{
+            variant: "body2",
+            fontWeight: open || isActive ? 600 : 500,
+            color: open || isActive ? "primary.secondary" : "text.primary",
+          }}
+        />
+
+        {/* Show expand icon only if there are children */}
+        {hasChildren &&
+          (open ? (
+            <ExpandLess fontSize="small" sx={{ color: iconColor }} />
+          ) : (
+            <ExpandMore fontSize="small" sx={{ color: iconColor }} />
+          ))}
       </ListItemButton>
-      <Collapse in={open} timeout="auto" unmountOnExit>
-        <List
-          component="div"
-          sx={{ p: 0, pl: 3, position: "relative", ...verticalDivider }}
-        >
-          <NavCollapseLoop item={item} />
-        </List>
-      </Collapse>
+
+      {hasChildren && (
+        <Collapse in={open} timeout="auto" unmountOnExit>
+          <Box
+            sx={{
+              pl: 4.5,
+              position: "relative",
+              "&:before": {
+                content: '""',
+                position: "absolute",
+                left: 28,
+                top: 0,
+                height: "100%",
+                width: "1px",
+                backgroundColor: "divider",
+              },
+            }}
+          >
+            <List disablePadding dense>
+              {item.children?.map((child: any, index: any) => (
+                <Box
+                  key={`${item.id}-child-${index}`}
+                  sx={{ position: "relative" }}
+                >
+                  {child.type === "collapse" ? (
+                    <NavCollapse item={child} />
+                  ) : (
+                    <NavItem item={child} />
+                  )}
+                </Box>
+              ))}
+            </List>
+          </Box>
+        </Collapse>
+      )}
     </>
   );
 }

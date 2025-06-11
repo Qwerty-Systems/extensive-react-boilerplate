@@ -138,7 +138,7 @@ export default function Cta4({
                 <Box sx={{ textAlign: "right" }}>
                   <ButtonAnimationWrapper>
                     <Button
-                      color="primary"
+                      color="secondary"
                       size="large"
                       variant="contained"
                       sx={{ minWidth: { md: 263 } }}

@@ -3,7 +3,6 @@
 import { JSX, useEffect, useRef, useState } from "react";
 
 // @mui
-import { useTheme } from "@mui/material/styles";
 /* import Button from "@mui/material/Button"; */
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
@@ -17,11 +16,9 @@ import { motion, useScroll, useTransform } from "framer-motion";
 /* import ButtonAnimationWrapper from "@/components/ButtonAnimationWrapper"; */
 import GraphicsCard from "@/components/cards/GraphicsCard";
 import ContainerWrapper from "@/components/ContainerWrapper";
-import GraphicsImage from "@/components/GraphicsImage";
-import { getBackgroundDots } from "@/utils/getBackgroundDots";
 
-// @assets
-import Wave from "@/images/graphics/Wave";
+import ButtonAnimationWrapper from "../ButtonAnimationWrapper";
+import Button from "@mui/material/Button";
 /* import SvgIcon from "@mui/material/SvgIcon"; */
 
 // threshold - adjust threshold as needed
@@ -37,10 +34,9 @@ export default function Hero({
   chip,
   headLine,
   captionLine,
-  /* primaryBtn, */
+  primaryBtn,
   videoSrc,
   videoThumbnail,
-  listData,
 }: {
   chip?: ChipType;
   headLine?: string;
@@ -51,7 +47,6 @@ export default function Hero({
   videoThumbnail?: string;
   listData?: Array<{ title: string; image: string }>;
 }) {
-  const theme = useTheme();
   const boxRadius = { xs: 24, sm: 32, md: 40 };
 
   const containerRef = useRef(null);
@@ -127,32 +122,32 @@ export default function Hero({
           zIndex: -1,
           borderBottomLeftRadius: boxRadius,
           borderBottomRightRadius: boxRadius,
-          background: getBackgroundDots(theme.palette.grey[300], 60, 35),
-          bgcolor: "grey.100",
+          // background: getBackgroundDots(theme.palette.grey[300], 60, 35),
+          // bgcolor: "grey.100",
         }}
       ></Box>
       <ContainerWrapper sx={{ py: 0 }}>
         <Box ref={containerRef}>
           <Box sx={{ pb: { xs: 3, sm: 4, md: 5 } }}>
             <Stack sx={{ alignItems: "center", gap: 1.5 }}>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{
-                  duration: 1,
-                  delay: 0.1,
-                  ease: [0.215, 0.61, 0.355, 1],
-                }}
-              >
-                {chip ? (
+              {chip && (
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{
+                    duration: 1,
+                    delay: 0.1,
+                    ease: [0.215, 0.61, 0.355, 1],
+                  }}
+                >
                   <Chip
                     variant="outlined"
                     label={
                       typeof chip?.label === "string" ? (
                         <Typography
                           variant="caption"
-                          sx={{ color: "text.secondary" }}
+                          sx={{ color: "rgba(255,255,255,0.8)" }}
                         >
                           {chip?.label}
                         </Typography>
@@ -161,14 +156,13 @@ export default function Hero({
                       )
                     }
                     sx={{
-                      bgcolor: "grey.100",
+                      bgcolor: "rgba(255,255,255,0.1)",
+                      borderColor: "rgba(255,255,255,0.3)",
                       "& .MuiChip-label": { py: 0.5, px: 1.5 },
                     }}
                   />
-                ) : (
-                  <></>
-                )}
-              </motion.div>
+                </motion.div>
+              )}
 
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -180,24 +174,21 @@ export default function Hero({
                   ease: [0.215, 0.61, 0.355, 1],
                 }}
               >
-                <Typography variant="h3" align="center" sx={{ maxWidth: 800 }}>
+                <Typography
+                  variant="h1"
+                  sx={{
+                    color: "white",
+                    fontWeight: 900,
+                    fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4rem" },
+                    lineHeight: 1.1,
+                    textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                    mb: 2,
+                  }}
+                >
                   {headLine}
                 </Typography>
               </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{
-                  duration: 1,
-                  delay: 0.2,
-                  ease: [0.215, 0.61, 0.355, 1],
-                }}
-              >
-                <Box sx={{ pt: 0.5, pb: 0.75 }}>
-                  <Wave size={0} />
-                </Box>
-              </motion.div>
+
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -209,18 +200,20 @@ export default function Hero({
                 }}
               >
                 <Typography
-                  variant="h6"
-                  align="center"
-                  sx={{ color: "text.secondary", maxWidth: 650 }}
+                  variant="h5"
+                  sx={{
+                    color: "rgba(255,255,255,0.95)",
+                    fontWeight: 300,
+                    fontSize: { xs: "1.2rem", sm: "1.4rem", md: "1.5rem" },
+                    maxWidth: 650,
+                    mb: 4,
+                  }}
                 >
                   {captionLine}
                 </Typography>
               </motion.div>
-            </Stack>
-            <Stack
-              sx={{ alignItems: "center", gap: 2, mt: { xs: 3, sm: 4, md: 5 } }}
-            >
-              {/* <motion.div
+
+              <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -233,56 +226,28 @@ export default function Hero({
                 <ButtonAnimationWrapper>
                   <Button
                     variant="contained"
-                    color="primary"
-                    startIcon={
-                      <SvgIcon
-                        component="svg"
-                        fontSize="inherit"
-                        sx={{ fontSize: "16px", strokeWidth: "3" }}
-                      ></SvgIcon>
-                    }
+                    sx={{
+                      background: "linear-gradient(45deg, #FFC107, #ffb300)",
+                      color: "#003d1a",
+                      textTransform: "uppercase",
+                      letterSpacing: "1px",
+                      fontWeight: 700,
+                      fontSize: "1.2rem",
+                      // eslint-disable-next-line no-restricted-syntax
+                      padding: "1.2rem 3rem",
+                      borderRadius: "50px",
+                      boxShadow: "0 10px 30px rgba(255,193,7,0.4)",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        transform: "translateY(-5px)",
+                        boxShadow: "0 20px 40px rgba(255,193,7,0.6)",
+                        filter: "brightness(1.1)",
+                        background: "linear-gradient(45deg, #FFC107, #ffb300)",
+                      },
+                    }}
                     {...primaryBtn}
                   />
                 </ButtonAnimationWrapper>
-              </motion.div> */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{
-                  duration: 1,
-                  delay: 0.5,
-                  ease: [0.215, 0.61, 0.355, 1],
-                }}
-              >
-                <Stack
-                  direction="row"
-                  sx={{ gap: 1, flexWrap: "wrap", justifyContent: "center" }}
-                >
-                  {listData?.map((item, index) => (
-                    <Chip
-                      key={index}
-                      label={
-                        <Typography variant="caption">{item.title}</Typography>
-                      }
-                      variant="outlined"
-                      icon={
-                        <GraphicsImage
-                          image={item.image}
-                          sx={{ width: 16, height: 16 }}
-                          cardMediaProps={undefined}
-                          nestedChildren={undefined}
-                        ></GraphicsImage>
-                      }
-                      sx={{
-                        height: 32,
-                        px: 1,
-                        bgcolor: "grey.100",
-                        "& .MuiChip-label": { py: 0.75, px: 1 },
-                      }}
-                    />
-                  ))}
-                </Stack>
               </motion.div>
             </Stack>
           </Box>

@@ -5,8 +5,17 @@ const other = {
   title: "Other",
   icon: "IconDotsVertical",
   type: "group",
-  roles: [],
+  roles: ["Admin", "PlatformOwner"],
   children: [
+    {
+      id: "changelog",
+      title: "Audit log",
+      type: "item",
+      url: "/admin-panel/audit-logs",
+      target: false,
+      icon: "IconHistory",
+      roles: ["Admin", "PlatformOwner"],
+    },
     {
       id: "changelog",
       title: "Changelog",
@@ -14,7 +23,7 @@ const other = {
       url: "https://phoenixcoded.gitbook.io/saasable/changelog",
       target: true,
       icon: "IconHistory",
-      roles: [],
+      roles: ["Admin", "PlatformOwner"],
     },
     {
       id: "documentation",
@@ -23,7 +32,7 @@ const other = {
       url: "https://phoenixcoded.gitbook.io/saasable",
       target: true,
       icon: "IconNotes",
-      roles: [],
+      roles: ["Admin", "PlatformOwner"],
     },
     {
       id: "support",
@@ -32,7 +41,7 @@ const other = {
       url: "https://support.phoenixcoded.net",
       target: true,
       icon: "IconLifebuoy",
-      roles: [],
+      roles: ["Admin", "PlatformOwner"],
     },
   ],
 };

@@ -27,6 +27,7 @@ import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import Error404 from "@/images/maintenance/Error404";
 
 type UsersKeys = keyof User;
 
@@ -107,14 +108,20 @@ function Users() {
     return searchParamsFilter ? JSON.parse(searchParamsFilter) : undefined;
   }, [searchParams]);
 
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useGetUsersQuery({
-      filter,
-      sort: {
-        order: (sortModel[0]?.sort?.toUpperCase() as SortEnum) || SortEnum.DESC,
-        orderBy: (sortModel[0]?.field as UsersKeys) || "id",
-      },
-    });
+  const {
+    data,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    error,
+    isError,
+  } = useGetUsersQuery({
+    filter,
+    sort: {
+      order: (sortModel[0]?.sort?.toUpperCase() as SortEnum) || SortEnum.DESC,
+      orderBy: (sortModel[0]?.field as UsersKeys) || "id",
+    },
+  });
 
   const handleSortModelChange = (newModel: GridSortModel) => {
     setSortModel(newModel);
@@ -130,8 +137,11 @@ function Users() {
   };
 
   const result = useMemo(() => {
-    const allData = data?.pages.flatMap((page) => page?.data) || [];
-    return removeDuplicatesFromArrayObjects<User>(allData as User[], "id");
+    if (!data?.pages) return [];
+
+    const allData = data.pages.flatMap((page) => (page?.data ? page.data : []));
+
+    return removeDuplicatesFromArrayObjects<User>(allData, "id");
   }, [data]);
 
   const columns: GridColDef[] = [
@@ -203,69 +213,100 @@ function Users() {
       filterable: false,
     },
   ];
-
+  const isForbidden =
+    isError && error?.message === "Request failed with status 403";
   return (
     <Container maxWidth="xl">
-      <Grid container spacing={3} pt={3}>
-        <Grid container spacing={3} size={{ xs: 12 }}>
-          <Grid size="grow">
-            <Typography variant="h3">
-              {tUsers("admin-panel-users:title")}
-            </Typography>
+      {isForbidden ? (
+        <Box
+          sx={{
+            height: 400,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 1,
+            backgroundColor: "background.paper",
+          }}
+        >
+          <Error404 />
+        </Box>
+      ) : (
+        <Grid container spacing={3} pt={3}>
+          <Grid container spacing={3} size={{ xs: 12 }}>
+            <Grid size="grow">
+              <Typography variant="h3">
+                {tUsers("admin-panel-users:title")}
+              </Typography>
+            </Grid>
+            <Grid container size="auto" wrap="nowrap" spacing={2}>
+              <Grid size="auto">
+                <UserFilter />
+              </Grid>
+              <Grid size="auto">
+                <Button
+                  variant="contained"
+                  LinkComponent={Link}
+                  href="/admin-panel/users/create"
+                  color="success"
+                >
+                  {tUsers("admin-panel-users:actions.create")}
+                </Button>
+              </Grid>
+            </Grid>
           </Grid>
-          <Grid container size="auto" wrap="nowrap" spacing={2}>
-            <Grid size="auto">
-              <UserFilter />
-            </Grid>
-            <Grid size="auto">
-              <Button
-                variant="contained"
-                LinkComponent={Link}
-                href="/admin-panel/users/create"
-                color="success"
-              >
-                {tUsers("admin-panel-users:actions.create")}
-              </Button>
-            </Grid>
+          <Grid sx={{ xs: 12 }} mb={2}>
+            <DataGrid
+              rows={result}
+              columns={columns}
+              loading={isFetchingNextPage}
+              sortModel={sortModel}
+              onSortModelChange={handleSortModelChange}
+              slots={{
+                footer: () => (
+                  <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
+                    {hasNextPage && !isError && (
+                      <Button
+                        onClick={() => fetchNextPage()}
+                        disabled={!hasNextPage || isFetchingNextPage}
+                        variant="outlined"
+                      >
+                        {tUsers("admin-panel-users:loadMore")}
+                      </Button>
+                    )}
+                    {isError && !isForbidden && (
+                      <Button
+                        onClick={() => {} /* fetchNextPage() */}
+                        disabled={isFetchingNextPage}
+                        variant="outlined"
+                        color="error"
+                        sx={{ ml: 2 }}
+                      >
+                        {tUsers("admin-panel-users:retry")}
+                      </Button>
+                    )}
+                    {isFetchingNextPage && (
+                      <CircularProgress size={24} sx={{ ml: 2 }} />
+                    )}
+                  </Box>
+                ),
+              }}
+              disableRowSelectionOnClick
+              disableColumnMenu
+              hideFooterPagination
+              rowHeight={60}
+              sx={{
+                border: 1,
+                borderColor: "divider",
+                "& .MuiDataGrid-columnHeaders": {
+                  backgroundColor: "background.paper",
+                },
+              }}
+            />
           </Grid>
         </Grid>
-        <Grid size={{ xs: 12 }} mb={2}>
-          <DataGrid
-            rows={result}
-            columns={columns}
-            loading={isFetchingNextPage}
-            sortModel={sortModel}
-            onSortModelChange={handleSortModelChange}
-            slots={{
-              footer: () => (
-                <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
-                  <Button
-                    onClick={() => fetchNextPage()}
-                    disabled={!hasNextPage || isFetchingNextPage}
-                    variant="outlined"
-                  >
-                    {tUsers("admin-panel-users:loadMore")}
-                  </Button>
-                  {isFetchingNextPage && (
-                    <CircularProgress size={24} sx={{ ml: 2 }} />
-                  )}
-                </Box>
-              ),
-            }}
-            disableRowSelectionOnClick
-            disableColumnMenu
-            hideFooterPagination
-            rowHeight={60}
-            sx={{
-              border: 1,
-              borderColor: "divider",
-              "& .MuiDataGrid-columnHeaders": {
-                backgroundColor: "background.paper",
-              },
-            }}
-          />
-        </Grid>
-      </Grid>
+      )}
     </Container>
   );
 }

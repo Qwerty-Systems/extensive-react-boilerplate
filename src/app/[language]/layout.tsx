@@ -62,7 +62,17 @@ export default async function RootLayout(props: {
   const params = await props.params;
   const { language } = params;
   const { children } = props;
+  // const { isLoading } = useAuth();
 
+  // if (isLoading)
+  //   return (
+  //     <AppSkeleton
+  //       primaryCount={6}
+  //       secondaryCount={1}
+  //       topbarCount={3}
+  //       itemSize={36}
+  //     />
+  //   );
   return (
     <html lang={language} dir={dir(language)} suppressHydrationWarning>
       <body suppressHydrationWarning>
