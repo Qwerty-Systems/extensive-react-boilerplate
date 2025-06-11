@@ -1,38 +1,39 @@
-// @mui
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-
-// @project
-import menuItems from "@/menu";
-import NavGroup from "./NavGroup";
-import { AuthContext } from "@/services/auth/auth-context";
+// ResponsiveDrawer.tsx
 import { useContext, useMemo } from "react";
-
-/***************************  DRAWER CONTENT - RESPONSIVE DRAWER  ***************************/
+import Box from "@mui/material/Box";
+import { AuthContext } from "@/services/auth/auth-context";
+import NavGroup from "./NavGroup";
+import menuItems from "@/menu";
+import { filterMenuItems, NavItemType } from "./menuUtils";
 
 export default function ResponsiveDrawer() {
   const { user } = useContext(AuthContext);
-  const filteredItems = useMemo(() => {
-    return menuItems.items.filter((item) => {
-      // Show item if no roles defined or user has required role
-      const userRoles = user?.role?.name ? [user.role.name] : [];
-      return !item.roles || item.roles.some((role) => userRoles.includes(role));
-    });
-  }, [user]);
-  const navGroups = filteredItems.map((item, index) => {
-    switch (item.type) {
-      case "group":
-        return <NavGroup key={index} item={item} />;
-      default:
-        return (
-          <Typography key={index} variant="h6" color="error" align="center">
-            Fix - Navigation Group
-          </Typography>
-        );
-    }
-  });
+
+  const filteredItems = useMemo(
+    () =>
+      filterMenuItems(
+        menuItems.items as NavItemType[],
+        user?.role?.name ? [user.role.name] : []
+      ),
+    [user]
+  );
 
   return (
-    <Box sx={{ py: 1, transition: "all 0.3s ease-in-out" }}>{navGroups}</Box>
+    <Box
+      sx={{
+        py: 1,
+        maxHeight: "calc(100vh - 64px)",
+        overflowY: "auto",
+        "&::-webkit-scrollbar": { width: 8 },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "divider",
+          borderRadius: 4,
+        },
+      }}
+    >
+      {filteredItems.map((item: any, index: any) => (
+        <NavGroup key={`group-${index}`} item={item} />
+      ))}
+    </Box>
   );
 }

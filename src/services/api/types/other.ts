@@ -114,3 +114,28 @@ export enum KycStatus {
   APPROVED = "approved",
   REJECTED = "rejected",
 }
+export enum PlanStatusEnum {
+  TRIAL = "trial",
+  ACTIVE = "active",
+  SUSPENDED = "suspended",
+  INACTIVE = "inactive",
+  CANCELLED = "cancelled",
+  PENDING = "pending",
+  EXPIRED = "expired",
+  COMPLETED = "completed",
+  ARCHIVED = "archived",
+  DELETED = "deleted",
+  UNKNOWN = "unknown",
+}
+
+export enum NotificationChannelEnum {
+  EMAIL = "EMAIL",
+  SMS = "SMS",
+  WEBHOOK = "WEBHOOK",
+}
+
+export enum NotificationTypeEnum {
+  ALERT = "ALERT",
+  REMINDER = "REMINDER",
+  REPORT = "REPORT",
+}

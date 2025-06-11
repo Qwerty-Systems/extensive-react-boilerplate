@@ -15,7 +15,8 @@
     "generate:field": "hygen generate field",
     "postgenerate:field": "npm run lint -- --fix",
     "sb": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "generate:types": "openapi-typescript http://localhost:3043/docs-json --output src/services/api/types/openapi.d.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -97,6 +98,7 @@
     "husky": "^9.0.10",
     "hygen": "^6.2.11",
     "is-ci": "^4.0.0",
+    "openapi-typescript": "^7.8.0",
     "prettier": "^3.2.5",
     "release-it": "^17.1.1",
     "storybook": "^8.1.10"

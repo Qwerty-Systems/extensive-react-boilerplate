@@ -1,14 +1,12 @@
-// @project
+// menu-items/index.ts
 import manage from "./manage";
-/* import other from "./other"; */
-import regions from "./regions";
+import other from "./other";
+import customerManagement from "./customer-management";
 import users from "./users";
 import finance from "./finance";
 
-/***************************  MENU ITEMS  ***************************/
-
 const menuItems = {
-  items: [manage, users, regions, finance /* , other */],
+  items: [manage, users, customerManagement, finance, other],
 };
 
 export default menuItems;

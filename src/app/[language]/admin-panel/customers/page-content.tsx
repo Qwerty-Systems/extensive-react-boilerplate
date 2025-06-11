@@ -1,107 +1,38 @@
 "use client";
 
-import { RoleEnum } from "@/services/api/types/role";
-import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
 import { useTranslation } from "@/services/i18n/client";
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
-import { useMemo, useState } from "react";
 import { useGetUsersQuery } from "./queries/queries";
 import { User } from "@/services/api/types/user";
-import Link from "@/components/link";
-import useAuth from "@/services/auth/use-auth";
-import useConfirmDialog from "@/components/confirm-dialog/use-confirm-dialog";
-import { useDeleteUsersService } from "@/services/api/services/users";
-import removeDuplicatesFromArrayObjects from "@/services/helpers/remove-duplicates-from-array-of-objects";
-import { useQueryClient } from "@tanstack/react-query";
-import { useRouter, useSearchParams } from "next/navigation";
-import { SortEnum } from "@/services/api/types/sort-type";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
-import EditIcon from "@mui/icons-material/Edit";
+import { RoleEnum } from "@/services/api/types/role";
+import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
+import { useSearchParams } from "next/navigation";
 import { DataGrid, GridColDef, GridSortModel } from "@mui/x-data-grid";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
-import Tooltip from "@mui/material/Tooltip";
-import IconButton from "@mui/material/IconButton";
-import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import UserFilter from "../users/user-filter";
 import Chip from "@mui/material/Chip";
-import MuiLink from "@mui/material/Link";
+import CustomerActions from "./customer-actions";
+import CustomerFilter from "./customer-filter";
+import { useEffect, useMemo, useState } from "react";
+import { SortEnum } from "@/services/api/types/sort-type";
+import removeDuplicatesFromArrayObjects from "@/services/helpers/remove-duplicates-from-array-of-objects";
+import Button from "@mui/material/Button";
+import { Index } from "@/components/common/PageCarded";
+import CustomerHeader from "./customer-header";
+import CustomerSidebar from "./customer-sidebar";
+import useAuth from "@/services/auth/use-auth";
+import Error404 from "@/images/maintenance/Error404";
+
 type UsersKeys = keyof User;
 
-function Actions({ user }: { user: User }) {
-  const { user: authUser } = useAuth();
-  const { confirmDialog } = useConfirmDialog();
-  const fetchUserDelete = useDeleteUsersService();
-  const queryClient = useQueryClient();
-  const { t: tUsers } = useTranslation("admin-panel-users");
-  const canDelete = user.id !== authUser?.id;
-
-  const handleDelete = async () => {
-    const isConfirmed = await confirmDialog({
-      title: tUsers("admin-panel-customers:confirm.delete.title"),
-      message: tUsers("admin-panel-customers:confirm.delete.message"),
-    });
-
-    if (isConfirmed) {
-      const searchParams = new URLSearchParams(window.location.search);
-      const filter = searchParams.get("filter");
-      const sort = searchParams.get("sort");
-
-      const previousData = queryClient.getQueryData<any>([
-        "users",
-        { sort, filter },
-      ]);
-
-      queryClient.setQueryData(["users", { sort, filter }], {
-        ...previousData,
-        pages: previousData?.pages.map((page: any) => ({
-          ...page,
-          data: page?.data.filter((item: User) => item.id !== user.id),
-        })),
-      });
-
-      await fetchUserDelete({ id: user.id });
-    }
-  };
-
-  return (
-    <Box display="flex" gap={1}>
-      <Tooltip title={tUsers("admin-panel-customers:actions.edit")}>
-        <IconButton
-          size="small"
-          LinkComponent={Link}
-          href={`/admin-panel/customers/edit/${user.id}`}
-          color="primary"
-        >
-          <EditIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-      {canDelete && (
-        <Tooltip title={tUsers("admin-panel-customers:actions.delete")}>
-          <IconButton size="small" onClick={handleDelete} color="error">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Box>
-  );
-}
-
-function Users() {
-  const { t: tUsers } = useTranslation("admin-panel-users");
-  const { t: tRoles } = useTranslation("admin-panel-roles");
-  const searchParams = useSearchParams();
-  const router = useRouter();
+function Customers({ onSelect }: { onSelect: (user: User) => void }) {
+  const { t } = useTranslation("admin-panel-customers");
   const { tenant } = useAuth();
-
+  const searchParams = useSearchParams();
+  const [_selectedCustomer, setSelectedCustomer] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [sortModel, setSortModel] = useState<GridSortModel>([
-    {
-      field: "id",
-      sort: "desc",
-    },
+    { field: "id", sort: "desc" },
   ]);
 
   const filter = useMemo(() => {
@@ -109,210 +40,259 @@ function Users() {
     return searchParamsFilter ? JSON.parse(searchParamsFilter) : undefined;
   }, [searchParams]);
 
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useGetUsersQuery({
-      filter: {
-        ...(filter || {}),
-        roles: [{ id: 6 }],
-        tenantId: tenant?.id,
-      },
-      sort: {
-        order: (sortModel[0]?.sort?.toUpperCase() as SortEnum) || SortEnum.DESC,
-        orderBy: (sortModel[0]?.field as UsersKeys) || "id",
-      },
-    });
+  // const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
+  //   useGetUsersQuery({
+  //     filter: {
+  //       ...(filter || {}),
+  //       roles: [{ id: 6 }],
+  //       tenantId: tenant?.id,
+  //     },
+  //     sort: {
+  //       order: (sortModel[0]?.sort?.toUpperCase() as SortEnum) || SortEnum.DESC,
+  //       orderBy: (sortModel[0]?.field as UsersKeys) || "id",
+  //     },
+  //   });
 
-  const handleSortModelChange = (newModel: GridSortModel) => {
-    setSortModel(newModel);
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set(
-      "sort",
-      JSON.stringify({
-        order: newModel[0]?.sort?.toUpperCase() || SortEnum.DESC,
-        orderBy: newModel[0]?.field || "id",
-      })
-    );
-    router.replace(window.location.pathname + "?" + searchParams.toString());
+  const {
+    data,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    error,
+    isError,
+  } = useGetUsersQuery({
+    filter: {
+      ...(filter || {}),
+      roles: [{ id: 6 }],
+      tenantId: tenant?.id,
+    },
+    sort: {
+      order: (sortModel[0]?.sort?.toUpperCase() as SortEnum) || SortEnum.DESC,
+      orderBy: (sortModel[0]?.field as UsersKeys) || "id",
+    },
+  });
+  useEffect(() => {
+    if (data) {
+      setIsLoading(false);
+    }
+  }, [data]);
+
+  const handleRowClick = (user: User) => {
+    setSelectedCustomer(user);
+    onSelect(user);
   };
 
   const result = useMemo(() => {
-    const allData = data?.pages.flatMap((page: any) => page?.data) || [];
-    return removeDuplicatesFromArrayObjects<User>(allData as User[], "id");
+    if (!data?.pages) return [];
+
+    const allData = data.pages.flatMap((page) => (page?.data ? page.data : []));
+
+    return removeDuplicatesFromArrayObjects<User>(allData, "id");
   }, [data]);
   const columns: GridColDef[] = [
     {
       field: "avatar",
       headerName: "",
       width: 60,
-      renderCell: (params: any) => (
+      renderCell: (params) => (
         <Avatar
-          alt={`${params.row.firstName} ${params.row.lastName}`}
-          src={params.row.photo?.path}
-          sx={{ width: 32, height: 32 }}
+          alt={`${params?.row?.firstName} ${params?.row?.lastName}`}
+          src={params?.row?.photo?.path}
+          sx={{ width: 32, height: 32, mt: 2 }}
         />
       ),
       sortable: false,
     },
+    // {
+    //   field: "id",
+    //   headerName: t("table.column1"),
+    //   width: 120,
+    // },
     {
-      field: "id",
-      headerName: tUsers("admin-panel-customers:table.column1"),
-      width: 120,
-    },
-    {
-      field: "name",
-      headerName: tUsers("admin-panel-customers:table.column2"),
+      field: "firstName",
+      headerName: t("table.column2"),
       width: 200,
-      valueGetter: (params: any) =>
-        `${params?.row?.firstName} ${params?.row?.lastName}`,
-      renderCell: (params: any) => (
-        <Box
-          sx={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {`${params?.row?.firstName} ${params?.row?.lastName}`}
-        </Box>
+      renderCell: (params) => (
+        <>
+          {params?.row?.firstName} {params?.row?.lastName}
+        </>
       ),
+      // valueGetter: (params: any) =>
+      //   `${params.row} ${params?.row?.lastName}`,
     },
     {
       field: "email",
-      headerName: tUsers("admin-panel-customers:table.column3"),
+      headerName: t("table.column3"),
       flex: 1,
       minWidth: 250,
+    },
+    {
+      field: "phoneNumber",
+      headerName: t("table.column4"),
+      flex: 1,
+      minWidth: 250,
+    },
+    {
+      field: "status",
+      headerName: t("table.column5"),
+      width: 120,
       renderCell: (params: any) => (
-        <Box
-          sx={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {params.value}
-        </Box>
+        <Chip
+          label={
+            params?.row?.status?.name === "Active"
+              ? t("status.active")
+              : t("status.inactive")
+          }
+          color={params?.row?.status?.name === "Active" ? "success" : "error"}
+          size="small"
+        />
       ),
     },
     {
-      field: "role",
-      headerName: tUsers("admin-panel-customers:table.column4"),
+      field: "residence",
+      headerName: t("table.column6"),
       width: 150,
-      valueGetter: (params: any) => tRoles(`role.${params?.name}`),
-    },
-    {
-      field: "regions",
-      headerName: tUsers("admin-panel-customers:table.column5"), // Occupants
-      flex: 1,
-      minWidth: 200,
-      renderCell: (params: any) => {
-        const regions = params.row.regions || [];
-        const count = regions.length;
-
-        return (
-          <Tooltip
-            title={
-              <Box>
-                {regions.slice(0, 5).map((region: any) => (
-                  <Typography key={region.id} variant="body2">
-                    {region?.name}
-                  </Typography>
-                ))}
-                {count > 5 && (
-                  <Typography variant="body2" fontStyle="italic">
-                    +{count - 5} more
-                  </Typography>
-                )}
-              </Box>
-            }
-          >
-            <MuiLink
-              component={Link}
-              href={`/admin-panel/regions?regionId=${params.row.id}`}
-              underline="hover"
-            >
-              <Chip
-                label={`${count} Region${count !== 1 ? "s" : ""}`}
-                clickable
-              />
-            </MuiLink>
-          </Tooltip>
-        );
-      },
+      renderCell: (params) => (
+        <Chip
+          label={`${params?.row?.residences?.length || 0}`}
+          variant="outlined"
+          size="small"
+        />
+      ),
     },
     {
       field: "actions",
       headerName: "",
       width: 120,
-      renderCell: (params: any) => <Actions user={params.row} />,
+      renderCell: (params) => (
+        <CustomerActions user={params?.row} onSelect={setSelectedCustomer} />
+      ),
       sortable: false,
-      filterable: false,
     },
   ];
-
+  const isForbidden =
+    isError && error?.message === "Request failed with status 403";
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          mt: "5",
+        }}
+      >
+        <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
+          <CircularProgress size={24} sx={{ ml: 2 }} />
+        </Box>
+      </Box>
+    );
+  }
   return (
-    <Container maxWidth="xl">
-      <Grid container spacing={3} pt={3}>
-        <Grid container spacing={3} size={{ xs: 12 }}>
-          <Grid size="grow">
-            <Typography variant="h3">
-              {tUsers("admin-panel-customers:title")}
-            </Typography>
-          </Grid>
-          <Grid container size="auto" wrap="nowrap" spacing={2}>
-            <Grid size="auto">
-              <UserFilter />
-            </Grid>
-            <Grid size="auto">
+    <>
+      {isForbidden ? (
+        <Box
+          sx={{
+            height: 400,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 1,
+            backgroundColor: "background.paper",
+          }}
+        >
+          <Error404 />
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            m: 4,
+          }}
+        >
+          <Box mb={2} mt={6}>
+            <CustomerFilter />
+          </Box>
+
+          <Box flex={1} position="relative">
+            <DataGrid
+              rows={result}
+              columns={columns}
+              loading={isFetchingNextPage}
+              sortModel={sortModel}
+              onSortModelChange={setSortModel}
+              onRowClick={(params) => handleRowClick(params.row)}
+              disableRowSelectionOnClick
+              disableColumnMenu
+              hideFooterPagination
+              rowHeight={60}
+              sx={{
+                border: 1,
+                borderColor: "divider",
+                "& .MuiDataGrid-columnHeaders": {
+                  backgroundColor: "background.paper",
+                },
+                "& .MuiDataGrid-row": {
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "action.hover",
+                  },
+                },
+              }}
+            />
+
+            <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
               <Button
-                variant="contained"
-                LinkComponent={Link}
-                href="/admin-panel/customers/create"
-                color="success"
+                onClick={() => fetchNextPage()}
+                disabled={!hasNextPage || isFetchingNextPage}
+                variant="outlined"
               >
-                {tUsers("admin-panel-customers:actions.create")}
+                {t("loadMore")}
+                {isFetchingNextPage && (
+                  <CircularProgress size={24} sx={{ ml: 2 }} />
+                )}
               </Button>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid size={{ xs: 12 }} mb={2}>
-          <DataGrid
-            rows={result}
-            columns={columns}
-            loading={isFetchingNextPage}
-            sortModel={sortModel}
-            onSortModelChange={handleSortModelChange}
-            slots={{
-              footer: () => (
-                <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
-                  <Button
-                    onClick={() => fetchNextPage()}
-                    disabled={!hasNextPage || isFetchingNextPage}
-                    variant="outlined"
-                  >
-                    {tUsers("admin-panel-customers:loadMore")}
-                  </Button>
-                  {isFetchingNextPage && (
-                    <CircularProgress size={24} sx={{ ml: 2 }} />
-                  )}
-                </Box>
-              ),
-            }}
-            disableRowSelectionOnClick
-            disableColumnMenu
-            hideFooterPagination
-            rowHeight={60}
-            sx={{
-              border: 1,
-              borderColor: "divider",
-              "& .MuiDataGrid-columnHeaders": {
-                backgroundColor: "background.paper",
-              },
-            }}
-          />
-        </Grid>
-      </Grid>
-    </Container>
+            </Box>
+          </Box>
+        </Box>
+      )}
+      )
+    </>
   );
 }
-
-export default withPageRequiredAuth(Users, { roles: [RoleEnum.ADMIN] });
+function CustomersClient() {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<User>();
+  const handleSelect = (user: User) => {
+    setSelectedItem(user);
+    setIsDrawerOpen(true);
+  };
+  return (
+    <Index
+      header={<CustomerHeader />}
+      content={<Customers onSelect={handleSelect} />}
+      sidebarContent={
+        <CustomerSidebar
+          onClose={() => setIsDrawerOpen(false)}
+          customer={selectedItem}
+        />
+      }
+      sidebarWidth={500}
+      scroll="normal"
+      isOpen={isDrawerOpen}
+      setIsOpen={setIsDrawerOpen}
+    />
+  );
+}
+export default withPageRequiredAuth(CustomersClient, {
+  roles: [
+    RoleEnum.ADMIN,
+    RoleEnum.PLATFORM_OWNER,
+    RoleEnum.AGENT,
+    RoleEnum.MANAGER,
+  ],
+});
