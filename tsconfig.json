@@ -28,7 +28,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/middleware.ts",
-    "./.next/types/**/*.ts"
+    "./.next/types/**/*.ts",
+    "src/components/theme/custom-theme.d.ts"
   ],
   "exclude": ["node_modules"]
 }

@@ -14,7 +14,6 @@ import branding from "@/branding.json";
 import Typography from "@mui/material/Typography";
 import { Footer7 } from "@/components/footer";
 import Box from "@mui/material/Box";
-
 function DescriptionLine() {
   return (
     <Typography variant="body2" sx={{ color: "text.secondary" }}>
@@ -557,94 +556,90 @@ export default function Home(/* props: Props */) {
   };
 
   return (
-    <ContainerWrapper
-      sx={{
-        background: "linear-gradient(135deg, #008037 0%, #00a044 100%)",
-        ml: 0,
-        mr: 0,
-      }}
-    >
-      <Stack sx={{ py: 1, gap: { xs: 3, sm: 4, md: 5 } }}></Stack>
-      <Grid
-        container
-        spacing={3}
-        wrap="nowrap"
-        pt={3}
-        direction="column"
-        sx={{ height: "90vh", justifyContent: "space-between" }}
-      >
-        <Grid size="grow">
-          <Hero
-            headLine={hero.headLine}
-            captionLine={hero.captionLine}
-            primaryBtn={hero.primaryBtn}
-            videoSrc={hero.videoSrc}
-            videoThumbnail={hero.videoThumbnail}
-            listData={hero.listData}
-          />
+    <Box>
+      <ContainerWrapper>
+        <Stack sx={{ py: 1, gap: { xs: 3, sm: 4, md: 5 } }}></Stack>
+        <Grid
+          container
+          spacing={3}
+          wrap="nowrap"
+          pt={3}
+          direction="column"
+          sx={{ height: "90vh", justifyContent: "space-between" }}
+        >
+          <Grid size="grow">
+            <Hero
+              headLine={hero.headLine}
+              captionLine={hero.captionLine}
+              primaryBtn={hero.primaryBtn}
+              videoSrc={hero.videoSrc}
+              videoThumbnail={hero.videoThumbnail}
+              listData={hero.listData}
+            />
 
-          {/* <Benefit
+            {/* <Benefit
             heading={benefit.heading}
             caption={benefit.caption}
             blockDetail={benefit.blockDetail}
           /> */}
-          <Feature18
-            heading={feature18.heading}
-            caption={feature18.caption}
-            topics={feature18.topics}
-          />
-          <Cta5
-            heading={cta5.heading}
-            primaryBtn={cta5.primaryBtn}
-            profileGroups={cta5.profileGroups}
-            caption={cta5.caption}
-            label={cta5.label}
-            description={cta5.description}
-            saleData={cta5.saleData}
-          />
-          <Feature21
-            heading={feature21.heading}
-            caption={feature21.caption}
-            image={feature21.image}
-            features={feature21.features}
-            primaryBtn={/* feature21.primaryBtn */ null}
-            secondaryBtn={/* feature21.secondaryBtn */ null}
-          />
-          <Clientele3
-            title={clientele.title}
-            clienteleList={clientele.clienteleList}
-          />
-          <Cta4
-            headLine={cta4.headLine}
-            primaryBtn={cta4.primaryBtn}
-            profileGroups={cta4.profileGroups}
-            clientContent={cta4.clientContent}
-          />
+            <Feature18
+              heading={feature18.heading}
+              caption={feature18.caption}
+              topics={feature18.topics}
+            />
+            <Cta5
+              heading={cta5.heading}
+              primaryBtn={cta5.primaryBtn}
+              profileGroups={cta5.profileGroups}
+              caption={cta5.caption}
+              label={cta5.label}
+              description={cta5.description}
+              saleData={cta5.saleData}
+            />
+            <Feature21
+              heading={feature21.heading}
+              caption={feature21.caption}
+              image={feature21.image}
+              features={feature21.features}
+              primaryBtn={/* feature21.primaryBtn */ null}
+              secondaryBtn={/* feature21.secondaryBtn */ null}
+            />
+            <Clientele3
+              title={clientele.title}
+              clienteleList={clientele.clienteleList}
+            />
+            <Cta4
+              headLine={cta4.headLine}
+              primaryBtn={cta4.primaryBtn}
+              profileGroups={cta4.profileGroups}
+              clientContent={cta4.clientContent}
+            />
 
-          <Faq6
-            heading={faq.heading}
-            caption={faq.caption}
-            faqList={faq.faqList.map((item) => ({
-              question: item.question,
-              answer:
-                typeof item.answer === "string"
-                  ? item.answer
-                  : {
-                      content: item.answer.content,
-                      type: "list",
-                      data: item.answer.data.map((dataItem) => ({
-                        primary: dataItem.primary,
-                      })),
-                    },
-              category: item.category,
-            }))}
-            getInTouch={faq.getInTouch}
-            categories={faq.categories}
-          />
+            <Faq6
+              heading={faq.heading}
+              caption={faq.caption}
+              faqList={faq.faqList.map((item) => ({
+                question: item.question,
+                answer:
+                  typeof item.answer === "string"
+                    ? item.answer
+                    : {
+                        content: item.answer.content,
+                        type: "list",
+                        data: item.answer.data.map((dataItem) => ({
+                          primary: dataItem.primary,
+                        })),
+                      },
+                category: item.category,
+              }))}
+              getInTouch={faq.getInTouch}
+              categories={faq.categories}
+            />
+          </Grid>
+          {/* <MuiLink href="/privacy-policy">Privacy Policy</MuiLink> */}
+          <Footer7 />
         </Grid>
-        {/* <MuiLink href="/privacy-policy">Privacy Policy</MuiLink> */}
-        <Footer7 />
-      </Grid>
-    </ContainerWrapper>
+      </ContainerWrapper>
+    </Box>
   );
 }
