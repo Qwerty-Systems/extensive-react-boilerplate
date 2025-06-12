@@ -19,6 +19,7 @@ import ContainerWrapper from "@/components/ContainerWrapper";
 
 import ButtonAnimationWrapper from "../ButtonAnimationWrapper";
 import Button from "@mui/material/Button";
+import { useTheme } from "@mui/material/styles";
 /* import SvgIcon from "@mui/material/SvgIcon"; */
 
 // threshold - adjust threshold as needed
@@ -48,14 +49,12 @@ export default function Hero({
   listData?: Array<{ title: string; image: string }>;
 }) {
   const boxRadius = { xs: 24, sm: 32, md: 40 };
-
+  const theme: any = useTheme();
   const containerRef = useRef(null);
-
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"],
   });
-
   const scale = useTransform(
     scrollYProgress,
     [0, 0.1, 0.2, 0.4, 0.6],
@@ -122,13 +121,61 @@ export default function Hero({
           zIndex: -1,
           borderBottomLeftRadius: boxRadius,
           borderBottomRightRadius: boxRadius,
-          // background: getBackgroundDots(theme.palette.grey[300], 60, 35),
-          // bgcolor: "grey.100",
+          background: `linear-gradient(135deg, ${theme.palette.landing.sections.hero.gradientFrom} 0%, ${theme.palette.landing.sections.hero.gradientTo} 100%)`,
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            background: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>')`,
+            animation: "float 20s ease-in-out infinite",
+          },
+          "&::after": {
+            content: '""',
+            position: "absolute",
+            top: "20%",
+            left: "10%",
+            width: "100px",
+            height: "100px",
+            background: "rgba(255,255,255,0.1)",
+            borderRadius: "50%",
+            animation: "float 15s ease-in-out infinite",
+            animationDelay: "-5s",
+          },
         }}
       ></Box>
-      <ContainerWrapper sx={{ py: 0 }}>
+      <ContainerWrapper
+        sx={{
+          py: 0,
+        }}
+      >
         <Box ref={containerRef}>
-          <Box sx={{ pb: { xs: 3, sm: 4, md: 5 } }}>
+          <Box
+            sx={{
+              pb: {
+                xs: 3,
+                sm: 4,
+                md: 5,
+                background: `linear-gradient(135deg, ${theme.palette.landing.sections.hero.gradientFrom} 0%, ${theme.palette.landing.sections.hero.gradientTo} 100%)`,
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  background: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>')`,
+                  animation: "float 20s ease-in-out infinite",
+                },
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  top: "20%",
+                  left: "10%",
+                  width: "100px",
+                  height: "100px",
+                  background: "rgba(255,255,255,0.1)",
+                  borderRadius: "50%",
+                  animation: "float 15s ease-in-out infinite",
+                  animationDelay: "-5s",
+                },
+              },
+            }}
+          >
             <Stack sx={{ alignItems: "center", gap: 1.5 }}>
               {chip && (
                 <motion.div

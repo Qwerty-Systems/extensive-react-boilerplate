@@ -25,6 +25,7 @@ import InitColorSchemeScript from "@/components/theme/init-color-scheme-script";
 // import KeycloakProvider from "@/services/social-auth/keycloak/keycloak-provider";
 import ClientProviders from "../../services/locale/locale-provider";
 import TenantProvider from "../../services/tenant/tenant-context";
+import ConfigProvider from "@/contexts/ConfigContext";
 // Client-side providers wrapper
 const AuthProviders = ({ children }: { children: React.ReactNode }) => (
   // <KeycloakProvider>
@@ -79,20 +80,22 @@ export default async function RootLayout(props: {
         <InitColorSchemeScript />
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
-          <ThemeProvider>
-            <CssBaseline />
-            <StoreLanguageProvider>
-              <ConfirmDialogProvider>
-                <AuthProviders>
-                  <TenantProvider>
-                    <ResponsiveAppBar />
-                    <ClientProviders>{children}</ClientProviders>
-                    <ToastContainer position="bottom-left" hideProgressBar />
-                  </TenantProvider>
-                </AuthProviders>
-              </ConfirmDialogProvider>
-            </StoreLanguageProvider>
-          </ThemeProvider>
+          <ConfigProvider>
+            <ThemeProvider>
+              <CssBaseline />
+              <StoreLanguageProvider>
+                <ConfirmDialogProvider>
+                  <AuthProviders>
+                    <TenantProvider>
+                      <ResponsiveAppBar />
+                      <ClientProviders>{children}</ClientProviders>
+                      <ToastContainer position="bottom-left" hideProgressBar />
+                    </TenantProvider>
+                  </AuthProviders>
+                </ConfirmDialogProvider>
+              </StoreLanguageProvider>
+            </ThemeProvider>
+          </ConfigProvider>
         </QueryClientProvider>
       </body>
     </html>

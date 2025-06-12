@@ -17,3 +17,6 @@ body * {
 html {
   scroll-behavior: smooth;
 }
+body {
+ /*  background: linear-gradient(135deg, #008037 0%, #00a044 100%); */
+}

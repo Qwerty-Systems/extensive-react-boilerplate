@@ -36,16 +36,16 @@ import NoteIcon from "@mui/icons-material/Note";
 import GpsFixedIcon from "@mui/icons-material/GpsFixed";
 
 declare module "@mui/material/styles" {
-  interface Theme {
-    customShadows: {
-      tooltip: string;
-    };
-  }
-  interface ThemeOptions {
-    customShadows?: {
-      tooltip?: string;
-    };
-  }
+  // interface Theme_ {
+  //   customShadows: {
+  //     tooltip: string;
+  //   };
+  // }
+  // interface ThemeOptions {
+  //   customShadows?: {
+  //     tooltip?: string;
+  //   };
+  // }
 }
 
 const swing = keyframes`

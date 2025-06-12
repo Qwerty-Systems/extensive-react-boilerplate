@@ -40,5 +40,10 @@
         }
       }
     }
+  },
+  "stats":{
+    "total":"Total customers",
+    "active":"Active Customers",
+    "new":"New Customers"
   }
 }

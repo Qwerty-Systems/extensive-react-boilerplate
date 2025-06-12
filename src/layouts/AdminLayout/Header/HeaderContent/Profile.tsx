@@ -64,6 +64,7 @@ export default function ProfileSection() {
   const innerId = innerOpen ? "profile-inner-popper" : undefined;
   const buttonStyle = { borderRadius: 2, p: 1 };
   const { colorScheme, setMode } = useColorScheme();
+  const { mode: colorMode, setColorMode } = useConfig();
   const language = useLanguage();
   const profileData = {
     avatar: {
@@ -143,10 +144,13 @@ export default function ProfileSection() {
                       secondaryAction={
                         <Switch
                           size="small"
-                          checked={false}
-                          onChange={() =>
-                            setMode(colorScheme === "light" ? "dark" : "light")
-                          }
+                          checked={colorMode === "light" ? false : true}
+                          onChange={() => {
+                            setMode(colorScheme === "light" ? "dark" : "light");
+                            setColorMode(
+                              colorMode === "light" ? "dark" : "light"
+                            );
+                          }}
                         />
                       }
                       sx={{
