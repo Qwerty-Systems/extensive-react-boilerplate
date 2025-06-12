@@ -51,6 +51,9 @@ export const Sidebar: React.FC<PageCardedSidebarProps> = ({
   return (
     <Paper sx={{ display: { xl: "none", xs: "block" } }}>
       <SwipeableDrawer
+        sx={{
+          zIndex: (theme) => theme.zIndex.appBar + 10, // Ensure it's above AppBar
+        }}
         variant="temporary"
         anchor={position}
         open={isOpen}
