@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import GlobalStyles from "@mui/material/GlobalStyles";
-import { SystemStyleObject } from "@mui/system/styleFunctionSx/styleFunctionSx";
-import { Theme } from "@mui/system";
+// import { Theme } from "@mui/system";
 import { PageCardedHeader } from "./PageCardedHeader";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
@@ -10,7 +9,7 @@ import { Sidebar } from "../SideBar";
 /**
  * Props for the PageCarded component.
  */
-type PageCardedProps = SystemStyleObject<Theme> & {
+type PageCardedProps = any /* SystemStyleObject<Theme> */ & {
   sidebarContent?: ReactNode;
   sidebarVariant?: "permanent" | "persistent" | "temporary";
   header?: ReactNode;
