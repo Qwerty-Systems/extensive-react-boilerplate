@@ -38,6 +38,7 @@
     "@types/react": "19.0.7",
     "@types/react-dom": "19.0.3",
     "accept-language": "^3.0.18",
+    "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.3.1",
