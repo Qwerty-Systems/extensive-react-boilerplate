@@ -99,11 +99,11 @@ const ResponsiveAppBar = () => {
     setAnchorNav(null);
   };
 
-  const navItems = [
-    { key: "marketplace", path: SectionKeys.MARKETPLACE },
-    { key: "recyclers", path: SectionKeys.RECYCLERS },
-    { key: "wasteCollectors", path: SectionKeys.WASTE_COLLECTORS },
-    { key: "communityGroups", path: SectionKeys.COMMUNITY_GROUPS },
+  const navItems: any[] = [
+    // { key: "marketplace", path: SectionKeys.MARKETPLACE },
+    // { key: "recyclers", path: SectionKeys.RECYCLERS },
+    // { key: "wasteCollectors", path: SectionKeys.WASTE_COLLECTORS },
+    // { key: "communityGroups", path: SectionKeys.COMMUNITY_GROUPS },
   ];
 
   const desktopNav = (
