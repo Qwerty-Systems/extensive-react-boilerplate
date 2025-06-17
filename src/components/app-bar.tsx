@@ -22,11 +22,19 @@ import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 
+// const StyledAppBar = styled(AppBar)({
+//   background: "inherit",
+//   boxShadow: "none",
+// });
 const StyledAppBar = styled(AppBar)({
-  background: "inherit",
+  background: "transparent",
   boxShadow: "none",
+  position: "absolute", // Add this
+  top: 0, // Add this
+  left: 0, // Add this
+  right: 0, // Add this
+  zIndex: 10, // Ensure it's above everything
 });
-
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   minHeight: 56,
   paddingTop: theme.spacing(1),
