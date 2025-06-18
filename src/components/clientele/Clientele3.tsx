@@ -3,7 +3,6 @@
 import { alpha, useTheme } from "@mui/material/styles";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
 // @third-party
@@ -19,14 +18,13 @@ import GraphicsImage from "../GraphicsImage";
 /***************************  CLIENTELE - 3  ***************************/
 
 interface Clientele3Props {
-  title?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clienteleList: Array<Record<string, any>>;
 }
 
-export default function Clientele3({ title, clienteleList }: Clientele3Props) {
+export default function Clientele3({ clienteleList }: Clientele3Props) {
   const theme = useTheme();
-
+  // const isLight = theme.palette.mode === "light";
   const settings = {
     autoplay: true,
     arrows: false,
@@ -62,25 +60,6 @@ export default function Clientele3({ title, clienteleList }: Clientele3Props) {
   return (
     <ContainerWrapper sx={{ py: SECTION_COMMON_PY }}>
       <Stack sx={{ gap: 2.5 }}>
-        {title && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{
-              duration: 0.5,
-              delay: 0.3,
-            }}
-          >
-            <Typography
-              variant="subtitle2"
-              align="center"
-              sx={{ color: "text.secondary" }}
-            >
-              {title}
-            </Typography>
-          </motion.div>
-        )}
         <Box
           sx={{
             position: "relative",
@@ -115,16 +94,20 @@ export default function Clientele3({ title, clienteleList }: Clientele3Props) {
                 >
                   <Chip
                     label={
-                      //TTODO: Uncomment this when you have the GraphicsImage component ready
                       <GraphicsImage
-                        nestedChildren={item.nestedChildren || null}
-                        image={item.image || ""}
-                        sx={item.sx || {}}
-                        cardMediaProps={item.cardMediaProps || {}}
+                        image={item.image}
+                        nestedChildren={null}
+                        sx={{
+                          height: { xs: 120, sm: 120, md: 120 },
+                          width: "auto",
+                          maxWidth: "100%",
+                          objectFit: "contain",
+                        }}
+                        cardMediaProps={{ component: "img" }}
                       />
                     }
                     sx={{
-                      bgcolor: "grey.100",
+                      bgcolor: "transparent",
                       height: { xs: 40, sm: 46, md: 60 },
                       width: 1,
                       "& .MuiChip-label": { p: 0 },

@@ -1,15 +1,13 @@
 "use client";
 import Grid from "@mui/material/Grid";
-import ContainerWrapper from "@/components/ContainerWrapper";
 import Hero from "@/components/hero/Hero";
-import Stack from "@mui/material/Stack";
 // import { Benefit } from "@/components/benefit";
 import Feature18 from "@/components/feature/Feature18";
 import Feature21 from "@/components/feature/Feature21";
-import { Cta4, Cta5 } from "@/components/cta";
-import { DynamicComponentType } from "@/enum";
+import { Cta4 } from "@/components/cta";
+// import { DynamicComponentType } from "@/enum";
 import { Clientele3 } from "@/components/clientele";
-import Faq6 from "@/components/faq/Faq6";
+// import Faq6 from "@/components/faq/Faq6";
 import branding from "@/branding.json";
 import Typography from "@mui/material/Typography";
 import { Footer7 } from "@/components/footer";
@@ -57,7 +55,6 @@ export default function Home(/* props: Props */) {
     },
     videoSrc: "/assets/videos/intro-thumbnail.mp4",
     videoThumbnail: "/assets/videos/thumbnails/intro-thumbnail.png",
-    listData: [],
   };
 
   // const benefit = {
@@ -288,36 +285,58 @@ export default function Home(/* props: Props */) {
     ],
     clientContent: "Join our journey!",
   };
+  // const clientele = {
+  //   title:
+  //     "Working with forward-thinking waste companies and community groups.",
+  //   clienteleList: [
+  //     {
+  //       image: {
+  //         path: "clientele/1.png",
+  //         component: "clientele/Dribbble",
+  //         type: DynamicComponentType.IMAGE,
+  //       },
+  //     },
+  //     {
+  //       image: {
+  //         component: "clientele/Reddit",
+  //         type: DynamicComponentType.IMAGE,
+  //       },
+  //     },
+  //     {
+  //       image: { component: "clientele/Mui", type: DynamicComponentType.IMAGE },
+  //     },
+  //     {
+  //       image: {
+  //         component: "clientele/Devto",
+  //         type: DynamicComponentType.IMAGE,
+  //       },
+  //     },
+  //     {
+  //       image: {
+  //         component: "clientele/Envato",
+  //         type: DynamicComponentType.IMAGE,
+  //       },
+  //     },
+  //   ],
+  // };
   const clientele = {
     title:
       "Working with forward-thinking waste companies and community groups.",
     clienteleList: [
       {
-        image: {
-          component: "clientele/Dribbble",
-          type: DynamicComponentType.IMAGE,
-        },
+        image: "/assets/images/clientele/1.png",
       },
       {
-        image: {
-          component: "clientele/Reddit",
-          type: DynamicComponentType.IMAGE,
-        },
+        image: "/assets/images/clientele/2.png",
       },
       {
-        image: { component: "clientele/Mui", type: DynamicComponentType.IMAGE },
+        image: "/assets/images/clientele/3.png",
       },
       {
-        image: {
-          component: "clientele/Devto",
-          type: DynamicComponentType.IMAGE,
-        },
+        image: "/assets/images/clientele/4.png",
       },
       {
-        image: {
-          component: "clientele/Envato",
-          type: DynamicComponentType.IMAGE,
-        },
+        image: "/assets/images/clientele/5.png",
       },
     ],
   };
@@ -352,294 +371,294 @@ export default function Home(/* props: Props */) {
     },
   };
 
-  const faq = {
-    heading: "Frequently Asked Questions",
-    caption:
-      "Answers to common queries about our Waste Collection & Recycling Management System.",
-    defaultExpanded: "Multi-Tenant Architecture",
-    faqList: [
-      {
-        question: "What types of organizations can use this platform?",
-        answer: `The system is built to support a wide range of users including Community Groups, Waste Management Companies, and Recycling Companies. Whether you're a small local group or a large-scale waste handler, the platform is built to scale and serve your specific needs.`,
-        category: "General",
-      },
-      {
-        question: "How does the multi-tenant architecture work?",
-        answer: {
-          content: `Each tenant operates in isolation with fully separate data and configuration.`,
-          type: "list",
-          data: [
-            { primary: "Dedicated schema for each tenant." },
-            {
-              primary:
-                "Individual settings like tax rates, waste categories, and branding.",
-            },
-            { primary: "Super Admin manages and oversees tenant activity." },
-          ],
-        },
-        category: "Multi-Tenant Architecture",
-      },
-      {
-        question: "Can tenants customize their environment?",
-        answer: `Yes, tenants can customize billing cycles, waste categories, branding (logo, color, templates), and compliance settings. This allows the platform to adapt to various operational models.`,
-        category: "Multi-Tenant Architecture",
-      },
-      {
-        question: "What roles are available in the system?",
-        answer: {
-          content:
-            "The system supports role-based access control with the following user types:",
-          type: "list",
-          data: [
-            { primary: "Super Admin" },
-            { primary: "Waste Management Company Admin" },
-            { primary: "Community Group Admin" },
-            { primary: "Recycling Company Admin" },
-            { primary: "Agent" },
-            { primary: "Customer" },
-          ],
-        },
-        category: "User & Role Management",
-      },
-      {
-        question: "Can a user have multiple roles?",
-        answer: `Yes, the system supports multiple roles per user. For example, an agent can also be a customer. Access and permissions adjust accordingly.`,
-        category: "User & Role Management",
-      },
-      {
-        question: "How is waste collection managed?",
-        answer: {
-          content: "Collection is structured around regions and residences.",
-          type: "list",
-          data: [
-            { primary: "Residences are assigned to regions." },
-            { primary: "Agents manage collections per region." },
-            {
-              primary:
-                "Supports ad-hoc and periodic (weekly/monthly) collection.",
-            },
-            { primary: "Route optimization is available." },
-          ],
-        },
-        category: "Waste Collection",
-      },
-      {
-        question: "Is the accounting system compliant with standards?",
-        answer: {
-          content:
-            "Yes, it features double-entry accounting aligned with IFRS 9 standards.",
-          type: "list",
-          data: [
-            { primary: "Debits and credits for every transaction." },
-            {
-              primary:
-                "Chart of Accounts with assets, liabilities, revenue, and expenses.",
-            },
-            {
-              primary:
-                "Integrated financial reports: P&L, Balance Sheet, Cash Flow.",
-            },
-          ],
-        },
-        category: "Payments & Accounting",
-      },
-      {
-        question: "What payment methods are supported?",
-        answer: {
-          content: "The platform integrates with multiple payment gateways.",
-          type: "list",
-          data: [
-            { primary: "Mobile Money (e.g., M-Pesa)" },
-            { primary: "Bank Transfers" },
-            { primary: "Credit/Debit Cards" },
-            { primary: "Cash (recorded by agents)" },
-          ],
-        },
-        category: "Payments & Accounting",
-      },
-      {
-        question: "How does the Recycling Marketplace work?",
-        answer: {
-          content:
-            "Recyclables can be listed and purchased through the platform.",
-          type: "list",
-          data: [
-            { primary: "Collection parties list categorized waste." },
-            {
-              primary: "Recycling companies can browse, buy, and rate sellers.",
-            },
-            { primary: "Supports bulk order aggregation and order tracking." },
-          ],
-        },
-        category: "Recycling Marketplace",
-      },
-      {
-        question: "What kind of reports are available?",
-        answer: {
-          content: "The platform provides rich dashboards and reporting tools.",
-          type: "list",
-          data: [
-            { primary: "Waste collected per region and period." },
-            { primary: "Revenue tracking, agent performance." },
-            { primary: "Order fulfillment and recycling trends." },
-            { primary: "Financial reports: P&L, Balance, Cash Flow." },
-          ],
-        },
-        category: "Reports & Analytics",
-      },
-      {
-        question: "How does the system handle communication?",
-        answer: {
-          content: "Automated and admin notifications are built-in.",
-          type: "list",
-          data: [
-            {
-              primary:
-                "SMS & Email reminders for billing, collection schedules.",
-            },
-            { primary: "Push notifications for mobile users." },
-            { primary: "Admin alerts for overdue invoices and pending tasks." },
-          ],
-        },
-        category: "Communication & Notifications",
-      },
-      {
-        question: "Is the system secure and compliant?",
-        answer: {
-          content:
-            "Yes, it implements modern security and compliance features.",
-          type: "list",
-          data: [
-            { primary: "JWT and OAuth2 for authentication." },
-            { primary: "Audit logs for all key system actions." },
-            { primary: "Data encryption for sensitive information." },
-          ],
-        },
-        category: "Security & Compliance",
-      },
-      {
-        question: "Can it integrate with external systems?",
-        answer: {
-          content: "Yes, APIs are available for third-party integration.",
-          type: "list",
-          data: [
-            { primary: "Payment APIs (M-Pesa, Stripe, Bank APIs)" },
-            { primary: "Email & SMS APIs (Twilio, SendGrid)" },
-            { primary: "Government & compliance systems" },
-            { primary: "Accounting tools like QuickBooks, Xero" },
-          ],
-        },
-        category: "Integration & API",
-      },
-    ],
-    getInTouch: {
-      link: {
-        children: "Contact Support",
-        href: "csupport@sakataka.co.ke", // replace with actual support link
-        target: "_blank",
-        rel: "noopener noreferrer",
-      },
-    },
-    categories: [
-      "General",
-      "Multi-Tenant Architecture",
-      "User & Role Management",
-      "Waste Collection",
-      "Payments & Accounting",
-      "Recycling Marketplace",
-      "Communication & Notifications",
-      "Reports & Analytics",
-      "Security & Compliance",
-      "Integration & API",
-    ],
-    activeCategory: "General",
-  };
+  // const faq = {
+  //   heading: "Frequently Asked Questions",
+  //   caption:
+  //     "Answers to common queries about our Waste Collection & Recycling Management System.",
+  //   defaultExpanded: "Multi-Tenant Architecture",
+  //   faqList: [
+  //     {
+  //       question: "What types of organizations can use this platform?",
+  //       answer: `The system is built to support a wide range of users including Community Groups, Waste Management Companies, and Recycling Companies. Whether you're a small local group or a large-scale waste handler, the platform is built to scale and serve your specific needs.`,
+  //       category: "General",
+  //     },
+  //     {
+  //       question: "How does the multi-tenant architecture work?",
+  //       answer: {
+  //         content: `Each tenant operates in isolation with fully separate data and configuration.`,
+  //         type: "list",
+  //         data: [
+  //           { primary: "Dedicated schema for each tenant." },
+  //           {
+  //             primary:
+  //               "Individual settings like tax rates, waste categories, and branding.",
+  //           },
+  //           { primary: "Super Admin manages and oversees tenant activity." },
+  //         ],
+  //       },
+  //       category: "Multi-Tenant Architecture",
+  //     },
+  //     {
+  //       question: "Can tenants customize their environment?",
+  //       answer: `Yes, tenants can customize billing cycles, waste categories, branding (logo, color, templates), and compliance settings. This allows the platform to adapt to various operational models.`,
+  //       category: "Multi-Tenant Architecture",
+  //     },
+  //     {
+  //       question: "What roles are available in the system?",
+  //       answer: {
+  //         content:
+  //           "The system supports role-based access control with the following user types:",
+  //         type: "list",
+  //         data: [
+  //           { primary: "Super Admin" },
+  //           { primary: "Waste Management Company Admin" },
+  //           { primary: "Community Group Admin" },
+  //           { primary: "Recycling Company Admin" },
+  //           { primary: "Agent" },
+  //           { primary: "Customer" },
+  //         ],
+  //       },
+  //       category: "User & Role Management",
+  //     },
+  //     {
+  //       question: "Can a user have multiple roles?",
+  //       answer: `Yes, the system supports multiple roles per user. For example, an agent can also be a customer. Access and permissions adjust accordingly.`,
+  //       category: "User & Role Management",
+  //     },
+  //     {
+  //       question: "How is waste collection managed?",
+  //       answer: {
+  //         content: "Collection is structured around regions and residences.",
+  //         type: "list",
+  //         data: [
+  //           { primary: "Residences are assigned to regions." },
+  //           { primary: "Agents manage collections per region." },
+  //           {
+  //             primary:
+  //               "Supports ad-hoc and periodic (weekly/monthly) collection.",
+  //           },
+  //           { primary: "Route optimization is available." },
+  //         ],
+  //       },
+  //       category: "Waste Collection",
+  //     },
+  //     {
+  //       question: "Is the accounting system compliant with standards?",
+  //       answer: {
+  //         content:
+  //           "Yes, it features double-entry accounting aligned with IFRS 9 standards.",
+  //         type: "list",
+  //         data: [
+  //           { primary: "Debits and credits for every transaction." },
+  //           {
+  //             primary:
+  //               "Chart of Accounts with assets, liabilities, revenue, and expenses.",
+  //           },
+  //           {
+  //             primary:
+  //               "Integrated financial reports: P&L, Balance Sheet, Cash Flow.",
+  //           },
+  //         ],
+  //       },
+  //       category: "Payments & Accounting",
+  //     },
+  //     {
+  //       question: "What payment methods are supported?",
+  //       answer: {
+  //         content: "The platform integrates with multiple payment gateways.",
+  //         type: "list",
+  //         data: [
+  //           { primary: "Mobile Money (e.g., M-Pesa)" },
+  //           { primary: "Bank Transfers" },
+  //           { primary: "Credit/Debit Cards" },
+  //           { primary: "Cash (recorded by agents)" },
+  //         ],
+  //       },
+  //       category: "Payments & Accounting",
+  //     },
+  //     {
+  //       question: "How does the Recycling Marketplace work?",
+  //       answer: {
+  //         content:
+  //           "Recyclables can be listed and purchased through the platform.",
+  //         type: "list",
+  //         data: [
+  //           { primary: "Collection parties list categorized waste." },
+  //           {
+  //             primary: "Recycling companies can browse, buy, and rate sellers.",
+  //           },
+  //           { primary: "Supports bulk order aggregation and order tracking." },
+  //         ],
+  //       },
+  //       category: "Recycling Marketplace",
+  //     },
+  //     {
+  //       question: "What kind of reports are available?",
+  //       answer: {
+  //         content: "The platform provides rich dashboards and reporting tools.",
+  //         type: "list",
+  //         data: [
+  //           { primary: "Waste collected per region and period." },
+  //           { primary: "Revenue tracking, agent performance." },
+  //           { primary: "Order fulfillment and recycling trends." },
+  //           { primary: "Financial reports: P&L, Balance, Cash Flow." },
+  //         ],
+  //       },
+  //       category: "Reports & Analytics",
+  //     },
+  //     {
+  //       question: "How does the system handle communication?",
+  //       answer: {
+  //         content: "Automated and admin notifications are built-in.",
+  //         type: "list",
+  //         data: [
+  //           {
+  //             primary:
+  //               "SMS & Email reminders for billing, collection schedules.",
+  //           },
+  //           { primary: "Push notifications for mobile users." },
+  //           { primary: "Admin alerts for overdue invoices and pending tasks." },
+  //         ],
+  //       },
+  //       category: "Communication & Notifications",
+  //     },
+  //     {
+  //       question: "Is the system secure and compliant?",
+  //       answer: {
+  //         content:
+  //           "Yes, it implements modern security and compliance features.",
+  //         type: "list",
+  //         data: [
+  //           { primary: "JWT and OAuth2 for authentication." },
+  //           { primary: "Audit logs for all key system actions." },
+  //           { primary: "Data encryption for sensitive information." },
+  //         ],
+  //       },
+  //       category: "Security & Compliance",
+  //     },
+  //     {
+  //       question: "Can it integrate with external systems?",
+  //       answer: {
+  //         content: "Yes, APIs are available for third-party integration.",
+  //         type: "list",
+  //         data: [
+  //           { primary: "Payment APIs (M-Pesa, Stripe, Bank APIs)" },
+  //           { primary: "Email & SMS APIs (Twilio, SendGrid)" },
+  //           { primary: "Government & compliance systems" },
+  //           { primary: "Accounting tools like QuickBooks, Xero" },
+  //         ],
+  //       },
+  //       category: "Integration & API",
+  //     },
+  //   ],
+  //   getInTouch: {
+  //     link: {
+  //       children: "Contact Support",
+  //       href: "csupport@sakataka.co.ke", // replace with actual support link
+  //       target: "_blank",
+  //       rel: "noopener noreferrer",
+  //     },
+  //   },
+  //   categories: [
+  //     "General",
+  //     "Multi-Tenant Architecture",
+  //     "User & Role Management",
+  //     "Waste Collection",
+  //     "Payments & Accounting",
+  //     "Recycling Marketplace",
+  //     "Communication & Notifications",
+  //     "Reports & Analytics",
+  //     "Security & Compliance",
+  //     "Integration & API",
+  //   ],
+  //   activeCategory: "General",
+  // };
 
   return (
     <Box>
-      <ContainerWrapper>
-        <Stack sx={{ py: 1, gap: { xs: 3, sm: 4, md: 5 } }}></Stack>
-        <Grid
-          container
-          spacing={3}
-          wrap="nowrap"
-          pt={3}
-          direction="column"
-          sx={{ height: "90vh", justifyContent: "space-between" }}
-        >
-          <Grid size="grow">
-            <Hero
-              headLine={hero.headLine}
-              captionLine={hero.captionLine}
-              primaryBtn={hero.primaryBtn}
-              videoSrc={hero.videoSrc}
-              videoThumbnail={hero.videoThumbnail}
-              listData={hero.listData}
-            />
+      <Grid
+        container
+        spacing={3}
+        wrap="nowrap"
+        direction="column"
+        sx={{ height: "90vh", justifyContent: "space-between" }}
+      >
+        <Grid size="grow">
+          {/* <Hero headLine={hero.headLine} /> */}
+          <Hero
+            headLine={hero.headLine}
+            captionLine={hero.captionLine}
+            primaryBtn={hero.primaryBtn}
+            videoSrc={hero.videoSrc}
+            videoThumbnail={hero.videoThumbnail}
+            // listData={hero.listData}
+          />
 
-            {/* <Benefit
+          {/* <Benefit
             heading={benefit.heading}
             caption={benefit.caption}
             blockDetail={benefit.blockDetail}
           /> */}
-            <Feature18
-              heading={feature18.heading}
-              caption={feature18.caption}
-              topics={feature18.topics}
-            />
-            <Cta5
-              heading={cta5.heading}
-              primaryBtn={cta5.primaryBtn}
-              profileGroups={cta5.profileGroups}
-              caption={cta5.caption}
-              label={cta5.label}
-              description={cta5.description}
-              saleData={cta5.saleData}
-            />
-            <Feature21
-              heading={feature21.heading}
-              caption={feature21.caption}
-              image={feature21.image}
-              features={feature21.features}
-              primaryBtn={/* feature21.primaryBtn */ null}
-              secondaryBtn={/* feature21.secondaryBtn */ null}
-            />
-            <Clientele3
-              title={clientele.title}
-              clienteleList={clientele.clienteleList}
-            />
-            <Cta4
-              headLine={cta4.headLine}
-              primaryBtn={cta4.primaryBtn}
-              profileGroups={cta4.profileGroups}
-              clientContent={cta4.clientContent}
-            />
+          <Feature18
+            heading={feature18.heading}
+            caption={feature18.caption}
+            topics={feature18.topics}
+          />
+          {/* <Cta5
+            heading={cta5.heading}
+            // primaryBtn={cta5.primaryBtn}
+            // profileGroups={cta5.profileGroups}
+            // caption={cta5.caption}
+            // label={cta5.label}
+            description={cta5.description}
+            // saleData={cta5.saleData}
+          /> */}
+          <Cta4
+            headLine={cta4.headLine}
+            primaryBtn={cta4.primaryBtn}
+            // profileGroups={cta4.profileGroups}
+            clientContent={cta4.clientContent}
+            // primaryBtn={cta5.primaryBtn}
+            // profileGroups={cta5.profileGroups}
+            // caption={cta5.caption}
+            // label={cta5.label}
+            description={cta5.description}
+            // saleData={cta5.saleData}
+          />
+          <Feature21
+            heading={feature21.heading}
+            caption={feature21.caption}
+            // image={feature21.image}
+            // features={feature21.features}
+            // primaryBtn={/* feature21.primaryBtn */ null}
+            // secondaryBtn={/* feature21.secondaryBtn */ null}
+          />
+          <Clientele3 clienteleList={clientele.clienteleList} />
 
-            <Faq6
-              heading={faq.heading}
-              caption={faq.caption}
-              faqList={faq.faqList.map((item) => ({
-                question: item.question,
-                answer:
-                  typeof item.answer === "string"
-                    ? item.answer
-                    : {
-                        content: item.answer.content,
-                        type: "list",
-                        data: item.answer.data.map((dataItem) => ({
-                          primary: dataItem.primary,
-                        })),
-                      },
-                category: item.category,
-              }))}
-              getInTouch={faq.getInTouch}
-              categories={faq.categories}
-            />
-          </Grid>
-          {/* <MuiLink href="/privacy-policy">Privacy Policy</MuiLink> */}
-          <Footer7 />
+          {/* <Faq6
+            heading={faq.heading}
+            caption={faq.caption}
+            faqList={faq.faqList.map((item) => ({
+              question: item.question,
+              answer:
+                typeof item.answer === "string"
+                  ? item.answer
+                  : {
+                      content: item.answer.content,
+                      type: "list",
+                      data: item.answer.data.map((dataItem) => ({
+                        primary: dataItem.primary,
+                      })),
+                    },
+              category: item.category,
+            }))}
+            getInTouch={faq.getInTouch}
+            categories={faq.categories}
+          /> */}
         </Grid>
-      </ContainerWrapper>
+        {/* <MuiLink href="/privacy-policy">Privacy Policy</MuiLink> */}
+        <Footer7 />
+      </Grid>
     </Box>
   );
 }
