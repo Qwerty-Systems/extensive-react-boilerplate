@@ -175,6 +175,7 @@ function Form() {
                     type="email"
                     testId="email"
                     autoFocus
+                    fullWidth={true}
                   />
                 </Grid>
 
@@ -184,6 +185,7 @@ function Form() {
                     label={t("sign-in:inputs.password.label")}
                     type="password"
                     testId="password"
+                    fullWidth={true}
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
