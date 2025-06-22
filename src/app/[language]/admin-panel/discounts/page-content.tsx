@@ -157,7 +157,7 @@ function Discounts() {
             textOverflow: "ellipsis",
           }}
         >
-          {params.value || "-"}
+          {params?.value || "-"}
         </Box>
       ),
     },
@@ -167,7 +167,7 @@ function Discounts() {
       width: 150,
       renderCell: (params) => (
         <Chip
-          label={tDiscountTypes(`discount-type:${params.value}`)}
+          label={tDiscountTypes(`discount-type:${params?.value}`)}
           color="primary"
           size="small"
         />
@@ -179,9 +179,13 @@ function Discounts() {
       width: 120,
       renderCell: (params) => (
         <span>
-          {params.row.type === DiscountTypeEnum.PERCENTAGE
-            ? `${params.value}%`
-            : `$${params.value.toFixed(2)}`}
+          {params?.row?.type
+            ? params?.row?.type === DiscountTypeEnum.PERCENTAGE
+              ? `${params?.value}%`
+              : params.value
+                ? /** `$${params?.value?.toFixed(2)}`*/ "-"
+                : "-"
+            : "-"}
         </span>
       ),
     },
@@ -190,7 +194,9 @@ function Discounts() {
       headerName: tDiscounts("admin-panel-discounts:table.column5"),
       width: 250,
       valueGetter: (params: any) =>
-        `${format(new Date(params.row.validFrom), "dd/MM/yyyy")} - ${format(new Date(params.row.validTo), "dd/MM/yyyy")}`,
+        params?.row?.validFrom
+          ? `${format(new Date(params?.row?.validFrom), "dd/MM/yyyy")} - ${format(new Date(params?.row?.validTo), "dd/MM/yyyy")}`
+          : "-",
     },
     {
       field: "isActive",
@@ -199,11 +205,11 @@ function Discounts() {
       renderCell: (params) => (
         <Chip
           label={
-            params.value
+            params?.value
               ? tDiscounts("admin-panel-discounts:status.active")
               : tDiscounts("admin-panel-discounts:status.inactive")
           }
-          color={params.value ? "success" : "error"}
+          color={params?.value ? "success" : "error"}
           size="small"
         />
       ),
@@ -212,7 +218,7 @@ function Discounts() {
       field: "actions",
       headerName: "",
       width: 120,
-      renderCell: (params) => <Actions discount={params.row} />,
+      renderCell: (params) => <Actions discount={params?.row} />,
       sortable: false,
       filterable: false,
     },

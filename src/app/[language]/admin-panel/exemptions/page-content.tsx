@@ -154,7 +154,7 @@ function Exemptions() {
             textOverflow: "ellipsis",
           }}
         >
-          {params.value || "-"}
+          {params?.value || "-"}
         </Box>
       ),
     },
@@ -163,8 +163,8 @@ function Exemptions() {
       headerName: tExemptions("admin-panel-exemptions:table.column3"),
       width: 200,
       valueGetter: (params: any) =>
-        params?.row.customer
-          ? `${params.row.customer.firstName} ${params.row.customer.lastName}`
+        params?.row?.customer
+          ? `${params?.row?.customer?.firstName} ${params?.row?.customer?.lastName}`
           : "-",
       renderCell: (params) => (
         <Box
@@ -174,7 +174,7 @@ function Exemptions() {
             textOverflow: "ellipsis",
           }}
         >
-          {params.value}
+          {params?.value}
         </Box>
       ),
     },
@@ -183,13 +183,15 @@ function Exemptions() {
       headerName: tExemptions("admin-panel-exemptions:table.column4"),
       width: 250,
       valueGetter: (params: any) =>
-        `${format(new Date(params.row.startDate), "dd/MM/yyyy")} - ${format(new Date(params.row.endDate), "dd/MM/yyyy")}`,
+        params?.row?.startDate
+          ? `${format(new Date(params?.row?.startDate), "dd/MM/yyyy")} - ${format(new Date(params?.row?.endDate), "dd/MM/yyyy")}`
+          : "-",
     },
     {
       field: "actions",
       headerName: "",
       width: 120,
-      renderCell: (params) => <Actions exemption={params.row} />,
+      renderCell: (params) => <Actions exemption={params?.row} />,
       sortable: false,
       filterable: false,
     },

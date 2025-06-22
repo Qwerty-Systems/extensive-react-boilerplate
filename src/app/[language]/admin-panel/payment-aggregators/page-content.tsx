@@ -173,7 +173,7 @@ function PaymentAggregators() {
         "admin-panel-payment-aggregators:table.column3"
       ),
       width: 200,
-      valueGetter: (params: any) => params.row.config?.webhookUrl || "-",
+      valueGetter: (params: any) => params?.row?.config?.webhookUrl || "-",
       renderCell: (params) => (
         <Box
           sx={{
@@ -182,7 +182,7 @@ function PaymentAggregators() {
             textOverflow: "ellipsis",
           }}
         >
-          {params.value}
+          {params?.value}
         </Box>
       ),
     },
@@ -195,7 +195,7 @@ function PaymentAggregators() {
       renderCell: (params) => (
         <Chip
           label={
-            params.value
+            params?.value
               ? tPaymentAggregators(
                   "admin-panel-payment-aggregators:status.active"
                 )
@@ -203,7 +203,7 @@ function PaymentAggregators() {
                   "admin-panel-payment-aggregators:status.inactive"
                 )
           }
-          color={params.value ? "success" : "error"}
+          color={params?.value ? "success" : "error"}
           size="small"
         />
       ),
@@ -212,7 +212,7 @@ function PaymentAggregators() {
       field: "actions",
       headerName: "",
       width: 120,
-      renderCell: (params) => <Actions aggregator={params.row} />,
+      renderCell: (params) => <Actions aggregator={params?.row} />,
       sortable: false,
       filterable: false,
     },

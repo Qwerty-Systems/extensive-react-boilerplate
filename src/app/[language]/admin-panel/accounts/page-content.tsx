@@ -138,7 +138,7 @@ function Accounts() {
     {
       field: "type",
       headerName: t("table.type"),
-      valueGetter: (params: any) => t(`account.types.${params.row.type}`),
+      valueGetter: (params: any) => t(`account.types.${params?.row?.type}`),
       flex: 1,
       minWidth: 150,
     },
@@ -148,7 +148,7 @@ function Accounts() {
       type: "number",
       flex: 1,
       minWidth: 150,
-      valueFormatter: (params: any) => `$${params.value.toFixed(2)}`,
+      valueFormatter: (params: any) => `$${params.value?.toFixed(2)}`,
     },
     {
       field: "active",
@@ -156,7 +156,7 @@ function Accounts() {
       flex: 1,
       minWidth: 120,
       renderCell: (params: any) => (
-        <Typography color={params.value ? "success.main" : "error"}>
+        <Typography color={params?.value ? "success.main" : "error"}>
           {params.value ? t("status.active") : t("status.inactive")}
         </Typography>
       ),
@@ -164,7 +164,7 @@ function Accounts() {
     {
       field: "tenant",
       headerName: t("table.tenant"),
-      valueGetter: (params: any) => params.row.tenant?.name,
+      valueGetter: (params: any) => params?.row?.tenant?.name,
       flex: 1,
       minWidth: 200,
     },
@@ -172,7 +172,7 @@ function Accounts() {
       field: "actions",
       headerName: "",
       width: 120,
-      renderCell: (params) => <Actions account={params.row} />,
+      renderCell: (params) => <Actions account={params?.row} />,
       sortable: false,
     },
   ];
