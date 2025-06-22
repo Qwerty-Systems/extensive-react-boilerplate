@@ -56,7 +56,7 @@ export const useGetCustomerPlansQuery = ({
           signal,
         }
       );
-      console.log("status, data ", status, data);
+
       if (status === HTTP_CODES_ENUM.OK) {
         return {
           data: data.data,

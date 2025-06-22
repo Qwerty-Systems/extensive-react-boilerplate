@@ -156,7 +156,7 @@ function CustomerPlans() {
       headerName: tCustomerPlans("admin-panel-customer-plans:table.column2"),
       width: 200,
       valueGetter: (params: any) =>
-        params.row.customer.map((c: any) => c.email).join(", "),
+        params.row?.customer?.map((c: any) => c.email).join(", "),
       renderCell: (params) => (
         <Box
           sx={{
@@ -165,7 +165,7 @@ function CustomerPlans() {
             textOverflow: "ellipsis",
           }}
         >
-          {params.row.customer.map((c: any) => c.email).join(", ")}
+          {params.row?.customer?.map((c: any) => c.email).join(", ")}
         </Box>
       ),
     },
@@ -175,7 +175,7 @@ function CustomerPlans() {
       flex: 1,
       minWidth: 200,
       valueGetter: (params: any) =>
-        params.row.plan.map((p: any) => p.name).join(", "),
+        params.row?.plan.map((p: any) => p.name).join(", "),
       renderCell: (params) => (
         <Box
           sx={{
@@ -184,7 +184,7 @@ function CustomerPlans() {
             textOverflow: "ellipsis",
           }}
         >
-          {params.row.plan.map((p: any) => p.name).join(", ")}
+          {params.row?.plan.map((p: any) => p.name).join(", ")}
         </Box>
       ),
     },
@@ -193,14 +193,14 @@ function CustomerPlans() {
       headerName: tCustomerPlans("admin-panel-customer-plans:table.column4"),
       width: 150,
       valueGetter: (params: any) =>
-        format(new Date(params.value), "dd/MM/yyyy"),
+        params?.value ? format(new Date(params.value), "dd/MM/yyyy") : "-",
     },
     {
       field: "endDate",
       headerName: tCustomerPlans("admin-panel-customer-plans:table.column5"),
       width: 150,
       valueGetter: (params: any) =>
-        params.value ? format(new Date(params.value), "dd/MM/yyyy") : "-",
+        params?.value ? format(new Date(params.value), "dd/MM/yyyy") : "-",
     },
     {
       field: "status",

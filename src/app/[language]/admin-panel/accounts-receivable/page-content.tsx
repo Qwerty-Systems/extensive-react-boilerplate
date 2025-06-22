@@ -138,7 +138,7 @@ function AccountsReceivables() {
       flex: 1,
       minWidth: 150,
       valueGetter: (params: any) =>
-        t(`transactionType.${params.row.transactionType}`),
+        t(`transactionType.${params?.row?.transactionType}`),
     },
     {
       field: "accountType",
@@ -146,8 +146,8 @@ function AccountsReceivables() {
       flex: 1,
       minWidth: 150,
       valueGetter: (params: any) =>
-        params.row.accountType
-          ? t(`accountType.${params.row.accountType}`)
+        params?.row?.accountType
+          ? t(`accountType.${params?.row?.accountType}`)
           : "",
     },
     {
@@ -156,12 +156,12 @@ function AccountsReceivables() {
       type: "number",
       flex: 1,
       minWidth: 150,
-      valueFormatter: (params: any) => `$${params.value.toFixed(2)}`,
+      valueFormatter: (params: any) => `$${params?.value?.toFixed(2)}`,
     },
     {
       field: "tenant",
       headerName: t("table.tenant"),
-      valueGetter: (params: any) => params.row.tenant?.name,
+      valueGetter: (params: any) => params?.row?.tenant?.name,
       flex: 1,
       minWidth: 200,
     },
@@ -171,13 +171,13 @@ function AccountsReceivables() {
       type: "dateTime",
       flex: 1,
       minWidth: 180,
-      valueGetter: (params: any) => new Date(params.row.createdAt),
+      valueGetter: (params: any) => new Date(params?.row?.createdAt),
     },
     {
       field: "actions",
       headerName: "",
       width: 120,
-      renderCell: (params: any) => <Actions accountsReceivable={params.row} />,
+      renderCell: (params: any) => <Actions accountsReceivable={params?.row} />,
       sortable: false,
     },
   ];

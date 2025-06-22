@@ -70,7 +70,7 @@ function AuditLogs() {
       minWidth: 150,
       renderCell: (params) => (
         <Chip
-          label={t(`audit.action.${params.row.action}`)}
+          label={t(`audit.action.${params?.row?.action}`)}
           color="primary"
           size="small"
         />
@@ -88,8 +88,8 @@ function AuditLogs() {
       flex: 1,
       minWidth: 200,
       valueGetter: (params: any) =>
-        params.row.performedByUser
-          ? `${params.row.performedByUser.firstName} ${params.row.performedByUser.lastName}`
+        params?.row?.performedByUser
+          ? `${params?.row?.performedByUser?.firstName} ${params?.row?.performedByUser?.lastName}`
           : "",
     },
     {
@@ -97,7 +97,7 @@ function AuditLogs() {
       headerName: t("table.tenant"),
       flex: 1,
       minWidth: 200,
-      valueGetter: (params: any) => params.row.performedByTenant?.name,
+      valueGetter: (params: any) => params?.row?.performedByTenant?.name,
     },
     {
       field: "description",
@@ -111,7 +111,9 @@ function AuditLogs() {
       flex: 1,
       minWidth: 180,
       valueGetter: (params: any) =>
-        format(new Date(params.row.createdAt), "PPpp"),
+        params?.row?.createdAt
+          ? format(new Date(params?.row?.createdAt), "PPpp")
+          : "-",
     },
   ];
 
