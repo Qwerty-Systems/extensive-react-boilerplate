@@ -260,7 +260,6 @@ function Customers({ onSelect }: { onSelect: (user: User) => void }) {
           </Box>
         </Box>
       )}
-      )
     </>
   );
 }
