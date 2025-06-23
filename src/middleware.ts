@@ -7,6 +7,7 @@ import {
   cookieName as i18nCookieName,
 } from "./services/i18n/config";
 import { AUTH_TOKEN_KEY } from "./services/auth/config";
+import { APP_DEFAULT_PATH } from "@/config";
 acceptLanguage.languages([...languages]);
 
 const PUBLIC_FILE = /\.(.*)$/;
@@ -100,6 +101,11 @@ export function middleware(req: NextRequest) {
   // Handle protected routes
   if (isProtectedRoute && !isAuthenticated) {
     return NextResponse.redirect(new URL(`/${pathLanguage}/sign-in`, req.url));
+  }
+  if (!isProtectedRoute && isAuthenticated) {
+    return NextResponse.redirect(
+      new URL(`/${pathLanguage}/${APP_DEFAULT_PATH}`, req.url)
+    );
   }
 
   // Handle language cookie from referer

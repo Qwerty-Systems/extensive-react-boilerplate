@@ -247,6 +247,72 @@ function withPageRequiredAuth(
     if (!user) {
       return null; // Already redirected in useEffect
     }
+    if (user) {
+      const userRole = user?.role?.name;
+      if (!userRole || !isRole(userRole)) {
+        router.replace(`/${language}/403-unauthorized`);
+        return;
+      }
+      console.log(
+        "User role:",
+        userRole,
+        options?.roles.includes(userRole as RoleEnum)
+      );
+      // Check if user has required role
+      const hasValidRole = Array.isArray(options?.roles)
+        ? options.roles.includes(userRole as RoleEnum)
+        : true;
+
+      if (!hasValidRole) {
+        router.replace(`/${language}/403-unauthorized`);
+        return;
+      }
+
+      // Redirect root path to default app path
+      if (pathname === `/${language}/`) {
+        router.replace(`/${language}${APP_DEFAULT_PATH}`);
+        return;
+      }
+
+      // Onboarding redirection logic
+      const isAdmin = isAdminRole(userRole);
+      const isOnboardingRoute =
+        pathname.includes("/onboarding/tenant") ||
+        pathname.includes("/onboarding/user");
+
+      const targetPath = `/${language}${APP_DEFAULT_PATH}`;
+
+      // Skip onboarding redirection for these routes
+      const isAllowedRoute =
+        isOnboardingRoute || pathname.includes("/sign-out");
+      console.log("ALLOW_ONBOARDING:", ALLOW_ONBOARDING);
+      if (!ALLOW_ONBOARDING) {
+        if (!isAllowedRoute) {
+          // Tenant onboarding for admins
+          if (isAdmin && !onboardingState.tenantOnboarded) {
+            router.replace(`/${language}/onboarding/tenant`);
+            return;
+          }
+
+          // User onboarding for regular users
+          if (!isAdmin && !onboardingState.userOnboarded) {
+            router.replace(`/${language}/onboarding/user`);
+            return;
+          }
+        }
+
+        // Redirect away from onboarding if completed
+        if (isOnboardingRoute) {
+          if (
+            (isAdmin && onboardingState.tenantOnboarded) ||
+            (!isAdmin && onboardingState.userOnboarded)
+          ) {
+            router.replace(targetPath);
+            return;
+          }
+        }
+      }
+    }
 
     return (
       <ErrorBoundary

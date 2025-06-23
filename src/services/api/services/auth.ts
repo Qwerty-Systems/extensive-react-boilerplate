@@ -6,6 +6,31 @@ import { Tokens } from "../types/tokens";
 import wrapperFetchJsonResponse from "../wrapper-fetch-json-response";
 import { RequestConfigType } from "./types/request-config";
 
+export type AuthTenantSignUpRequest = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  name: string;
+  type: any;
+};
+
+export type AuthTenantSignUpResponse = any;
+
+export function useAuthTenantSignUpService() {
+  const fetchBase = useFetch();
+
+  return useCallback(
+    (data: AuthTenantSignUpRequest, requestConfig?: RequestConfigType) => {
+      return fetchBase(`${API_URL}/v1/auth/tenant/register`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        ...requestConfig,
+      }).then(wrapperFetchJsonResponse<AuthTenantSignUpResponse>);
+    },
+    [fetchBase]
+  );
+}
 export type AuthLoginRequest = {
   email: string;
   password: string;
