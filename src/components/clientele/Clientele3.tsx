@@ -14,6 +14,8 @@ import ContainerWrapper from "@/components/ContainerWrapper";
 
 import { SECTION_COMMON_PY } from "@/utils/constant";
 import GraphicsImage from "../GraphicsImage";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 
 /***************************  CLIENTELE - 3  ***************************/
 
@@ -58,8 +60,29 @@ export default function Clientele3({ clienteleList }: Clientele3Props) {
   };
 
   return (
-    <ContainerWrapper sx={{ py: SECTION_COMMON_PY }}>
+    <ContainerWrapper
+      sx={{ py: SECTION_COMMON_PY /* , background: "#005c24" */ }}
+    >
       <Stack sx={{ gap: 2.5 }}>
+        <Box
+          sx={{
+            py: SECTION_COMMON_PY,
+            textAlign: "center",
+          }}
+        >
+          <ContainerWrapper>
+            <Typography
+              variant="h3"
+              sx={{
+                fontSize: "1.5rem",
+                mb: 1,
+                color: "#FFC107",
+              }}
+            >
+              Partners in Clean Communities
+            </Typography>
+          </ContainerWrapper>
+        </Box>
         <Box
           sx={{
             position: "relative",
@@ -117,6 +140,34 @@ export default function Clientele3({ clienteleList }: Clientele3Props) {
               ))}
             </Slider>
           </motion.div>
+        </Box>
+        <Box
+          sx={{
+            py: SECTION_COMMON_PY,
+            textAlign: "center",
+          }}
+        >
+          <ContainerWrapper>
+            <Button
+              href="/en/sign-up"
+              rel="noopener noreferrer"
+              variant="contained"
+              sx={{
+                background: "linear-gradient(45deg, #FFC107, #ffb300)",
+                color: "#003d1a",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+                fontWeight: 700,
+                borderRadius: "50px",
+                boxShadow: "0 10px 30px rgba(255,193,7,0.4)",
+                px: 3,
+                py: 1.5,
+              }}
+            >
+              {" "}
+              Join us on this journey!
+            </Button>
+          </ContainerWrapper>
         </Box>
       </Stack>
     </ContainerWrapper>
