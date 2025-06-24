@@ -43,7 +43,23 @@
       "validation": {
         "required": "Consent to the Privacy Policy is required"
       }
+    },
+    "isTenantSignup": {
+      "label": "Sign up as a tenant"
+    },
+    "tenantName": {
+      "label": "Tenant Name",
+      "validation": {
+        "required": "Tenant name is required"
+      }
+    },
+    "tenantType": {
+      "label": "Tenant Type",
+      "validation": {
+        "required": "Please select a tenant type"
+      }
     }
   },
-  "or": "OR"
+  "or": "OR",
+  "registrationSuccess": "Registration successful! Please check your email to verify your account."
 }

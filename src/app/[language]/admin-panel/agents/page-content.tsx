@@ -154,11 +154,11 @@ function Users() {
       ),
       sortable: false,
     },
-    {
-      field: "id",
-      headerName: tUsers("admin-panel-agents:table.column1"),
-      width: 120,
-    },
+    // {
+    //   field: "id",
+    //   headerName: tUsers("admin-panel-agents:table.column1"),
+    //   width: 120,
+    // },
     {
       field: "name",
       headerName: tUsers("admin-panel-agents:table.column2"),

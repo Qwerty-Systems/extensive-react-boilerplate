@@ -225,6 +225,9 @@ import ContainerWrapper from "@/components/ContainerWrapper";
 import { SECTION_COMMON_PY } from "@/utils/constant";
 import Button from "@mui/material/Button";
 import Input from "@mui/material/Input";
+import FollowUS from "./FollowUS";
+import Copyright from "./Copyright";
+import { CopyrightType } from "@/enum";
 
 export default function Footer7() {
   return (
@@ -236,8 +239,8 @@ export default function Footer7() {
       }}
     >
       <ContainerWrapper>
-        <Grid container spacing={4}>
-          <Grid sx={{ xs: 12, md: 3 }}>
+        <Grid container spacing={18}>
+          <Grid sx={{ xs: 12, md: 4 }}>
             <Box>
               <Typography variant="h6" sx={{ color: "#FFC107", mb: 2 }}>
                 Stay Connected
@@ -279,7 +282,7 @@ export default function Footer7() {
             </Box>
           </Grid>
 
-          <Grid sx={{ xs: 12, md: 3 }}>
+          <Grid sx={{ xs: 12, md: 4 }}>
             <Box>
               <Typography variant="h6" sx={{ color: "#FFC107", mb: 2 }}>
                 Get Started
@@ -303,7 +306,7 @@ export default function Footer7() {
             </Box>
           </Grid>
 
-          <Grid sx={{ xs: 12, md: 3 }}>
+          <Grid sx={{ xs: 12, md: 4 }}>
             <Box>
               <Typography variant="h6" sx={{ color: "#FFC107", mb: 2 }}>
                 Let&apos;s Talk
@@ -316,13 +319,14 @@ export default function Footer7() {
               </Typography>
             </Box>
           </Grid>
-
-          <Grid sx={{ xs: 12, md: 3 }}>
+        </Grid>
+        <Grid container sx={{ mt: 6 }}>
+          <Grid sx={{ xs: 12, md: 6 }}>
             <Box>
               <Typography variant="h6" sx={{ color: "#FFC107", mb: 2 }}>
                 Follow Our Progress
               </Typography>
-              <Stack direction="row" spacing={1}>
+              {/* <Stack direction="row" spacing={1}>
                 {["Instagram", "Twitter", "LinkedIn"].map((platform, index) => (
                   <Button
                     key={index}
@@ -346,6 +350,20 @@ export default function Footer7() {
                         : "💼"}
                   </Button>
                 ))}
+              </Stack> */}
+              <Stack
+                direction={{ sm: "row" }}
+                sx={{
+                  alignItems: "center",
+                  justifyContent: { xs: "center", sm: "space-between" },
+                  gap: 1.5,
+                  py: { xs: 2, sm: 1.5 },
+                  px: { xs: 2, sm: 3 },
+                }}
+              >
+                <FollowUS heading={false} color="grey.100" />
+
+                <Copyright type={CopyrightType.TYPE3} />
               </Stack>
             </Box>
           </Grid>

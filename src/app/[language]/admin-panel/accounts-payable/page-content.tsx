@@ -152,7 +152,7 @@ function AccountsPayables() {
       type: "number",
       flex: 1,
       minWidth: 150,
-      valueFormatter: (params: any) => `$${params.value.toFixed(2)}`,
+      valueFormatter: (params: any) => `$${params?.value?.toFixed(2)}`,
     },
     {
       field: "amount",
@@ -160,12 +160,12 @@ function AccountsPayables() {
       type: "number",
       flex: 1,
       minWidth: 150,
-      valueFormatter: (params: any) => `$${params.value.toFixed(2)}`,
+      valueFormatter: (params: any) => `$${params?.value?.toFixed(2)}`,
     },
     {
       field: "tenant",
       headerName: t("table.tenant"),
-      valueGetter: (params: any) => params.row.tenant?.name,
+      valueGetter: (params: any) => params?.row?.tenant?.name,
       flex: 1,
       minWidth: 200,
     },
@@ -173,7 +173,7 @@ function AccountsPayables() {
       field: "actions",
       headerName: "",
       width: 120,
-      renderCell: (params: any) => <Actions accountsPayable={params.row} />,
+      renderCell: (params: any) => <Actions accountsPayable={params?.row} />,
       sortable: false,
     },
   ];

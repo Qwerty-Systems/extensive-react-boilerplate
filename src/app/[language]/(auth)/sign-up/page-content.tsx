@@ -5,6 +5,7 @@ import { useForm, FormProvider, useFormState } from "react-hook-form";
 import {
   useAuthLoginService,
   useAuthSignUpService,
+  useAuthTenantSignUpService,
 } from "@/services/api/services/auth";
 import useAuthActions from "@/services/auth/use-auth-actions";
 import useAuthTokens from "@/services/auth/use-auth-tokens";
@@ -26,6 +27,18 @@ import SocialAuth from "@/services/social-auth/social-auth";
 import { isGoogleAuthEnabled } from "@/services/social-auth/google/google-config";
 import { isFacebookAuthEnabled } from "@/services/social-auth/facebook/facebook-config";
 import { isKeycloakAuthEnabled } from "@/services/social-auth/keycloak/keycloak-config";
+import { useEffect, useState } from "react";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
+import {
+  TenantType,
+  useGetTenantTypesService,
+} from "@/services/api/services/tenant-types";
+import CircularProgress from "@mui/material/CircularProgress";
+import FormSelectInput from "@/components/form/select/form-select";
+import { APP_DEFAULT_PATH } from "@/config";
+import { useRouter } from "next/navigation";
+import { useSnackbar } from "@/hooks/use-snackbar";
 type TPolicy = {
   id: string;
   name: string;
@@ -37,9 +50,11 @@ type SignUpFormData = {
   email: string;
   password: string;
   policy: TPolicy[];
+  tenantName?: string; // New field
+  tenantType?: any; // New field
 };
 
-const useValidationSchema = () => {
+const useValidationSchema = (isTenantSignup: boolean) => {
   const { t } = useTranslation("sign-up");
 
   return yup.object().shape({
@@ -61,6 +76,14 @@ const useValidationSchema = () => {
       .array()
       .min(1, t("sign-up:inputs.policy.validation.required"))
       .required(),
+    ...(isTenantSignup && {
+      tenantName: yup
+        .string()
+        .required(t("sign-up:inputs.tenantName.validation.required")),
+      tenantType: yup
+        .object()
+        .required(t("sign-up:inputs.tenantType.validation.required")),
+    }),
   });
 };
 
@@ -82,12 +105,22 @@ function FormActions() {
 }
 
 function Form() {
-  const { setUser } = useAuthActions();
+  const [isTenantSignup, setIsTenantSignup] = useState(false);
+  const { setUser, setTenant } = useAuthActions();
   const { setTokensInfo } = useAuthTokens();
   const fetchAuthLogin = useAuthLoginService();
   const fetchAuthSignUp = useAuthSignUpService();
+  const fetchAuthTenantSignUp = useAuthTenantSignUpService(); // New service
+  const [tenantTypes, setTenantTypes] = useState<TenantType[]>([]);
+  const [isLoadingTenantTypes, setIsLoadingTenantTypes] = useState(false);
+  const fetchTenantTypes = useGetTenantTypesService();
+  const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
+
   const { t } = useTranslation("sign-up");
-  const validationSchema = useValidationSchema();
+  const validationSchema = useValidationSchema(
+    isTenantSignup
+  ) as yup.ObjectSchema<SignUpFormData>;
   const policyOptions = [
     { id: "policy", name: t("sign-up:inputs.policy.agreement") },
   ];
@@ -100,47 +133,142 @@ function Form() {
       email: "",
       password: "",
       policy: [],
+      tenantName: "",
+      tenantType: "",
     },
   });
 
   const { handleSubmit, setError } = methods;
 
   const onSubmit = handleSubmit(async (formData) => {
-    const { data: dataSignUp, status: statusSignUp } =
-      await fetchAuthSignUp(formData);
+    if (isTenantSignup) {
+      const { data: dataSignUp, status: statusSignUp } =
+        await fetchAuthTenantSignUp({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+          name: formData.tenantName!,
+          type: { id: formData.tenantType!.id },
+        });
+      if (statusSignUp === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
+        (Object.keys(dataSignUp.errors) as Array<keyof SignUpFormData>).forEach(
+          (key) => {
+            setError(key, {
+              type: "manual",
+              message: t(
+                `sign-up:inputs.${key}.validation.server.${dataSignUp.errors[key]}`
+              ),
+            });
+          }
+        );
 
-    if (statusSignUp === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
-      (Object.keys(dataSignUp.errors) as Array<keyof SignUpFormData>).forEach(
-        (key) => {
-          setError(key, {
-            type: "manual",
-            message: t(
-              `sign-up:inputs.${key}.validation.server.${dataSignUp.errors[key]}`
+        return;
+      }
+      if (
+        statusSignUp === HTTP_CODES_ENUM.OK ||
+        statusSignUp === HTTP_CODES_ENUM.NO_CONTENT
+      ) {
+        const { data: dataSignIn, status: statusSignIn } = await fetchAuthLogin(
+          {
+            email: formData.email,
+            password: formData.password,
+          }
+        );
+
+        if (statusSignIn === HTTP_CODES_ENUM.OK) {
+          setTokensInfo({
+            token: dataSignIn.token,
+            refreshToken: dataSignIn.refreshToken,
+            tokenExpires: dataSignIn.tokenExpires,
+          });
+          setUser(dataSignIn.user);
+          setTenant(dataSignIn.user.tenant ?? null);
+          // const urlParams = new URLSearchParams(window.location.search);
+          // const returnTo =
+          //   urlParams.get("returnTo") || `/en/${APP_DEFAULT_PATH}`;
+          //TODO: Fix language handling
+          //`/${language}${APP_DEFAULT_PATH}`;
+          //router.push(returnTo);
+          enqueueSnackbar(
+            t(
+              "registrationSuccess",
+              "Registration successful! Please check your email to verify your account."
             ),
+            {
+              variant: "success",
+            }
+          );
+          router.replace(`/en/${APP_DEFAULT_PATH}`);
+        } else {
+          setError("email", {
+            type: "manual",
+            message: t("sign-up:inputs.email.validation.loginFailed"),
+          });
+          setError("password", {
+            type: "manual",
+            message: t("sign-up:inputs.password.validation.loginFailed"),
           });
         }
-      );
+      }
+    } else {
+      const { data: dataSignUp, status: statusSignUp } = await fetchAuthSignUp({
+        // firstName: formData.firstName,
+        // lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+      });
+      if (statusSignUp === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
+        (Object.keys(dataSignUp.errors) as Array<keyof SignUpFormData>).forEach(
+          (key) => {
+            setError(key, {
+              type: "manual",
+              message: t(
+                `sign-up:inputs.${key}.validation.server.${dataSignUp.errors[key]}`
+              ),
+            });
+          }
+        );
 
-      return;
-    }
+        return;
+      }
 
-    const { data: dataSignIn, status: statusSignIn } = await fetchAuthLogin({
-      email: formData.email,
-      password: formData.password,
-    });
+      const { data: dataSignIn, status: statusSignIn } = await fetchAuthLogin({
+        email: formData.email,
+        password: formData.password,
+      });
 
-    if (statusSignIn === HTTP_CODES_ENUM.OK) {
-      setTokensInfo(
-        {
-          token: dataSignIn.token,
-          refreshToken: dataSignIn.refreshToken,
-          tokenExpires: dataSignIn.tokenExpires,
-        }
-        /*  "local" */
-      );
-      setUser(dataSignIn.user);
+      if (statusSignIn === HTTP_CODES_ENUM.OK) {
+        setTokensInfo(
+          {
+            token: dataSignIn.token,
+            refreshToken: dataSignIn.refreshToken,
+            tokenExpires: dataSignIn.tokenExpires,
+          }
+          /*  "local" */
+        );
+        setUser(dataSignIn.user);
+      }
     }
   });
+  // Fetch tenant types on component mount
+  useEffect(() => {
+    const loadTenantTypes = async () => {
+      setIsLoadingTenantTypes(true);
+      try {
+        const { data } = await fetchTenantTypes({ page: 1, limit: 100 });
+        if (data && "data" in data) {
+          setTenantTypes(data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch tenant types:", error);
+      } finally {
+        setIsLoadingTenantTypes(false);
+      }
+    };
+
+    loadTenantTypes();
+  }, [fetchTenantTypes]);
 
   return (
     <FormProvider {...methods}>
@@ -150,6 +278,48 @@ function Form() {
             <Grid size={{ xs: 12 }} mt={3}>
               <Typography variant="h6">{t("sign-up:title")}</Typography>
             </Grid>
+            {/* Tenant Signup Toggle */}
+            <Grid sx={{ xs: 12 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isTenantSignup}
+                    onChange={(e) => setIsTenantSignup(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label={t("sign-up:inputs.isTenantSignup.label")}
+              />
+            </Grid>
+
+            {/* Tenant Fields - Conditionally shown */}
+            {isTenantSignup && (
+              <>
+                <Grid sx={{ xs: 12 }}>
+                  <FormTextInput<SignUpFormData>
+                    name="tenantName"
+                    label={t("sign-up:inputs.tenantName.label")}
+                    testId="tenant-name"
+                  />
+                </Grid>
+                <Grid sx={{ xs: 12 }}>
+                  {isLoadingTenantTypes ? (
+                    <Box display="flex" justifyContent="center">
+                      <CircularProgress size={24} />
+                    </Box>
+                  ) : (
+                    <FormSelectInput<SignUpFormData, TenantType>
+                      name="tenantType"
+                      label={t("sign-up:inputs.tenantType.label")}
+                      options={tenantTypes}
+                      testId="tenant-type"
+                      keyValue="id"
+                      renderOption={(option) => option.name}
+                    />
+                  )}
+                </Grid>
+              </>
+            )}
             {[!isKeycloakAuthEnabled].some(Boolean) && (
               <>
                 <Grid size={{ xs: 12 }}>

@@ -3,7 +3,6 @@ import Grid from "@mui/material/Grid";
 import Hero from "@/components/hero/Hero";
 // import { Benefit } from "@/components/benefit";
 import Feature18 from "@/components/feature/Feature18";
-import Feature21 from "@/components/feature/Feature21";
 import { Cta4 } from "@/components/cta";
 // import { DynamicComponentType } from "@/enum";
 import { Clientele3 } from "@/components/clientele";
@@ -18,19 +17,11 @@ function DescriptionLine() {
       SakaTaka connects every player in the waste value chain. Waste collectors
       get the tools to serve communities better. Residents get reliable service
       and easy communication. Recyclers get consistent material supply.
-      Communities get cleaner environments. When everyone&apos;s connected
-      through one platform, waste stops being a problem and starts being an
-      opportunity. Built in Kenya, designed for impact across Africa and beyond.{" "}
-      {/* <Link href={branding.company.socialLink.discord} passHref>
-        <MuiLink
-          variant="caption"
-          color="primary"
-          component="a"
-          underline="hover"
-        >
-          Join our journey!
-        </MuiLink>
-      </Link> */}
+      Communities get cleaner environments. <br />
+      <br />
+      When everyone&apos;s connected through one platform, waste stops being a
+      problem and starts being an opportunity. Built in Kenya, designed for
+      impact across Africa and beyond.
     </Typography>
   );
 }
@@ -40,10 +31,10 @@ export default function Home(/* props: Props */) {
   const hero: any = {
     headLine: (
       <>
-        Waste Collection
+        A Smarter Way to Run
         <br />
         <Box component="span" sx={{ color: "#FFC107" }}>
-          That Actually Works
+          Waste Services
         </Box>
       </>
     ),
@@ -114,9 +105,9 @@ export default function Home(/* props: Props */) {
   // };
 
   const feature18 = {
-    heading: "What You Get.",
-    caption:
-      "We’re on a mission to revolutionize waste management. Join us as we build a platform that empowers waste collectors and communities.",
+    heading: "More than just software ",
+    caption: "",
+    // "We’re on a mission to revolutionize waste management. Join us as we build a platform that empowers waste collectors and communities.",
     topics: [
       {
         icon: "tabler-sparkles",
@@ -232,35 +223,35 @@ export default function Home(/* props: Props */) {
       },
     ],
   };
-  const feature21 = {
-    heading: `Partners in Clean Communities`,
-    caption:
-      "Working with forward-thinking waste companies and community groups.",
-    image: "/assets/images/graphics/hosting/dashboard-light.png",
-    // primaryBtn: {
-    //   children: "Find out more",
-    //   href: "/",
-    //   ...linkProps,
-    // },
-    // secondaryBtn: {
-    //   children: "Start Now",
-    //   href: "/",
-    //   ...linkProps,
-    // },
-    features: [
-      {
-        animationDelay: 0.1,
-        icon: "tabler-components",
-        title: "Payments Made Simple",
-      },
-    ],
-  };
+  // const feature21 = {
+  //   heading: `Partners in Clean Communities`,
+  //   caption:
+  //     "Working with forward-thinking waste companies and community groups.",
+  //   image: "/assets/images/graphics/hosting/dashboard-light.png",
+  //   // primaryBtn: {
+  //   //   children: "Find out more",
+  //   //   href: "/",
+  //   //   ...linkProps,
+  //   // },
+  //   // secondaryBtn: {
+  //   //   children: "Start Now",
+  //   //   href: "/",
+  //   //   ...linkProps,
+  //   // },
+  //   features: [
+  //     {
+  //       animationDelay: 0.1,
+  //       icon: "tabler-components",
+  //       title: "Payments Made Simple",
+  //     },
+  //   ],
+  // };
   const cta4 = {
-    headLine: "Want the inside scoop on new features?",
+    headLine: "Powering The Waste Ecosystem",
     primaryBtn: {
-      children: "Stay Connected",
-      href: "/",
-      target: "_blank",
+      children: "Join Now",
+      href: "/en/sign-up",
+      //target: "_blank",
       rel: "noopener noreferrer",
     },
     profileGroups: {
@@ -283,7 +274,7 @@ export default function Home(/* props: Props */) {
       { primary: "Regular Updates Provided" },
       { primary: "Proven Industry Leader" },
     ],
-    clientContent: "Join our journey!",
+    clientContent: "Join us on this journey!",
   };
   // const clientele = {
   //   title:
@@ -604,15 +595,6 @@ export default function Home(/* props: Props */) {
             caption={feature18.caption}
             topics={feature18.topics}
           />
-          {/* <Cta5
-            heading={cta5.heading}
-            // primaryBtn={cta5.primaryBtn}
-            // profileGroups={cta5.profileGroups}
-            // caption={cta5.caption}
-            // label={cta5.label}
-            description={cta5.description}
-            // saleData={cta5.saleData}
-          /> */}
           <Cta4
             headLine={cta4.headLine}
             primaryBtn={cta4.primaryBtn}
@@ -621,18 +603,18 @@ export default function Home(/* props: Props */) {
             // primaryBtn={cta5.primaryBtn}
             // profileGroups={cta5.profileGroups}
             // caption={cta5.caption}
-            // label={cta5.label}
+            //label={cta5.label}
             description={cta5.description}
             // saleData={cta5.saleData}
           />
-          <Feature21
+          {/* <Feature21
             heading={feature21.heading}
             caption={feature21.caption}
-            // image={feature21.image}
-            // features={feature21.features}
-            // primaryBtn={/* feature21.primaryBtn */ null}
-            // secondaryBtn={/* feature21.secondaryBtn */ null}
-          />
+            image={feature21.image}
+            features={feature21.features}
+            primaryBtn={/* feature21.primaryBtn  null}
+            secondaryBtn={/* feature21.secondaryBtn  null}
+          /> */}
           <Clientele3 clienteleList={clientele.clienteleList} />
 
           {/* <Faq6
