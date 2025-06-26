@@ -286,7 +286,7 @@ function withPageRequiredAuth(
       const isAllowedRoute =
         isOnboardingRoute || pathname.includes("/sign-out");
       console.log("ALLOW_ONBOARDING:", ALLOW_ONBOARDING);
-      if (!ALLOW_ONBOARDING) {
+      if (ALLOW_ONBOARDING) {
         if (!isAllowedRoute) {
           // Tenant onboarding for admins
           if (isAdmin && !onboardingState.tenantOnboarded) {

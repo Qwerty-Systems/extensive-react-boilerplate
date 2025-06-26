@@ -1,879 +1,10 @@
-"use client";
-
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { RoleEnum } from "@/services/api/types/role";
-import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
-import Container from "@mui/material/Container";
-import Typography from "@mui/material/Typography";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import TextField from "@mui/material/TextField";
-import Alert from "@mui/material/Alert";
-import CircularProgress from "@mui/material/CircularProgress";
-import { TENANT_ONBOARDING_STEPS } from "@/utils/constant";
-import {
-  useCompleteStep,
-  useGetOnboardingStatus,
-  useInitializeOnboarding,
-  useSkipStep,
-} from "@/services/api/services/onboarding";
-import {
-  OnboardingEntityType,
-  OnboardingStepStatus,
-} from "@/services/api/types/onboarding";
-import useAuth from "@/services/auth/use-auth";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Grid from "@mui/material/Grid";
-
-// Mock languages and timezones for the demo
-const LANGUAGES = [
-  { value: "en", label: "English" },
-  { value: "es", label: "Spanish" },
-  { value: "fr", label: "French" },
-  { value: "de", label: "German" },
-];
-
-const TIMEZONES = [
-  { value: "UTC-12", label: "UTC-12:00" },
-  { value: "UTC-8", label: "UTC-08:00 (PST)" },
-  { value: "UTC-5", label: "UTC-05:00 (EST)" },
-  { value: "UTC", label: "UTC" },
-  { value: "UTC+1", label: "UTC+01:00 (CET)" },
-  { value: "UTC+8", label: "UTC+08:00 (CST)" },
-];
-
-function TenantOnboarding() {
-  const { t } = useTranslation("onboarding-tenant");
-  const [activeStepKey, setActiveStepKey] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-  const [skippedSteps, setSkippedSteps] = useState<string[]>([]);
-  const { user } = useAuth();
-  const getOnboardingStatus = useGetOnboardingStatus();
-  const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
-  const [formData, setFormData] = useState<Record<string, any>>({});
-  const [error, setError] = useState<string | null>(null);
-
-  // Create a map of steps by key for quick lookup
-  const stepsByKey = useMemo(() => {
-    return TENANT_ONBOARDING_STEPS.reduce(
-      (acc, step) => {
-        acc[step.key] = step;
-        return acc;
-      },
-      {} as Record<string, (typeof TENANT_ONBOARDING_STEPS)[0]>
-    );
-  }, []);
-
-  // Get ordered step keys
-  const orderedStepKeys = useMemo(() => {
-    return TENANT_ONBOARDING_STEPS.map((step) => step.key);
-  }, []);
-
-  // Find step index by key
-  const getStepIndex = (key: string) => orderedStepKeys.indexOf(key);
-
-  const refetch = useCallback(async () => {
-    if (user?.tenant?.id) {
-      setLoading(true);
-      try {
-        const result = await getOnboardingStatus({
-          entityType: OnboardingEntityType.TENANT,
-          entityId: user?.tenant?.id,
-        });
-
-        if (
-          result?.data &&
-          "steps" in result.data &&
-          Array.isArray(result.data.steps)
-        ) {
-          setOnboardingStatus(result);
-
-          const completed: string[] = [];
-          const skipped: string[] = [];
-
-          result.data.steps.forEach((step: any) => {
-            if (step.status === OnboardingStepStatus.COMPLETED.toLowerCase()) {
-              completed.push(step.stepKey);
-            } else if (
-              step.status === OnboardingStepStatus.SKIPPED.toLowerCase()
-            ) {
-              skipped.push(step.stepKey);
-            }
-          });
-
-          setCompletedSteps(completed);
-          setSkippedSteps(skipped);
-
-          // Find first incomplete step by order
-          const firstIncomplete = result.data.steps.find(
-            (step: any) =>
-              step.status === OnboardingStepStatus.PENDING.toLowerCase()
-          );
-
-          setActiveStepKey(firstIncomplete ? firstIncomplete.stepKey : null);
-        } else {
-          console.warn("Unexpected onboarding status response:", result);
-          setError(t("errorLoadingStatus"));
-        }
-      } catch (err: any) {
-        console.error("Error fetching onboarding status:", err);
-        setError(err.message || t("errorLoadingStatus"));
-      } finally {
-        setLoading(false);
-      }
-    }
-  }, [user, getOnboardingStatus, t]);
-
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
-  const initializeOnboarding = useInitializeOnboarding();
-  const completeStep = useCompleteStep();
-  const skipStep = useSkipStep();
-
-  useEffect(() => {
-    if (user?.tenant?.id && !onboardingStatus) {
-      initializeOnboarding({
-        entityId: user.tenant.id!,
-        entityType: OnboardingEntityType.TENANT,
-      })
-        .then(() => refetch())
-        .catch((err) => setError(err.message));
-    }
-  }, [user?.tenant?.id, onboardingStatus, initializeOnboarding, refetch]);
-
-  const handleNext = useCallback(async () => {
-    if (!user?.tenant?.id || !user?.id || !onboardingStatus || !activeStepKey)
-      return;
-
-    const currentStep = onboardingStatus.data.steps.find(
-      (step: any) => step.stepKey === activeStepKey
-    );
-
-    if (!currentStep) return;
-
-    try {
-      setLoading(true);
-
-      await completeStep({
-        entityType: OnboardingEntityType.TENANT,
-        entityId: user.tenant.id,
-        stepId: currentStep.id,
-        metadata: formData,
-        performedBy: { userId: user.id?.toString() ?? "" },
-      });
-
-      refetch();
-    } catch (err: any) {
-      setError(err.message || t("errorCompletingStep"));
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    user,
-    onboardingStatus,
-    activeStepKey,
-    formData,
-    completeStep,
-    refetch,
-    t,
-  ]);
-
-  const handleBack = () => {
-    if (!activeStepKey) return;
-
-    const currentIndex = getStepIndex(activeStepKey);
-    if (currentIndex > 0) {
-      setActiveStepKey(orderedStepKeys[currentIndex - 1]);
-    }
-  };
-
-  const handleSkip = useCallback(async () => {
-    if (!user?.tenant?.id || !user?.id || !onboardingStatus || !activeStepKey)
-      return;
-
-    try {
-      setLoading(true);
-
-      await skipStep({
-        entityType: OnboardingEntityType.TENANT,
-        entityId: user.tenant.id,
-        stepKey: activeStepKey,
-        performedBy: { userId: user.id.toString() },
-      });
-
-      refetch();
-    } catch (err: any) {
-      setError(err.message || t("errorSkippingStep"));
-    } finally {
-      setLoading(false);
-    }
-  }, [user, onboardingStatus, activeStepKey, skipStep, refetch, t]);
-
-  const handleSubmit = useCallback(async () => {
-    if (!user?.tenant?.id || !user?.id || !onboardingStatus) return;
-
-    try {
-      setLoading(true);
-
-      await Promise.all(
-        onboardingStatus.data.steps
-          .filter((step: any) => step.status === OnboardingStepStatus.PENDING)
-          .map((step: any) =>
-            completeStep({
-              entityType: OnboardingEntityType.TENANT,
-              entityId: user?.tenant?.id || "",
-              stepId: step.id,
-              metadata: formData,
-              performedBy: { userId: user?.id?.toString() ?? "" },
-            })
-          )
-      );
-
-      refetch();
-      setConfirmDialogOpen(false);
-    } catch (err: any) {
-      setError(err.message || t("errorSubmitting"));
-    } finally {
-      setLoading(false);
-    }
-  }, [user, onboardingStatus, formData, completeStep, refetch, t]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  const handleSelectChange = (e: any) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const isStepOptional = (stepKey: string) => {
-    return stepsByKey[stepKey]?.isSkippable;
-  };
-
-  const isStepCompleted = (stepKey: string) => {
-    return completedSteps.includes(stepKey);
-  };
-
-  const isStepSkipped = (stepKey: string) => {
-    return skippedSteps.includes(stepKey);
-  };
-
-  const getStepContent = (stepKey: string) => {
-    switch (stepKey) {
-      case "tenant_registration": // Tenant Registration
-        return (
-          <Grid container spacing={3}>
-            <Grid sx={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                label={t("tenantNamePlaceholder")}
-                name="tenantName"
-                value={formData.tenantName || ""}
-                onChange={handleInputChange}
-                variant="outlined"
-                required
-              />
-            </Grid>
-            <Grid sx={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                label={t("contactEmailPlaceholder")}
-                name="contactEmail"
-                type="email"
-                value={formData.contactEmail || ""}
-                onChange={handleInputChange}
-                variant="outlined"
-                required
-              />
-            </Grid>
-          </Grid>
-        );
-
-      case "admin_creation": // Admin Account Setup
-        return (
-          <Grid container spacing={3}>
-            <Grid sx={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                label={t("adminFirstNamePlaceholder")}
-                name="adminFirstName"
-                value={formData.adminFirstName || ""}
-                onChange={handleInputChange}
-                variant="outlined"
-                required
-              />
-            </Grid>
-            <Grid sx={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                label={t("adminLastNamePlaceholder")}
-                name="adminLastName"
-                value={formData.adminLastName || ""}
-                onChange={handleInputChange}
-                variant="outlined"
-                required
-              />
-            </Grid>
-            <Grid sx={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                label={t("adminEmailPlaceholder")}
-                name="adminEmail"
-                type="email"
-                value={formData.adminEmail || ""}
-                onChange={handleInputChange}
-                variant="outlined"
-                required
-              />
-            </Grid>
-            <Grid sx={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                label={t("adminPasswordPlaceholder")}
-                name="adminPassword"
-                type="password"
-                value={formData.adminPassword || ""}
-                onChange={handleInputChange}
-                variant="outlined"
-                required
-              />
-            </Grid>
-          </Grid>
-        );
-
-      case "domain_configuration": // Domain Configuration
-        return (
-          <Grid container spacing={3}>
-            <Grid sx={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                label={t("customDomainPlaceholder")}
-                name="customDomain"
-                value={formData.customDomain || ""}
-                onChange={handleInputChange}
-                placeholder="yourdomain.example.com"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid sx={{ xs: 12 }}>
-              <Alert severity="info">{t("domainOptionalMessage")}</Alert>
-            </Grid>
-          </Grid>
-        );
-
-      case "schema_initialization": // Schema Initialization
-        return (
-          <Box textAlign="center" py={4}>
-            <CircularProgress size={60} />
-            <Typography variant="h6" mt={2}>
-              {t("schemaInitializationTitle")}
-            </Typography>
-            <Typography variant="body2" color="textSecondary" mt={1}>
-              {t("schemaInitializationDescription")}
-            </Typography>
-          </Box>
-        );
-
-      case "payment_setup": // Payment Setup
-        return (
-          <Grid container spacing={3}>
-            <Grid sx={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                label={t("cardholderNamePlaceholder")}
-                name="cardName"
-                value={formData.cardName || ""}
-                onChange={handleInputChange}
-                variant="outlined"
-                required
-              />
-            </Grid>
-            <Grid sx={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                label={t("creditCardNumberPlaceholder")}
-                name="cardNumber"
-                value={formData.cardNumber || ""}
-                onChange={handleInputChange}
-                variant="outlined"
-                required
-              />
-            </Grid>
-            <Grid sx={{ xs: 12, md: 4 }}>
-              <TextField
-                fullWidth
-                label={t("expiryDatePlaceholder")}
-                name="cardExpiry"
-                value={formData.cardExpiry || ""}
-                onChange={handleInputChange}
-                placeholder="MM/YY"
-                variant="outlined"
-                required
-              />
-            </Grid>
-            <Grid sx={{ xs: 12, md: 4 }}>
-              <TextField
-                fullWidth
-                label={t("cvvPlaceholder")}
-                name="cardCvv"
-                value={formData.cardCvv || ""}
-                onChange={handleInputChange}
-                variant="outlined"
-                required
-              />
-            </Grid>
-          </Grid>
-        );
-
-      case "branding_configuration": // Branding Configuration
-        return (
-          <Grid container spacing={3}>
-            <Grid sx={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                label={t("primaryColorPlaceholder")}
-                name="primaryColor"
-                value={formData.primaryColor || ""}
-                onChange={handleInputChange}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid sx={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                label={t("secondaryColorPlaceholder")}
-                name="secondaryColor"
-                value={formData.secondaryColor || ""}
-                onChange={handleInputChange}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid sx={{ xs: 12 }}>
-              <input
-                accept="image/*"
-                type="file"
-                id="logo-upload"
-                hidden
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    setFormData((prev) => ({
-                      ...prev,
-                      logo: e.target.files?.[0],
-                    }));
-                  }
-                }}
-              />
-              <label htmlFor="logo-upload">
-                <Button variant="outlined" component="span">
-                  {t("uploadLogoButton")}
-                </Button>
-              </label>
-              {formData.logo && (
-                <Typography variant="body2" mt={1}>
-                  {formData.logo.name}
-                </Typography>
-              )}
-            </Grid>
-          </Grid>
-        );
-
-      case "initial_settings": // Initial Settings
-        return (
-          <Grid container spacing={3}>
-            <Grid sx={{ xs: 12, md: 6 }}>
-              <FormControl fullWidth variant="outlined">
-                <InputLabel>{t("languagePlaceholder")}</InputLabel>
-                <Select
-                  name="language"
-                  value={formData.language || ""}
-                  onChange={handleSelectChange}
-                  label={t("languagePlaceholder")}
-                >
-                  {LANGUAGES.map((lang) => (
-                    <MenuItem key={lang.value} value={lang.value}>
-                      {lang.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid sx={{ xs: 12, md: 6 }}>
-              <FormControl fullWidth variant="outlined">
-                <InputLabel>{t("timezonePlaceholder")}</InputLabel>
-                <Select
-                  name="timezone"
-                  value={formData.timezone || ""}
-                  onChange={handleSelectChange}
-                  label={t("timezonePlaceholder")}
-                >
-                  {TIMEZONES.map((tz) => (
-                    <MenuItem key={tz.value} value={tz.value}>
-                      {tz.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid sx={{ xs: 12 }}>
-              <Typography variant="h6" gutterBottom>
-                {t("notificationSettings.title")}
-              </Typography>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!formData.notification_email}
-                    onChange={handleInputChange}
-                    name="notification_email"
-                  />
-                }
-                label={t("notificationSettings.emailNotifications")}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!formData.notification_sms}
-                    onChange={handleInputChange}
-                    name="notification_sms"
-                  />
-                }
-                label={t("notificationSettings.smsNotifications")}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!formData.notification_push}
-                    onChange={handleInputChange}
-                    name="notification_push"
-                  />
-                }
-                label={t("notificationSettings.pushNotifications")}
-              />
-            </Grid>
-          </Grid>
-        );
-
-      case "go_live_check": // Go-Live Checklist
-        return (
-          <Grid container spacing={3}>
-            <Grid sx={{ xs: 12 }}>
-              <FormControlLabel
-                control={<Checkbox name="verifiedSettings" />}
-                label={t("verifiedSettingsLabel")}
-              />
-            </Grid>
-            <Grid sx={{ xs: 12 }}>
-              <FormControlLabel
-                control={<Checkbox name="testedRegistration" />}
-                label={t("testedRegistrationLabel")}
-              />
-            </Grid>
-            <Grid sx={{ xs: 12 }}>
-              <FormControlLabel
-                control={<Checkbox name="reviewedCompliance" />}
-                label={t("reviewedComplianceLabel")}
-              />
-            </Grid>
-            <Grid sx={{ xs: 12 }}>
-              <FormControlLabel
-                control={<Checkbox name="backedUpConfig" />}
-                label={t("backedUpConfigLabel")}
-              />
-            </Grid>
-          </Grid>
-        );
-
-      default:
-        return `Unknown step: ${stepKey}`;
-    }
-  };
-
-  const renderStepActions = () => {
-    if (!activeStepKey) {
-      return (
-        <Box mt={4}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => (window.location.href = "/")}
-          >
-            {t("backToHomeButton")}
-          </Button>
-        </Box>
-      );
-    }
-
-    const currentStepIndex = getStepIndex(activeStepKey);
-    const isLastStep = currentStepIndex === TENANT_ONBOARDING_STEPS.length - 1;
-
-    return (
-      <Box mt={4} display="flex" justifyContent="space-between">
-        <Button disabled={currentStepIndex === 0} onClick={handleBack}>
-          {t("previousButton")}
-        </Button>
-
-        <Box>
-          {isStepOptional(activeStepKey) && (
-            <Button
-              variant="outlined"
-              onClick={handleSkip}
-              sx={{ mr: 2 }}
-              disabled={loading}
-            >
-              {t("skipButton")}
-            </Button>
-          )}
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={isLastStep ? () => setConfirmDialogOpen(true) : handleNext}
-            disabled={loading}
-          >
-            {loading ? (
-              <CircularProgress size={24} />
-            ) : isLastStep ? (
-              t("finishButton")
-            ) : (
-              t("nextButton")
-            )}
-          </Button>
-        </Box>
-      </Box>
-    );
-  };
-
-  const renderCompletionScreen = () => (
-    <Box textAlign="center" py={6}>
-      <Box mb={3}>
-        <svg width="100" height="100" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="12" fill="#4CAF50" />
-          <path fill="none" stroke="#FFF" strokeWidth="2" d="M7 13l3 3 7-7" />
-        </svg>
-      </Box>
-      <Typography variant="h4" gutterBottom>
-        {t("tenantOnboardingSuccessTitle")}
-      </Typography>
-      <Typography variant="body1" color="textSecondary">
-        {t("completionMessage")}
-      </Typography>
-      <Box mt={4}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => (window.location.href = "/")}
-        >
-          {t("backToHomeButton")}
-        </Button>
-      </Box>
-    </Box>
-  );
-
-  if (loading) {
-    return (
-      <Container maxWidth="xl">
-        <Grid
-          container
-          justifyContent="center"
-          alignItems="center"
-          style={{ minHeight: "80vh" }}
-        >
-          <Grid sx={{ xs: 12 }} textAlign="center">
-            <CircularProgress size={60} />
-            <Typography variant="h6" mt={2}>
-              {t("loadingMessage")}
-            </Typography>
-          </Grid>
-        </Grid>
-      </Container>
-    );
-  }
-
-  if (error) {
-    return (
-      <Container maxWidth="xl">
-        <Grid container spacing={3} pt={3}>
-          <Grid sx={{ xs: 12 }}>
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
-            </Alert>
-            <Button
-              variant="contained"
-              onClick={() => window.location.reload()}
-            >
-              {t("retryButton")}
-            </Button>
-            <Button variant="outlined" sx={{ ml: 2 }} href="/support">
-              {t("contactSupportButton")}
-            </Button>
-          </Grid>
-        </Grid>
-      </Container>
-    );
-  }
-
-  // Calculate active step index for stepper
-  const activeStepIndex = activeStepKey
-    ? getStepIndex(activeStepKey)
-    : TENANT_ONBOARDING_STEPS.length;
-
-  return (
-    <Container maxWidth="xl">
-      <Grid container spacing={3} pt={3}>
-        <Grid sx={{ xs: 12 }} mb={2}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            <strong>{t("title")}</strong>
-          </Typography>
-          <Typography variant="subtitle1" color="textSecondary">
-            {t("description")}
-          </Typography>
-        </Grid>
-
-        <Grid sx={{ xs: 12 }}>
-          <Stepper
-            activeStep={activeStepIndex}
-            alternativeLabel
-            sx={{
-              mb: 4,
-              overflowX: "auto",
-              "& .MuiStepLabel-label": {
-                fontSize: { xs: "0.75rem", sm: "0.875rem" },
-              },
-            }}
-          >
-            {TENANT_ONBOARDING_STEPS.map((step) => (
-              <Step
-                key={step.key}
-                completed={
-                  isStepCompleted(step.key) ||
-                  activeStepIndex > getStepIndex(step.key)
-                }
-              >
-                <StepLabel
-                  optional={
-                    step.isSkippable && (
-                      <Typography variant="caption">
-                        {t("optionalLabel")}
-                      </Typography>
-                    )
-                  }
-                  error={isStepSkipped(step.key)}
-                >
-                  {step.name}
-                </StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-
-          <Paper elevation={2} sx={{ p: 3 }}>
-            {!activeStepKey ? (
-              renderCompletionScreen()
-            ) : (
-              <>
-                <Typography variant="h5" gutterBottom>
-                  {stepsByKey[activeStepKey]?.name || ""}
-                </Typography>
-                <Typography variant="body1" color="textSecondary" mb={3}>
-                  {stepsByKey[activeStepKey]?.description || ""}
-                </Typography>
-
-                {getStepContent(activeStepKey)}
-
-                {renderStepActions()}
-              </>
-            )}
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* Confirmation Dialog */}
-      {confirmDialogOpen && (
-        <Box
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1300,
-          }}
-        >
-          <Paper sx={{ p: 4, maxWidth: 500, width: "100%" }}>
-            <Typography variant="h6" gutterBottom>
-              {t("confirmationMessage")}
-            </Typography>
-            <Typography variant="body1" mb={3}>
-              {t("confirmationDescription")}
-            </Typography>
-            <Box display="flex" justifyContent="flex-end">
-              <Button
-                onClick={() => setConfirmDialogOpen(false)}
-                sx={{ mr: 2 }}
-                disabled={loading}
-              >
-                {t("cancelConfirmationButton")}
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSubmit}
-                disabled={loading}
-              >
-                {loading ? <CircularProgress size={24} /> : t("confirmButton")}
-              </Button>
-            </Box>
-          </Paper>
-        </Box>
-      )}
-    </Container>
-  );
-}
-
-export default withPageRequiredAuth(TenantOnboarding, {
-  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER, RoleEnum.MANAGER],
-});
 // "use client";
 
-// import {
-//   useState,
-//   useEffect,
-//   useCallback,
-//   JSXElementConstructor,
-//   Key,
-//   ReactElement,
-//   ReactNode,
-//   ReactPortal,
-// } from "react";
+// import { useState, useEffect, useCallback, useMemo } from "react";
 // import { useTranslation } from "react-i18next";
 // import { RoleEnum } from "@/services/api/types/role";
 // import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
 // import Container from "@mui/material/Container";
-// import Grid from "@mui/material/Grid";
 // import Typography from "@mui/material/Typography";
 // import Stepper from "@mui/material/Stepper";
 // import Step from "@mui/material/Step";
@@ -902,6 +33,7 @@ export default withPageRequiredAuth(TenantOnboarding, {
 // import MenuItem from "@mui/material/MenuItem";
 // import FormControlLabel from "@mui/material/FormControlLabel";
 // import Checkbox from "@mui/material/Checkbox";
+// import Grid from "@mui/material/Grid";
 
 // // Mock languages and timezones for the demo
 // const LANGUAGES = [
@@ -922,16 +54,35 @@ export default withPageRequiredAuth(TenantOnboarding, {
 
 // function TenantOnboarding() {
 //   const { t } = useTranslation("onboarding-tenant");
-//   const [activeStep, setActiveStep] = useState(0);
+//   const [activeStepKey, setActiveStepKey] = useState<string | null>(null);
 //   const [loading, setLoading] = useState(true);
 //   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-//   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
-//   const [skippedSteps, setSkippedSteps] = useState<number[]>([]);
+//   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+//   const [skippedSteps, setSkippedSteps] = useState<string[]>([]);
 //   const { user } = useAuth();
 //   const getOnboardingStatus = useGetOnboardingStatus();
 //   const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
 //   const [formData, setFormData] = useState<Record<string, any>>({});
 //   const [error, setError] = useState<string | null>(null);
+
+//   // Create a map of steps by key for quick lookup
+//   const stepsByKey = useMemo(() => {
+//     return TENANT_ONBOARDING_STEPS.reduce(
+//       (acc, step) => {
+//         acc[step.key] = step;
+//         return acc;
+//       },
+//       {} as Record<string, (typeof TENANT_ONBOARDING_STEPS)[0]>
+//     );
+//   }, []);
+
+//   // Get ordered step keys
+//   const orderedStepKeys = useMemo(() => {
+//     return TENANT_ONBOARDING_STEPS.map((step) => step.key);
+//   }, []);
+
+//   // Find step index by key
+//   const getStepIndex = (key: string) => orderedStepKeys.indexOf(key);
 
 //   const refetch = useCallback(async () => {
 //     if (user?.tenant?.id) {
@@ -939,39 +90,45 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //       try {
 //         const result = await getOnboardingStatus({
 //           entityType: OnboardingEntityType.TENANT,
-//           entityId: user.tenant.id,
+//           entityId: user?.tenant?.id,
 //         });
 
-//         // Ensure it’s the success type
-//         if ("steps" in result && Array.isArray(result.steps)) {
+//         if (
+//           result?.data &&
+//           "steps" in result.data &&
+//           Array.isArray(result.data.steps)
+//         ) {
 //           setOnboardingStatus(result);
 
-//           const completed: number[] = [];
-//           const skipped: number[] = [];
+//           const completed: string[] = [];
+//           const skipped: string[] = [];
 
-//           result.steps.forEach((step: any, index: number) => {
-//             if (step.status === OnboardingStepStatus.COMPLETED) {
-//               completed.push(index);
-//             } else if (step.status === OnboardingStepStatus.SKIPPED) {
-//               skipped.push(index);
+//           result.data.steps.forEach((step: any) => {
+//             if (step.status === OnboardingStepStatus.COMPLETED.toLowerCase()) {
+//               completed.push(step.stepKey);
+//             } else if (
+//               step.status === OnboardingStepStatus.SKIPPED.toLowerCase()
+//             ) {
+//               skipped.push(step.stepKey);
 //             }
 //           });
 
 //           setCompletedSteps(completed);
 //           setSkippedSteps(skipped);
 
-//           const firstIncomplete = result.steps.findIndex(
-//             (step: any) => step.status === OnboardingStepStatus.PENDING
+//           // Find first incomplete step by order
+//           const firstIncomplete = result.data.steps.find(
+//             (step: any) =>
+//               step.status === OnboardingStepStatus.PENDING.toLowerCase()
 //           );
 
-//           setActiveStep(
-//             firstIncomplete >= 0 ? firstIncomplete : result.steps.length
-//           );
+//           setActiveStepKey(firstIncomplete ? firstIncomplete.stepKey : null);
 //         } else {
 //           console.warn("Unexpected onboarding status response:", result);
 //           setError(t("errorLoadingStatus"));
 //         }
 //       } catch (err: any) {
+//         console.error("Error fetching onboarding status:", err);
 //         setError(err.message || t("errorLoadingStatus"));
 //       } finally {
 //         setLoading(false);
@@ -987,11 +144,10 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //   const completeStep = useCompleteStep();
 //   const skipStep = useSkipStep();
 
-//   // Initialize onboarding if not exists
 //   useEffect(() => {
 //     if (user?.tenant?.id && !onboardingStatus) {
 //       initializeOnboarding({
-//         entityId: user.tenant.id,
+//         entityId: user.tenant.id!,
 //         entityType: OnboardingEntityType.TENANT,
 //       })
 //         .then(() => refetch())
@@ -1000,9 +156,13 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //   }, [user?.tenant?.id, onboardingStatus, initializeOnboarding, refetch]);
 
 //   const handleNext = useCallback(async () => {
-//     if (!user?.tenant?.id || !user?.id || !onboardingStatus) return;
+//     if (!user?.tenant?.id || !user?.id || !onboardingStatus || !activeStepKey)
+//       return;
 
-//     const currentStep = onboardingStatus.steps[activeStep];
+//     const currentStep = onboardingStatus.data.steps.find(
+//       (step: any) => step.stepKey === activeStepKey
+//     );
+
 //     if (!currentStep) return;
 
 //     try {
@@ -1011,7 +171,7 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //       await completeStep({
 //         entityType: OnboardingEntityType.TENANT,
 //         entityId: user.tenant.id,
-//         stepKey: currentStep.stepKey,
+//         stepId: currentStep.id,
 //         metadata: formData,
 //         performedBy: { userId: user.id?.toString() ?? "" },
 //       });
@@ -1022,19 +182,28 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //     } finally {
 //       setLoading(false);
 //     }
-//   }, [user, onboardingStatus, activeStep, formData, completeStep, refetch, t]);
+//   }, [
+//     user,
+//     onboardingStatus,
+//     activeStepKey,
+//     formData,
+//     completeStep,
+//     refetch,
+//     t,
+//   ]);
 
 //   const handleBack = () => {
-//     if (activeStep > 0) {
-//       setActiveStep(activeStep - 1);
+//     if (!activeStepKey) return;
+
+//     const currentIndex = getStepIndex(activeStepKey);
+//     if (currentIndex > 0) {
+//       setActiveStepKey(orderedStepKeys[currentIndex - 1]);
 //     }
 //   };
 
 //   const handleSkip = useCallback(async () => {
-//     if (!user?.tenant?.id || !user?.id || !onboardingStatus) return;
-
-//     const currentStep = onboardingStatus.steps[activeStep];
-//     if (!currentStep) return;
+//     if (!user?.tenant?.id || !user?.id || !onboardingStatus || !activeStepKey)
+//       return;
 
 //     try {
 //       setLoading(true);
@@ -1042,7 +211,7 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //       await skipStep({
 //         entityType: OnboardingEntityType.TENANT,
 //         entityId: user.tenant.id,
-//         stepKey: currentStep.stepKey,
+//         stepKey: activeStepKey,
 //         performedBy: { userId: user.id.toString() },
 //       });
 
@@ -1052,7 +221,7 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //     } finally {
 //       setLoading(false);
 //     }
-//   }, [user, onboardingStatus, activeStep, skipStep, refetch, t]);
+//   }, [user, onboardingStatus, activeStepKey, skipStep, refetch, t]);
 
 //   const handleSubmit = useCallback(async () => {
 //     if (!user?.tenant?.id || !user?.id || !onboardingStatus) return;
@@ -1060,18 +229,16 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //     try {
 //       setLoading(true);
 
-//       // Complete all remaining steps
 //       await Promise.all(
-//         onboardingStatus.steps
+//         onboardingStatus.data.steps
 //           .filter((step: any) => step.status === OnboardingStepStatus.PENDING)
 //           .map((step: any) =>
 //             completeStep({
 //               entityType: OnboardingEntityType.TENANT,
-//               // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-//               entityId: user?.tenant?.id!,
-//               stepKey: step.stepKey,
+//               entityId: user?.tenant?.id || "",
+//               stepId: step.id,
 //               metadata: formData,
-//               performedBy: { userId: user?.id?.toString() },
+//               performedBy: { userId: user?.id?.toString() ?? "" },
 //             })
 //           )
 //       );
@@ -1087,7 +254,6 @@ export default withPageRequiredAuth(TenantOnboarding, {
 
 //   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 //     const { name, value, type, checked } = e.target;
-
 //     setFormData((prev) => ({
 //       ...prev,
 //       [name]: type === "checkbox" ? checked : value,
@@ -1102,59 +268,21 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //     }));
 //   };
 
-//   const isStepOptional = (step: number) => {
-//     return TENANT_ONBOARDING_STEPS[step]?.isSkippable;
+//   const isStepOptional = (stepKey: string) => {
+//     return stepsByKey[stepKey]?.isSkippable;
 //   };
 
-//   const isStepCompleted = (step: number) => {
-//     return completedSteps.includes(step);
+//   const isStepCompleted = (stepKey: string) => {
+//     return completedSteps.includes(stepKey);
 //   };
 
-//   const isStepSkipped = (step: number) => {
-//     return skippedSteps.includes(step);
+//   const isStepSkipped = (stepKey: string) => {
+//     return skippedSteps.includes(stepKey);
 //   };
 
-//   // const getStepContent = (step: number) => {
-//   //   // ... (same as before, but using formData directly)
-//   //   switch (step) {
-//   //     case 0: // Tenant Registration
-//   //       return (
-//   //         <Grid container spacing={3}>
-//   //           <Grid sx={{ xs: 12 }} md={6}>
-//   //             <TextField
-//   //               fullWidth
-//   //               label={t("tenantNamePlaceholder")}
-//   //               name="tenantName"
-//   //               value={formData.tenantName || ""}
-//   //               onChange={handleInputChange}
-//   //               variant="outlined"
-//   //               required
-//   //             />
-//   //           </Grid>
-//   //           <Grid sx={{ xs: 12 }} md={6}>
-//   //             <TextField
-//   //               fullWidth
-//   //               label={t("contactEmailPlaceholder")}
-//   //               name="contactEmail"
-//   //               type="email"
-//   //               value={formData.contactEmail || ""}
-//   //               onChange={handleInputChange}
-//   //               variant="outlined"
-//   //               required
-//   //             />
-//   //           </Grid>
-//   //         </Grid>
-//   //       );
-
-//   //     // ... other steps remain the same
-
-//   //     default:
-//   //       return `Unknown step: ${step + 1}`;
-//   //   }
-//   // };
-//   const getStepContent = (step: number) => {
-//     switch (step) {
-//       case 0: // Tenant Registration
+//   const getStepContent = (stepKey: string) => {
+//     switch (stepKey) {
+//       case "tenant_registration": // Tenant Registration
 //         return (
 //           <Grid container spacing={3}>
 //             <Grid sx={{ xs: 12, md: 6 }}>
@@ -1182,14 +310,17 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //             </Grid>
 //           </Grid>
 //         );
-//       case 1: // Admin Account Setup
+
+//       case "admin_creation": // Admin Account Setup
 //         return (
 //           <Grid container spacing={3}>
 //             <Grid sx={{ xs: 12, md: 6 }}>
 //               <TextField
 //                 fullWidth
-//                 label="Admin First Name"
+//                 label={t("adminFirstNamePlaceholder")}
 //                 name="adminFirstName"
+//                 value={formData.adminFirstName || ""}
+//                 onChange={handleInputChange}
 //                 variant="outlined"
 //                 required
 //               />
@@ -1197,8 +328,10 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //             <Grid sx={{ xs: 12, md: 6 }}>
 //               <TextField
 //                 fullWidth
-//                 label="Admin Last Name"
+//                 label={t("adminLastNamePlaceholder")}
 //                 name="adminLastName"
+//                 value={formData.adminLastName || ""}
+//                 onChange={handleInputChange}
 //                 variant="outlined"
 //                 required
 //               />
@@ -1206,9 +339,11 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //             <Grid sx={{ xs: 12, md: 6 }}>
 //               <TextField
 //                 fullWidth
-//                 label="Admin Email"
+//                 label={t("adminEmailPlaceholder")}
 //                 name="adminEmail"
 //                 type="email"
+//                 value={formData.adminEmail || ""}
+//                 onChange={handleInputChange}
 //                 variant="outlined"
 //                 required
 //               />
@@ -1216,9 +351,11 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //             <Grid sx={{ xs: 12, md: 6 }}>
 //               <TextField
 //                 fullWidth
-//                 label="Admin Password"
+//                 label={t("adminPasswordPlaceholder")}
 //                 name="adminPassword"
 //                 type="password"
+//                 value={formData.adminPassword || ""}
+//                 onChange={handleInputChange}
 //                 variant="outlined"
 //                 required
 //               />
@@ -1226,48 +363,49 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //           </Grid>
 //         );
 
-//       case 2: // Domain Configuration
+//       case "domain_configuration": // Domain Configuration
 //         return (
 //           <Grid container spacing={3}>
 //             <Grid sx={{ xs: 12 }}>
 //               <TextField
 //                 fullWidth
-//                 label="Custom Domain"
+//                 label={t("customDomainPlaceholder")}
 //                 name="customDomain"
+//                 value={formData.customDomain || ""}
+//                 onChange={handleInputChange}
 //                 placeholder="yourdomain.example.com"
 //                 variant="outlined"
 //               />
 //             </Grid>
 //             <Grid sx={{ xs: 12 }}>
-//               <Alert severity="info">
-//                 This step is optional. You can configure your domain later in
-//                 settings.
-//               </Alert>
+//               <Alert severity="info">{t("domainOptionalMessage")}</Alert>
 //             </Grid>
 //           </Grid>
 //         );
 
-//       case 3: // Schema Initialization
+//       case "schema_initialization": // Schema Initialization
 //         return (
 //           <Box textAlign="center" py={4}>
 //             <CircularProgress size={60} />
 //             <Typography variant="h6" mt={2}>
-//               Initializing database schema...
+//               {t("schemaInitializationTitle")}
 //             </Typography>
 //             <Typography variant="body2" color="textSecondary" mt={1}>
-//               This may take a few moments. Please don&apos;t close this window.
+//               {t("schemaInitializationDescription")}
 //             </Typography>
 //           </Box>
 //         );
 
-//       case 4: // Payment Setup
+//       case "payment_setup": // Payment Setup
 //         return (
 //           <Grid container spacing={3}>
 //             <Grid sx={{ xs: 12 }}>
 //               <TextField
 //                 fullWidth
-//                 label="Cardholder Name"
+//                 label={t("cardholderNamePlaceholder")}
 //                 name="cardName"
+//                 value={formData.cardName || ""}
+//                 onChange={handleInputChange}
 //                 variant="outlined"
 //                 required
 //               />
@@ -1275,8 +413,10 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //             <Grid sx={{ xs: 12 }}>
 //               <TextField
 //                 fullWidth
-//                 label="Credit Card Number"
+//                 label={t("creditCardNumberPlaceholder")}
 //                 name="cardNumber"
+//                 value={formData.cardNumber || ""}
+//                 onChange={handleInputChange}
 //                 variant="outlined"
 //                 required
 //               />
@@ -1284,8 +424,10 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //             <Grid sx={{ xs: 12, md: 4 }}>
 //               <TextField
 //                 fullWidth
-//                 label="Expiry Date"
+//                 label={t("expiryDatePlaceholder")}
 //                 name="cardExpiry"
+//                 value={formData.cardExpiry || ""}
+//                 onChange={handleInputChange}
 //                 placeholder="MM/YY"
 //                 variant="outlined"
 //                 required
@@ -1294,8 +436,10 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //             <Grid sx={{ xs: 12, md: 4 }}>
 //               <TextField
 //                 fullWidth
-//                 label="CVV"
+//                 label={t("cvvPlaceholder")}
 //                 name="cardCvv"
+//                 value={formData.cardCvv || ""}
+//                 onChange={handleInputChange}
 //                 variant="outlined"
 //                 required
 //               />
@@ -1303,37 +447,59 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //           </Grid>
 //         );
 
-//       case 5: // Branding Configuration
+//       case "branding_configuration": // Branding Configuration
 //         return (
 //           <Grid container spacing={3}>
 //             <Grid sx={{ xs: 12 }}>
 //               <TextField
 //                 fullWidth
-//                 label="Primary Color"
+//                 label={t("primaryColorPlaceholder")}
 //                 name="primaryColor"
+//                 value={formData.primaryColor || ""}
+//                 onChange={handleInputChange}
 //                 variant="outlined"
 //               />
 //             </Grid>
 //             <Grid sx={{ xs: 12 }}>
 //               <TextField
 //                 fullWidth
-//                 label="Secondary Color"
+//                 label={t("secondaryColorPlaceholder")}
 //                 name="secondaryColor"
+//                 value={formData.secondaryColor || ""}
+//                 onChange={handleInputChange}
 //                 variant="outlined"
 //               />
 //             </Grid>
 //             <Grid sx={{ xs: 12 }}>
-//               <input accept="image/*" type="file" id="logo-upload" hidden />
+//               <input
+//                 accept="image/*"
+//                 type="file"
+//                 id="logo-upload"
+//                 hidden
+//                 onChange={(e) => {
+//                   if (e.target.files && e.target.files[0]) {
+//                     setFormData((prev) => ({
+//                       ...prev,
+//                       logo: e.target.files?.[0],
+//                     }));
+//                   }
+//                 }}
+//               />
 //               <label htmlFor="logo-upload">
 //                 <Button variant="outlined" component="span">
-//                   Upload Logo
+//                   {t("uploadLogoButton")}
 //                 </Button>
 //               </label>
+//               {formData.logo && (
+//                 <Typography variant="body2" mt={1}>
+//                   {formData.logo.name}
+//                 </Typography>
+//               )}
 //             </Grid>
 //           </Grid>
 //         );
 
-//       case 6: // Initial Settings
+//       case "initial_settings": // Initial Settings
 //         return (
 //           <Grid container spacing={3}>
 //             <Grid sx={{ xs: 12, md: 6 }}>
@@ -1341,7 +507,7 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //                 <InputLabel>{t("languagePlaceholder")}</InputLabel>
 //                 <Select
 //                   name="language"
-//                   value={formData.language}
+//                   value={formData.language || ""}
 //                   onChange={handleSelectChange}
 //                   label={t("languagePlaceholder")}
 //                 >
@@ -1358,7 +524,7 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //                 <InputLabel>{t("timezonePlaceholder")}</InputLabel>
 //                 <Select
 //                   name="timezone"
-//                   value={formData.timezone}
+//                   value={formData.timezone || ""}
 //                   onChange={handleSelectChange}
 //                   label={t("timezonePlaceholder")}
 //                 >
@@ -1377,7 +543,7 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //               <FormControlLabel
 //                 control={
 //                   <Checkbox
-//                     checked={formData.notifications.email}
+//                     checked={!!formData.notification_email}
 //                     onChange={handleInputChange}
 //                     name="notification_email"
 //                   />
@@ -1387,7 +553,7 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //               <FormControlLabel
 //                 control={
 //                   <Checkbox
-//                     checked={formData.notifications.sms}
+//                     checked={!!formData.notification_sms}
 //                     onChange={handleInputChange}
 //                     name="notification_sms"
 //                   />
@@ -1397,7 +563,7 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //               <FormControlLabel
 //                 control={
 //                   <Checkbox
-//                     checked={formData.notifications.push}
+//                     checked={!!formData.notification_push}
 //                     onChange={handleInputChange}
 //                     name="notification_push"
 //                   />
@@ -1408,43 +574,43 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //           </Grid>
 //         );
 
-//       case 12: // Go-Live Checklist
+//       case "go_live_check": // Go-Live Checklist
 //         return (
 //           <Grid container spacing={3}>
 //             <Grid sx={{ xs: 12 }}>
 //               <FormControlLabel
-//                 control={<Checkbox />}
-//                 label="I have verified all tenant settings"
+//                 control={<Checkbox name="verifiedSettings" />}
+//                 label={t("verifiedSettingsLabel")}
 //               />
 //             </Grid>
 //             <Grid sx={{ xs: 12 }}>
 //               <FormControlLabel
-//                 control={<Checkbox />}
-//                 label="I have tested user registration"
+//                 control={<Checkbox name="testedRegistration" />}
+//                 label={t("testedRegistrationLabel")}
 //               />
 //             </Grid>
 //             <Grid sx={{ xs: 12 }}>
 //               <FormControlLabel
-//                 control={<Checkbox />}
-//                 label="I have reviewed compliance requirements"
+//                 control={<Checkbox name="reviewedCompliance" />}
+//                 label={t("reviewedComplianceLabel")}
 //               />
 //             </Grid>
 //             <Grid sx={{ xs: 12 }}>
 //               <FormControlLabel
-//                 control={<Checkbox />}
-//                 label="I have backed up initial configuration"
+//                 control={<Checkbox name="backedUpConfig" />}
+//                 label={t("backedUpConfigLabel")}
 //               />
 //             </Grid>
 //           </Grid>
 //         );
 
 //       default:
-//         return `Unknown step: ${step + 1}`;
+//         return `Unknown step: ${stepKey}`;
 //     }
 //   };
 
 //   const renderStepActions = () => {
-//     if (activeStep >= TENANT_ONBOARDING_STEPS.length) {
+//     if (!activeStepKey) {
 //       return (
 //         <Box mt={4}>
 //           <Button
@@ -1458,14 +624,17 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //       );
 //     }
 
+//     const currentStepIndex = getStepIndex(activeStepKey);
+//     const isLastStep = currentStepIndex === TENANT_ONBOARDING_STEPS.length - 1;
+
 //     return (
 //       <Box mt={4} display="flex" justifyContent="space-between">
-//         <Button disabled={activeStep === 0} onClick={handleBack}>
+//         <Button disabled={currentStepIndex === 0} onClick={handleBack}>
 //           {t("previousButton")}
 //         </Button>
 
 //         <Box>
-//           {isStepOptional(activeStep) && (
+//           {isStepOptional(activeStepKey) && (
 //             <Button
 //               variant="outlined"
 //               onClick={handleSkip}
@@ -1479,16 +648,12 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //           <Button
 //             variant="contained"
 //             color="primary"
-//             onClick={
-//               activeStep === TENANT_ONBOARDING_STEPS.length - 1
-//                 ? () => setConfirmDialogOpen(true)
-//                 : handleNext
-//             }
+//             onClick={isLastStep ? () => setConfirmDialogOpen(true) : handleNext}
 //             disabled={loading}
 //           >
 //             {loading ? (
 //               <CircularProgress size={24} />
-//             ) : activeStep === TENANT_ONBOARDING_STEPS.length - 1 ? (
+//             ) : isLastStep ? (
 //               t("finishButton")
 //             ) : (
 //               t("nextButton")
@@ -1568,10 +733,15 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //     );
 //   }
 
+//   // Calculate active step index for stepper
+//   const activeStepIndex = activeStepKey
+//     ? getStepIndex(activeStepKey)
+//     : TENANT_ONBOARDING_STEPS.length;
+
 //   return (
 //     <Container maxWidth="xl">
 //       <Grid container spacing={3} pt={3}>
-//         <Grid sx={{ xs: 12, mb: 2 }}>
+//         <Grid sx={{ xs: 12 }} mb={2}>
 //           <Typography variant="h4" component="h1" gutterBottom>
 //             <strong>{t("title")}</strong>
 //           </Typography>
@@ -1582,7 +752,7 @@ export default withPageRequiredAuth(TenantOnboarding, {
 
 //         <Grid sx={{ xs: 12 }}>
 //           <Stepper
-//             activeStep={activeStep}
+//             activeStep={activeStepIndex}
 //             alternativeLabel
 //             sx={{
 //               mb: 4,
@@ -1592,57 +762,43 @@ export default withPageRequiredAuth(TenantOnboarding, {
 //               },
 //             }}
 //           >
-//             {TENANT_ONBOARDING_STEPS.map(
-//               (
-//                 step: {
-//                   key: Key | null | undefined;
-//                   name:
-//                     | string
-//                     | number
-//                     | boolean
-//                     | ReactElement<unknown, string | JSXElementConstructor<any>>
-//                     | Iterable<ReactNode>
-//                     | ReactPortal
-//                     | null
-//                     | undefined;
-//                 },
-//                 index: number
-//               ) => (
-//                 <Step
-//                   key={step.key}
-//                   completed={isStepCompleted(index) || activeStep > index}
-//                   sx={{ minWidth: 120 }}
+//             {TENANT_ONBOARDING_STEPS.map((step) => (
+//               <Step
+//                 key={step.key}
+//                 completed={
+//                   isStepCompleted(step.key) ||
+//                   activeStepIndex > getStepIndex(step.key)
+//                 }
+//               >
+//                 <StepLabel
+//                   optional={
+//                     step.isSkippable && (
+//                       <Typography variant="caption">
+//                         {t("optionalLabel")}
+//                       </Typography>
+//                     )
+//                   }
+//                   error={isStepSkipped(step.key)}
 //                 >
-//                   <StepLabel
-//                     optional={
-//                       isStepOptional(index) && (
-//                         <Typography variant="caption">
-//                           {t("optionalLabel")}
-//                         </Typography>
-//                       )
-//                     }
-//                     error={isStepSkipped(index)}
-//                   >
-//                     {step.name}
-//                   </StepLabel>
-//                 </Step>
-//               )
-//             )}
+//                   {step.name}
+//                 </StepLabel>
+//               </Step>
+//             ))}
 //           </Stepper>
 
 //           <Paper elevation={2} sx={{ p: 3 }}>
-//             {activeStep >= TENANT_ONBOARDING_STEPS.length ? (
+//             {!activeStepKey ? (
 //               renderCompletionScreen()
 //             ) : (
 //               <>
 //                 <Typography variant="h5" gutterBottom>
-//                   {TENANT_ONBOARDING_STEPS[activeStep]?.name || ""}
+//                   {stepsByKey[activeStepKey]?.name || ""}
 //                 </Typography>
 //                 <Typography variant="body1" color="textSecondary" mb={3}>
-//                   {TENANT_ONBOARDING_STEPS[activeStep]?.description || ""}
+//                   {stepsByKey[activeStepKey]?.description || ""}
 //                 </Typography>
 
-//                 {getStepContent(activeStep)}
+//                 {getStepContent(activeStepKey)}
 
 //                 {renderStepActions()}
 //               </>
@@ -1701,814 +857,1125 @@ export default withPageRequiredAuth(TenantOnboarding, {
 // export default withPageRequiredAuth(TenantOnboarding, {
 //   roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER, RoleEnum.MANAGER],
 // });
+"use client";
 
-// "use client";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { RoleEnum } from "@/services/api/types/role";
+import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
+import Container from "@mui/material/Container";
+import Typography from "@mui/material/Typography";
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import TextField from "@mui/material/TextField";
+import Alert from "@mui/material/Alert";
+import CircularProgress from "@mui/material/CircularProgress";
+import {
+  TENANT_ONBOARDING_STEPS,
+  OnboardingStepDefinition,
+} from "@/utils/constant";
+import {
+  useCompleteStep,
+  useGetOnboardingStatus,
+  useInitializeOnboarding,
+  useSkipStep,
+} from "@/services/api/services/onboarding";
+import {
+  OnboardingEntityType,
+  OnboardingStepStatus,
+} from "@/services/api/types/onboarding";
+import useAuth from "@/services/auth/use-auth";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Grid from "@mui/material/Grid";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import { useForm, Controller, useFormState } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { useSnackbar } from "notistack";
 
-// import {
-//   useState,
-//   useEffect,
-//   JSXElementConstructor,
-//   Key,
-//   ReactElement,
-//   ReactNode,
-//   ReactPortal,
-// } from "react";
-// import { useTranslation } from "react-i18next";
-// import { RoleEnum } from "@/services/api/types/role";
-// import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
-// import Container from "@mui/material/Container";
-// import Grid from "@mui/material/Grid";
-// import Typography from "@mui/material/Typography";
-// import Stepper from "@mui/material/Stepper";
-// import Step from "@mui/material/Step";
-// import StepLabel from "@mui/material/StepLabel";
-// import Button from "@mui/material/Button";
-// import Box from "@mui/material/Box";
-// import Paper from "@mui/material/Paper";
-// import TextField from "@mui/material/TextField";
-// import FormControl from "@mui/material/FormControl";
-// import InputLabel from "@mui/material/InputLabel";
-// import Select from "@mui/material/Select";
-// import MenuItem from "@mui/material/MenuItem";
-// import Checkbox from "@mui/material/Checkbox";
-// import FormControlLabel from "@mui/material/FormControlLabel";
-// import Alert from "@mui/material/Alert";
-// import CircularProgress from "@mui/material/CircularProgress";
-// import { TENANT_ONBOARDING_STEPS } from "@/utils/constant";
-// import {
-//   useCompleteStep,
-//   useGetOnboardingStatus,
-//   useInitializeOnboarding,
-//   useSkipStep,
-// } from "@/services/api/services/onboarding";
-// import {
-//   OnboardingEntityType,
-//   OnboardingStepStatus,
-// } from "@/services/api/types/onboarding";
-// import useAuth from "@/services/auth/use-auth";
+// Configuration flag from environment variables
+const SHOW_ONLY_REQUIRED_STEPS =
+  process.env.NEXT_PUBLIC_ONBOARDING_SHOW_ONLY_REQUIRED === "true";
 
-// // Mock languages and timezones for the demo
-// const LANGUAGES = [
-//   { value: "en", label: "English" },
-//   { value: "es", label: "Spanish" },
-//   { value: "fr", label: "French" },
-//   { value: "de", label: "German" },
-// ];
+/**
+ * Filter steps based on environment configuration
+ * @param steps All onboarding steps
+ * @returns Filtered steps based on SHOW_ONLY_REQUIRED_STEPS flag
+ */
+const filterSteps = (steps: OnboardingStepDefinition[]) => {
+  return SHOW_ONLY_REQUIRED_STEPS
+    ? steps.filter((step) => step.isRequired)
+    : steps;
+};
 
-// const TIMEZONES = [
-//   { value: "UTC-12", label: "UTC-12:00" },
-//   { value: "UTC-8", label: "UTC-08:00 (PST)" },
-//   { value: "UTC-5", label: "UTC-05:00 (EST)" },
-//   { value: "UTC", label: "UTC" },
-//   { value: "UTC+1", label: "UTC+01:00 (CET)" },
-//   { value: "UTC+8", label: "UTC+08:00 (CST)" },
-// ];
-// function TenantOnboarding() {
-//   const { t } = useTranslation("onboarding-tenant");
-//   const [activeStep, setActiveStep] = useState(0);
-//   const [loading, setLoading] = useState(true);
-//   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-//   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
-//   const [skippedSteps, setSkippedSteps] = useState<number[]>([]);
-//   const { user } = useAuth();
-//   const getOnboardingStatus = useGetOnboardingStatus();
-//   const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
-//   const [isStatusLoading, setIsStatusLoading] = useState(true);
-//   const [activeStepIndex, setActiveStepIndex] = useState(0);
-//   const [formData, setFormData] = useState<Record<string, any>>({});
-//   const [error, setError] = useState<string | null>(null);
-//   const refetch = async () => {
-//     if (user?.tenant) {
-//       setIsStatusLoading(true);
-//       try {
-//         if (!user.tenant?.id) {
-//           throw new Error("Tenant ID is missing");
-//         }
-//         const status = await getOnboardingStatus({
-//           entityType: OnboardingEntityType.TENANT,
-//           entityId: user.tenant.id,
-//         });
-//         setOnboardingStatus(status);
-//       } finally {
-//         setIsStatusLoading(false);
-//       }
-//     }
-//   };
+// Mock languages and timezones for the demo
+const LANGUAGES = [
+  { value: "en", label: "English" },
+  { value: "es", label: "Spanish" },
+  { value: "fr", label: "French" },
+  { value: "de", label: "German" },
+];
 
-//   useEffect(() => {
-//     refetch();
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [user?.tenant]);
+const TIMEZONES = [
+  { value: "UTC-12", label: "UTC-12:00" },
+  { value: "UTC-8", label: "UTC-08:00 (PST)" },
+  { value: "UTC-5", label: "UTC-05:00 (EST)" },
+  { value: "UTC", label: "UTC" },
+  { value: "UTC+1", label: "UTC+01:00 (CET)" },
+  { value: "UTC+8", label: "UTC+08:00 (CST)" },
+];
 
-//   const initializeOnboarding = useInitializeOnboarding();
-//   const completeStep = useCompleteStep();
-//   const skipStep = useSkipStep();
+/**
+ * Validation schemas for each step
+ */
+const validationSchemas = {
+  tenant_registration: yup.object().shape({
+    tenantName: yup.string().required("Tenant name is required"),
+    contactEmail: yup
+      .string()
+      .email("Invalid email")
+      .required("Contact email is required"),
+  }),
+  admin_creation: yup.object().shape({
+    adminFirstName: yup.string().required("First name is required"),
+    adminLastName: yup.string().required("Last name is required"),
+    adminEmail: yup
+      .string()
+      .email("Invalid email")
+      .required("Email is required"),
+    adminPassword: yup
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .required("Password is required"),
+  }),
+  payment_setup: yup.object().shape({
+    cardName: yup.string().required("Cardholder name is required"),
+    cardNumber: yup
+      .string()
+      .matches(/^\d{16}$/, "Card number must be 16 digits")
+      .required("Card number is required"),
+    cardExpiry: yup
+      .string()
+      .matches(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/, "Invalid expiry date (MM/YY)")
+      .required("Expiry date is required"),
+    cardCvv: yup
+      .string()
+      .matches(/^\d{3,4}$/, "Invalid CVV")
+      .required("CVV is required"),
+  }),
+  initial_settings: yup.object().shape({
+    language: yup.string().required("Language is required"),
+    timezone: yup.string().required("Timezone is required"),
+  }),
+};
 
-//   // Initialize onboarding if not exists - updated request format
-//   useEffect(() => {
-//     if (user?.tenant?.id && !isStatusLoading && !onboardingStatus) {
-//       initializeOnboarding({ tenantId: user?.tenant?.id })
-//         .then(() => refetch())
-//         .catch((err) => console.log(err.message));
-//     }
-//     // Simulate loading onboarding data
-//     // const timer = setTimeout(() => {
-//     //   setLoading(false);
+/**
+ * Main tenant onboarding component
+ */
+function TenantOnboarding() {
+  const { t } = useTranslation("onboarding-tenant");
+  const { enqueueSnackbar } = useSnackbar();
+  const [activeStepKey, setActiveStepKey] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const [skippedSteps, setSkippedSteps] = useState<string[]>([]);
+  const { user } = useAuth();
+  const getOnboardingStatus = useGetOnboardingStatus();
+  const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-//     //   // Mark first step as completed for demo
-//     //   setCompletedSteps([0]);
-//     // }, 1500);
+  // Form state per step
+  const [stepFormData, setStepFormData] = useState<Record<string, any>>({});
+  const formRef = useRef<HTMLFormElement>(null);
 
-//     // return () => clearTimeout(timer);
-//   }, [user?.tenant?.id, isStatusLoading, onboardingStatus]);
+  // Filter steps based on configuration
+  const filteredSteps = useMemo(() => filterSteps(TENANT_ONBOARDING_STEPS), []);
 
-//   // Handle Next - updated mutation call
-//   const handleNext = async () => {
-//     if (!onboardingStatus || !user?.tenant?.id || !user?.id) return;
+  // Create a map of steps by key for quick lookup
+  const stepsByKey = useMemo(() => {
+    return filteredSteps.reduce(
+      (acc, step) => {
+        acc[step.key] = step;
+        return acc;
+      },
+      {} as Record<string, (typeof filteredSteps)[0]>
+    );
+  }, [filteredSteps]);
 
-//     const currentStep = onboardingStatus.steps[activeStepIndex];
+  // Get ordered step keys
+  const orderedStepKeys = useMemo(() => {
+    return filteredSteps.map((step) => step.key);
+  }, [filteredSteps]);
 
-//     try {
-//       setLoading(true);
+  // Find step index by key
+  const getStepIndex = (key: string) => orderedStepKeys.indexOf(key);
 
-//       await completeStep({
-//         entityType: OnboardingEntityType.TENANT,
-//         // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-//         entityId: user?.tenant?.id!,
-//         stepKey: currentStep.stepKey,
-//         metadata: formData[currentStep.stepKey] || {},
-//         performedBy: { userId: user.id.toString() },
-//       });
+  /**
+   * Fetch onboarding status from API
+   */
+  const refetch = useCallback(async () => {
+    if (user?.tenant?.id) {
+      setLoading(true);
+      try {
+        const result = await getOnboardingStatus({
+          entityType: OnboardingEntityType.TENANT,
+          entityId: user?.tenant?.id,
+        });
 
-//       refetch();
-//       setActiveStepIndex(activeStepIndex + 1);
-//     } catch (err: any) {
-//       setError(err.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+        if (
+          result?.data &&
+          "steps" in result.data &&
+          Array.isArray(result.data.steps)
+        ) {
+          setOnboardingStatus(result);
 
-//   const handleBack = () => {
-//     setActiveStep(activeStep - 1);
-//   };
-//   // Handle Skip Step - updated mutation call
-//   const handleSkipStep = async (stepKey: string) => {
-//     if (!user?.tenant?.id || !user?.id) return;
+          const completed: string[] = [];
+          const skipped: string[] = [];
 
-//     try {
-//       setLoading(true);
-//       await skipStep({
-//         entityType: OnboardingEntityType.TENANT,
-//         entityId: user?.tenant?.id,
-//         stepKey,
-//         performedBy: { userId: user.id.toString() },
-//       });
+          result.data.steps.forEach((step: any) => {
+            if (step.status === OnboardingStepStatus.COMPLETED.toLowerCase()) {
+              completed.push(step.stepKey);
+            } else if (
+              step.status === OnboardingStepStatus.SKIPPED.toLowerCase()
+            ) {
+              skipped.push(step.stepKey);
+            }
+          });
 
-//       refetch();
-//       setActiveStepIndex(activeStepIndex + 1);
-//     } catch (err: any) {
-//       setError(err.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+          setCompletedSteps(completed);
+          setSkippedSteps(skipped);
 
-//   // Handle Submit - updated mutation call
-//   const handleSubmit = async () => {
-//     if (!user?.tenant?.id || !user?.id) return;
+          // Find first incomplete step by order
+          const firstIncomplete = filteredSteps.find(
+            (step) =>
+              !completed.includes(step.key) && !skipped.includes(step.key)
+          );
 
-//     try {
-//       setLoading(true);
+          setActiveStepKey(firstIncomplete ? firstIncomplete.key : null);
+        } else {
+          console.warn("Unexpected onboarding status response:", result);
+          setError(t("errorLoadingStatus"));
+        }
+      } catch (err: any) {
+        console.error("Error fetching onboarding status:", err);
+        setError(err.message || t("errorLoadingStatus"));
+      } finally {
+        setLoading(false);
+      }
+    }
+  }, [user, getOnboardingStatus, t, filteredSteps]);
 
-//       const stepsToComplete =
-//         onboardingStatus?.steps
-//           .filter(
-//             (step: { status: any }) =>
-//               step.status === OnboardingStepStatus.PENDING
-//           )
-//           .map((step: { stepKey: any }) => step.stepKey) || [];
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
-//       await Promise.all(
-//         stepsToComplete.map((stepKey: any) =>
-//           completeStep({
-//             entityType: OnboardingEntityType.TENANT,
-//             // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-//             entityId: user?.tenant?.id!,
-//             stepKey,
-//             performedBy: { userId: user.id?.toString() },
-//           })
-//         )
-//       );
+  const initializeOnboarding = useInitializeOnboarding();
+  const completeStep = useCompleteStep();
+  const skipStep = useSkipStep();
 
-//       refetch();
-//       setConfirmDialogOpen(false);
-//       setActiveStepIndex(TENANT_ONBOARDING_STEPS.length);
-//     } catch (err: any) {
-//       setError(err.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-//   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const { name, value, type, checked } = e.target;
+  // Initialize onboarding if not already done
+  useEffect(() => {
+    if (user?.tenant?.id && !onboardingStatus) {
+      initializeOnboarding({
+        entityId: user.tenant.id!,
+        entityType: OnboardingEntityType.TENANT,
+      })
+        .then(() => refetch())
+        .catch((err) => {
+          setError(err.message);
+          enqueueSnackbar(t("initializationError"), { variant: "error" });
+        });
+    }
+  }, [
+    user?.tenant?.id,
+    onboardingStatus,
+    initializeOnboarding,
+    refetch,
+    t,
+    enqueueSnackbar,
+  ]);
 
-//     if (name.startsWith("notification_")) {
-//       const notificationType = name.split("_")[1];
-//       setFormData({
-//         ...formData,
-//         notifications: {
-//           ...formData.notifications,
-//           [notificationType]: checked,
-//         },
-//       });
-//     } else {
-//       setFormData({
-//         ...formData,
-//         [name]: type === "checkbox" ? checked : value,
-//       });
-//     }
-//   };
+  /**
+   * Handle moving to the next step
+   */
+  const handleNext = useCallback(async () => {
+    if (!user?.tenant?.id || !user?.id || !onboardingStatus || !activeStepKey) {
+      return;
+    }
 
-//   const handleSelectChange = (e: any) => {
-//     const { name, value } = e.target;
-//     setFormData({
-//       ...formData,
-//       [name]: value,
-//     });
-//   };
+    const currentStep = onboardingStatus.data.steps.find(
+      (step: any) => step.stepKey === activeStepKey
+    );
 
-//   const isStepOptional = (step: number) => {
-//     return TENANT_ONBOARDING_STEPS[step]?.isSkippable;
-//   };
+    if (!currentStep) return;
 
-//   const isStepCompleted = (step: number) => {
-//     return completedSteps.includes(step);
-//   };
+    try {
+      setLoading(true);
 
-//   const isStepSkipped = (step: number) => {
-//     return skippedSteps.includes(step);
-//   };
+      await completeStep({
+        entityType: OnboardingEntityType.TENANT,
+        entityId: user.tenant.id,
+        stepId: currentStep.id,
+        metadata: stepFormData[activeStepKey] || {},
+        performedBy: { userId: user.id?.toString() ?? "" },
+      });
 
-//   const getStepContent = (step: number) => {
-//     switch (step) {
-//       case 0: // Tenant Registration
-//         return (
-//           <Grid container spacing={3}>
-//             <Grid sx={{ xs: 12, md: 6 }}>
-//               <TextField
-//                 fullWidth
-//                 label={t("tenantNamePlaceholder")}
-//                 name="tenantName"
-//                 value={formData.tenantName}
-//                 onChange={handleInputChange}
-//                 variant="outlined"
-//                 required
-//               />
-//             </Grid>
-//             <Grid sx={{ xs: 12, md: 6 }}>
-//               <TextField
-//                 fullWidth
-//                 label={t("contactEmailPlaceholder")}
-//                 name="contactEmail"
-//                 type="email"
-//                 value={formData.contactEmail}
-//                 onChange={handleInputChange}
-//                 variant="outlined"
-//                 required
-//               />
-//             </Grid>
-//           </Grid>
-//         );
+      refetch();
+      enqueueSnackbar(t("stepCompletedSuccess"), { variant: "success" });
+    } catch (err: any) {
+      setError(err.message || t("errorCompletingStep"));
+      enqueueSnackbar(t("stepCompletionError"), { variant: "error" });
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    user,
+    onboardingStatus,
+    activeStepKey,
+    stepFormData,
+    completeStep,
+    refetch,
+    t,
+    enqueueSnackbar,
+  ]);
 
-//       case 1: // Admin Account Setup
-//         return (
-//           <Grid container spacing={3}>
-//             <Grid sx={{ xs: 12, md: 6 }}>
-//               <TextField
-//                 fullWidth
-//                 label="Admin First Name"
-//                 name="adminFirstName"
-//                 variant="outlined"
-//                 required
-//               />
-//             </Grid>
-//             <Grid sx={{ xs: 12, md: 6 }}>
-//               <TextField
-//                 fullWidth
-//                 label="Admin Last Name"
-//                 name="adminLastName"
-//                 variant="outlined"
-//                 required
-//               />
-//             </Grid>
-//             <Grid sx={{ xs: 12, md: 6 }}>
-//               <TextField
-//                 fullWidth
-//                 label="Admin Email"
-//                 name="adminEmail"
-//                 type="email"
-//                 variant="outlined"
-//                 required
-//               />
-//             </Grid>
-//             <Grid sx={{ xs: 12, md: 6 }}>
-//               <TextField
-//                 fullWidth
-//                 label="Admin Password"
-//                 name="adminPassword"
-//                 type="password"
-//                 variant="outlined"
-//                 required
-//               />
-//             </Grid>
-//           </Grid>
-//         );
+  /**
+   * Handle moving to the previous step
+   */
+  const handleBack = () => {
+    if (!activeStepKey) return;
 
-//       case 2: // Domain Configuration
-//         return (
-//           <Grid container spacing={3}>
-//             <Grid sx={{ xs: 12 }}>
-//               <TextField
-//                 fullWidth
-//                 label="Custom Domain"
-//                 name="customDomain"
-//                 placeholder="yourdomain.example.com"
-//                 variant="outlined"
-//               />
-//             </Grid>
-//             <Grid sx={{ xs: 12 }}>
-//               <Alert severity="info">
-//                 This step is optional. You can configure your domain later in
-//                 settings.
-//               </Alert>
-//             </Grid>
-//           </Grid>
-//         );
+    const currentIndex = getStepIndex(activeStepKey);
+    if (currentIndex > 0) {
+      setActiveStepKey(orderedStepKeys[currentIndex - 1]);
+    }
+  };
 
-//       case 3: // Schema Initialization
-//         return (
-//           <Box textAlign="center" py={4}>
-//             <CircularProgress size={60} />
-//             <Typography variant="h6" mt={2}>
-//               Initializing database schema...
-//             </Typography>
-//             <Typography variant="body2" color="textSecondary" mt={1}>
-//               This may take a few moments. Please don&apos;t close this window.
-//             </Typography>
-//           </Box>
-//         );
+  /**
+   * Handle skipping the current step
+   */
+  const handleSkip = useCallback(async () => {
+    if (!user?.tenant?.id || !user?.id || !onboardingStatus || !activeStepKey) {
+      return;
+    }
 
-//       case 4: // Payment Setup
-//         return (
-//           <Grid container spacing={3}>
-//             <Grid sx={{ xs: 12 }}>
-//               <TextField
-//                 fullWidth
-//                 label="Cardholder Name"
-//                 name="cardName"
-//                 variant="outlined"
-//                 required
-//               />
-//             </Grid>
-//             <Grid sx={{ xs: 12 }}>
-//               <TextField
-//                 fullWidth
-//                 label="Credit Card Number"
-//                 name="cardNumber"
-//                 variant="outlined"
-//                 required
-//               />
-//             </Grid>
-//             <Grid sx={{ xs: 12, md: 4 }}>
-//               <TextField
-//                 fullWidth
-//                 label="Expiry Date"
-//                 name="cardExpiry"
-//                 placeholder="MM/YY"
-//                 variant="outlined"
-//                 required
-//               />
-//             </Grid>
-//             <Grid sx={{ xs: 12, md: 4 }}>
-//               <TextField
-//                 fullWidth
-//                 label="CVV"
-//                 name="cardCvv"
-//                 variant="outlined"
-//                 required
-//               />
-//             </Grid>
-//           </Grid>
-//         );
+    try {
+      setLoading(true);
 
-//       case 5: // Branding Configuration
-//         return (
-//           <Grid container spacing={3}>
-//             <Grid sx={{ xs: 12 }}>
-//               <TextField
-//                 fullWidth
-//                 label="Primary Color"
-//                 name="primaryColor"
-//                 variant="outlined"
-//               />
-//             </Grid>
-//             <Grid sx={{ xs: 12 }}>
-//               <TextField
-//                 fullWidth
-//                 label="Secondary Color"
-//                 name="secondaryColor"
-//                 variant="outlined"
-//               />
-//             </Grid>
-//             <Grid sx={{ xs: 12 }}>
-//               <input accept="image/*" type="file" id="logo-upload" hidden />
-//               <label htmlFor="logo-upload">
-//                 <Button variant="outlined" component="span">
-//                   Upload Logo
-//                 </Button>
-//               </label>
-//             </Grid>
-//           </Grid>
-//         );
+      await skipStep({
+        entityType: OnboardingEntityType.TENANT,
+        entityId: user.tenant.id,
+        stepKey: activeStepKey,
+        performedBy: { userId: user.id.toString() },
+      });
 
-//       case 6: // Initial Settings
-//         return (
-//           <Grid container spacing={3}>
-//             <Grid sx={{ xs: 12, md: 6 }}>
-//               <FormControl fullWidth variant="outlined">
-//                 <InputLabel>{t("languagePlaceholder")}</InputLabel>
-//                 <Select
-//                   name="language"
-//                   value={formData.language}
-//                   onChange={handleSelectChange}
-//                   label={t("languagePlaceholder")}
-//                 >
-//                   {LANGUAGES.map((lang) => (
-//                     <MenuItem key={lang.value} value={lang.value}>
-//                       {lang.label}
-//                     </MenuItem>
-//                   ))}
-//                 </Select>
-//               </FormControl>
-//             </Grid>
-//             <Grid sx={{ xs: 12, md: 6 }}>
-//               <FormControl fullWidth variant="outlined">
-//                 <InputLabel>{t("timezonePlaceholder")}</InputLabel>
-//                 <Select
-//                   name="timezone"
-//                   value={formData.timezone}
-//                   onChange={handleSelectChange}
-//                   label={t("timezonePlaceholder")}
-//                 >
-//                   {TIMEZONES.map((tz) => (
-//                     <MenuItem key={tz.value} value={tz.value}>
-//                       {tz.label}
-//                     </MenuItem>
-//                   ))}
-//                 </Select>
-//               </FormControl>
-//             </Grid>
-//             <Grid sx={{ xs: 12 }}>
-//               <Typography variant="h6" gutterBottom>
-//                 {t("notificationSettings.title")}
-//               </Typography>
-//               <FormControlLabel
-//                 control={
-//                   <Checkbox
-//                     checked={formData.notifications.email}
-//                     onChange={handleInputChange}
-//                     name="notification_email"
-//                   />
-//                 }
-//                 label={t("notificationSettings.emailNotifications")}
-//               />
-//               <FormControlLabel
-//                 control={
-//                   <Checkbox
-//                     checked={formData.notifications.sms}
-//                     onChange={handleInputChange}
-//                     name="notification_sms"
-//                   />
-//                 }
-//                 label={t("notificationSettings.smsNotifications")}
-//               />
-//               <FormControlLabel
-//                 control={
-//                   <Checkbox
-//                     checked={formData.notifications.push}
-//                     onChange={handleInputChange}
-//                     name="notification_push"
-//                   />
-//                 }
-//                 label={t("notificationSettings.pushNotifications")}
-//               />
-//             </Grid>
-//           </Grid>
-//         );
+      refetch();
+      enqueueSnackbar(t("stepSkippedSuccess"), { variant: "info" });
+    } catch (err: any) {
+      setError(err.message || t("errorSkippingStep"));
+      enqueueSnackbar(t("stepSkipError"), { variant: "error" });
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    user,
+    onboardingStatus,
+    activeStepKey,
+    skipStep,
+    refetch,
+    t,
+    enqueueSnackbar,
+  ]);
 
-//       case 12: // Go-Live Checklist
-//         return (
-//           <Grid container spacing={3}>
-//             <Grid sx={{ xs: 12 }}>
-//               <FormControlLabel
-//                 control={<Checkbox />}
-//                 label="I have verified all tenant settings"
-//               />
-//             </Grid>
-//             <Grid sx={{ xs: 12 }}>
-//               <FormControlLabel
-//                 control={<Checkbox />}
-//                 label="I have tested user registration"
-//               />
-//             </Grid>
-//             <Grid sx={{ xs: 12 }}>
-//               <FormControlLabel
-//                 control={<Checkbox />}
-//                 label="I have reviewed compliance requirements"
-//               />
-//             </Grid>
-//             <Grid sx={{ xs: 12 }}>
-//               <FormControlLabel
-//                 control={<Checkbox />}
-//                 label="I have backed up initial configuration"
-//               />
-//             </Grid>
-//           </Grid>
-//         );
+  /**
+   * Handle form submission for the entire onboarding
+   */
+  const handleSubmit = useCallback(async () => {
+    if (!user?.tenant?.id || !user?.id || !onboardingStatus) return;
 
-//       default:
-//         return `Unknown step: ${step + 1}`;
-//     }
-//   };
+    try {
+      setLoading(true);
 
-//   const renderStepActions = () => {
-//     if (activeStep === TENANT_ONBOARDING_STEPS.length) {
-//       // Completion screen
-//       return (
-//         <Box mt={4}>
-//           <Button
-//             variant="contained"
-//             color="primary"
-//             onClick={() => (window.location.href = "/")}
-//           >
-//             {t("backToHomeButton")}
-//           </Button>
-//         </Box>
-//       );
-//     }
+      await Promise.all(
+        onboardingStatus.data.steps
+          .filter((step: any) => step.status === OnboardingStepStatus.PENDING)
+          .map((step: any) =>
+            completeStep({
+              entityType: OnboardingEntityType.TENANT,
+              entityId: user?.tenant?.id || "",
+              stepId: step.id,
+              metadata: stepFormData[step.stepKey] || {},
+              performedBy: { userId: user?.id?.toString() ?? "" },
+            })
+          )
+      );
 
-//     return (
-//       <Box mt={4} display="flex" justifyContent="space-between">
-//         <Button disabled={activeStep === 0} onClick={handleBack}>
-//           {t("previousButton")}
-//         </Button>
+      refetch();
+      setConfirmDialogOpen(false);
+      enqueueSnackbar(t("onboardingCompleteSuccess"), { variant: "success" });
+    } catch (err: any) {
+      setError(err.message || t("errorSubmitting"));
+      enqueueSnackbar(t("onboardingCompletionError"), { variant: "error" });
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    user,
+    onboardingStatus,
+    stepFormData,
+    completeStep,
+    refetch,
+    t,
+    enqueueSnackbar,
+  ]);
 
-//         <Box>
-//           {isStepOptional(activeStep) && (
-//             <Button
-//               variant="outlined"
-//               onClick={() =>
-//                 handleSkipStep(
-//                   TENANT_ONBOARDING_STEPS[activeStep]?.key?.toString() || ""
-//                 )
-//               }
-//               sx={{ mr: 2 }}
-//             >
-//               {t("skipButton")}
-//             </Button>
-//           )}
+  /**
+   * Update form data for a specific step
+   */
+  const handleStepDataChange = (stepKey: string, data: any) => {
+    setStepFormData((prev) => ({
+      ...prev,
+      [stepKey]: { ...prev[stepKey], ...data },
+    }));
+  };
 
-//           <Button
-//             variant="contained"
-//             color="primary"
-//             onClick={
-//               activeStep === TENANT_ONBOARDING_STEPS.length - 1
-//                 ? () => setConfirmDialogOpen(true)
-//                 : handleNext
-//             }
-//           >
-//             {activeStep === TENANT_ONBOARDING_STEPS.length - 1
-//               ? t("finishButton")
-//               : t("nextButton")}
-//           </Button>
-//         </Box>
-//       </Box>
-//     );
-//   };
+  const isStepOptional = (stepKey: string) => {
+    return stepsByKey[stepKey]?.isSkippable;
+  };
 
-//   const renderCompletionScreen = () => (
-//     <Box textAlign="center" py={6}>
-//       <Box mb={3}>
-//         <svg width="100" height="100" viewBox="0 0 24 24">
-//           <circle cx="12" cy="12" r="12" fill="#4CAF50" />
-//           <path fill="none" stroke="#FFF" strokeWidth="2" d="M7 13l3 3 7-7" />
-//         </svg>
-//       </Box>
-//       <Typography variant="h4" gutterBottom>
-//         {t("tenantOnboardingSuccessTitle")}
-//       </Typography>
-//       <Typography variant="body1" color="textSecondary">
-//         {t("completionMessage")}
-//       </Typography>
-//       <Box mt={4}>
-//         <Button
-//           variant="contained"
-//           color="primary"
-//           onClick={() => (window.location.href = "/")}
-//         >
-//           {t("backToHomeButton")}
-//         </Button>
-//       </Box>
-//     </Box>
-//   );
+  const isStepCompleted = (stepKey: string) => {
+    return completedSteps.includes(stepKey);
+  };
 
-//   if (loading && activeStep !== 3) {
-//     return (
-//       <Container maxWidth="xl">
-//         <Grid
-//           container
-//           justifyContent="center"
-//           alignItems="center"
-//           style={{ minHeight: "80vh" }}
-//         >
-//           <Grid sx={{ xs: 12 }} textAlign="center">
-//             <CircularProgress size={60} />
-//             <Typography variant="h6" mt={2}>
-//               {t("loadingMessage")}
-//             </Typography>
-//           </Grid>
-//         </Grid>
-//       </Container>
-//     );
-//   }
+  const isStepSkipped = (stepKey: string) => {
+    return skippedSteps.includes(stepKey);
+  };
 
-//   if (error) {
-//     return (
-//       <Container maxWidth="xl">
-//         <Grid container spacing={3} pt={3}>
-//           <Grid sx={{ xs: 12 }}>
-//             <Alert severity="error" sx={{ mb: 3 }}>
-//               {error}
-//             </Alert>
-//             <Button
-//               variant="contained"
-//               onClick={() => window.location.reload()}
-//             >
-//               {t("retryButton")}
-//             </Button>
-//             <Button variant="outlined" sx={{ ml: 2 }}>
-//               {t("contactSupportButton")}
-//             </Button>
-//           </Grid>
-//         </Grid>
-//       </Container>
-//     );
-//   }
+  /**
+   * Step Components - Each step is now a separate component
+   * with its own validation and form handling
+   */
 
-//   return (
-//     <Container maxWidth="xl">
-//       <Grid container spacing={3} pt={3}>
-//         <Grid sx={{ xs: 12 }} mb={2}>
-//           <Typography variant="h4" component="h1" gutterBottom>
-//             <strong>{t("title")}</strong>
-//           </Typography>
-//           <Typography variant="subtitle1" color="textSecondary">
-//             {t("description")}
-//           </Typography>
-//         </Grid>
+  const TenantRegistrationStep = ({ stepKey }: { stepKey: string }) => {
+    const { register, handleSubmit, control } = useForm({
+      resolver: yupResolver(validationSchemas.tenant_registration),
+      defaultValues: stepFormData[stepKey] || {},
+    });
 
-//         <Grid sx={{ xs: 12 }}>
-//           <Stepper
-//             activeStep={activeStep}
-//             alternativeLabel
-//             sx={{
-//               mb: 4,
-//               overflowX: "auto",
-//               "& .MuiStepLabel-label": {
-//                 fontSize: { xs: "0.75rem", sm: "0.875rem" },
-//               },
-//             }}
-//           >
-//             {TENANT_ONBOARDING_STEPS.map(
-//               (
-//                 step: {
-//                   key: Key | null | undefined;
-//                   name:
-//                     | string
-//                     | number
-//                     | bigint
-//                     | boolean
-//                     | ReactElement<unknown, string | JSXElementConstructor<any>>
-//                     | Iterable<ReactNode>
-//                     | ReactPortal
-//                     | Promise<
-//                         | string
-//                         | number
-//                         | bigint
-//                         | boolean
-//                         | ReactPortal
-//                         | ReactElement<
-//                             unknown,
-//                             string | JSXElementConstructor<any>
-//                           >
-//                         | Iterable<ReactNode>
-//                         | null
-//                         | undefined
-//                       >
-//                     | null
-//                     | undefined;
-//                 },
-//                 index: number
-//               ) => (
-//                 <Step
-//                   key={step.key}
-//                   completed={isStepCompleted(index) || activeStep > index}
-//                   sx={{ minWidth: 120 }}
-//                 >
-//                   <StepLabel
-//                     optional={
-//                       isStepOptional(index) && (
-//                         <Typography variant="caption">Optional</Typography>
-//                       )
-//                     }
-//                     error={isStepSkipped(index)}
-//                   >
-//                     {step.name}
-//                   </StepLabel>
-//                 </Step>
-//               )
-//             )}
-//           </Stepper>
+    // eslint-disable-next-line no-restricted-syntax
+    const { errors } = useFormState({ control });
 
-//           <Paper elevation={2} sx={{ p: 3 }}>
-//             {activeStep === TENANT_ONBOARDING_STEPS.length ? (
-//               renderCompletionScreen()
-//             ) : (
-//               <>
-//                 <Typography variant="h5" gutterBottom>
-//                   {TENANT_ONBOARDING_STEPS[activeStep].name}
-//                 </Typography>
-//                 <Typography variant="body1" color="textSecondary" mb={3}>
-//                   {TENANT_ONBOARDING_STEPS[activeStep].description}
-//                 </Typography>
+    const onSubmit = (data: any) => {
+      handleStepDataChange(stepKey, data);
+      handleNext();
+    };
 
-//                 {getStepContent(activeStep)}
+    return (
+      <form onSubmit={handleSubmit(onSubmit)} ref={formRef}>
+        <Grid container spacing={3}>
+          <Grid sx={{ xs: 12, md: 6 }}>
+            <TextField
+              fullWidth
+              label={t("tenantNamePlaceholder")}
+              {...register("tenantName")}
+              error={!!errors.tenantName}
+              helperText={errors.tenantName?.message as string}
+              variant="outlined"
+              required
+            />
+          </Grid>
+          <Grid sx={{ xs: 12, md: 6 }}>
+            <TextField
+              fullWidth
+              label={t("contactEmailPlaceholder")}
+              type="email"
+              {...register("contactEmail")}
+              error={!!errors.contactEmail}
+              helperText={errors.contactEmail?.message as string}
+              variant="outlined"
+              required
+            />
+          </Grid>
+        </Grid>
+      </form>
+    );
+  };
 
-//                 {renderStepActions()}
-//               </>
-//             )}
-//           </Paper>
-//         </Grid>
-//       </Grid>
+  const AdminAccountSetupStep = ({ stepKey }: { stepKey: string }) => {
+    const { register, handleSubmit, control } = useForm({
+      resolver: yupResolver(validationSchemas.admin_creation),
+      defaultValues: stepFormData[stepKey] || {},
+    });
 
-//       {/* Confirmation Dialog */}
-//       {confirmDialogOpen && (
-//         <Box
-//           sx={{
-//             position: "fixed",
-//             top: 0,
-//             left: 0,
-//             width: "100%",
-//             height: "100%",
-//             backgroundColor: "rgba(0,0,0,0.5)",
-//             display: "flex",
-//             alignItems: "center",
-//             justifyContent: "center",
-//             zIndex: 1300,
-//           }}
-//         >
-//           <Paper sx={{ p: 4, maxWidth: 500, width: "100%" }}>
-//             <Typography variant="h6" gutterBottom>
-//               {t("confirmationMessage")}
-//             </Typography>
-//             <Typography variant="body1" mb={3}>
-//               Please review all information before completing the onboarding
-//               process.
-//             </Typography>
-//             <Box display="flex" justifyContent="flex-end">
-//               <Button
-//                 onClick={() => setConfirmDialogOpen(false)}
-//                 sx={{ mr: 2 }}
-//               >
-//                 {t("cancelConfirmationButton")}
-//               </Button>
-//               <Button
-//                 variant="contained"
-//                 color="primary"
-//                 onClick={handleSubmit}
-//                 disabled={loading}
-//               >
-//                 {loading ? <CircularProgress size={24} /> : t("confirmButton")}
-//               </Button>
-//             </Box>
-//           </Paper>
-//         </Box>
-//       )}
-//     </Container>
-//   );
-// }
+    // eslint-disable-next-line no-restricted-syntax
+    const { errors } = useFormState({ control });
 
-// export default withPageRequiredAuth(TenantOnboarding, {
-//   roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER, RoleEnum.MANAGER],
-// });
+    const onSubmit = (data: any) => {
+      handleStepDataChange(stepKey, data);
+      handleNext();
+    };
+
+    return (
+      <form onSubmit={handleSubmit(onSubmit)} ref={formRef}>
+        <Grid container spacing={3}>
+          <Grid sx={{ xs: 12, md: 6 }}>
+            <TextField
+              fullWidth
+              label={t("adminFirstNamePlaceholder")}
+              {...register("adminFirstName")}
+              error={!!errors.adminFirstName}
+              helperText={errors.adminFirstName?.message as string}
+              variant="outlined"
+              required
+            />
+          </Grid>
+          <Grid sx={{ xs: 12, md: 6 }}>
+            <TextField
+              fullWidth
+              label={t("adminLastNamePlaceholder")}
+              {...register("adminLastName")}
+              error={!!errors.adminLastName}
+              helperText={errors.adminLastName?.message as string}
+              variant="outlined"
+              required
+            />
+          </Grid>
+          <Grid sx={{ xs: 12, md: 6 }}>
+            <TextField
+              fullWidth
+              label={t("adminEmailPlaceholder")}
+              type="email"
+              {...register("adminEmail")}
+              error={!!errors.adminEmail}
+              helperText={errors.adminEmail?.message as string}
+              variant="outlined"
+              required
+            />
+          </Grid>
+          <Grid sx={{ xs: 12, md: 6 }}>
+            <TextField
+              fullWidth
+              label={t("adminPasswordPlaceholder")}
+              type="password"
+              {...register("adminPassword")}
+              error={!!errors.adminPassword}
+              helperText={errors.adminPassword?.message as string}
+              variant="outlined"
+              required
+            />
+          </Grid>
+        </Grid>
+      </form>
+    );
+  };
+
+  const DomainConfigurationStep = ({ stepKey }: { stepKey: string }) => {
+    return (
+      <Grid container spacing={3}>
+        <Grid sx={{ xs: 12 }}>
+          <TextField
+            fullWidth
+            label={t("customDomainPlaceholder")}
+            name="customDomain"
+            value={stepFormData[stepKey]?.customDomain || ""}
+            onChange={(e) =>
+              handleStepDataChange(stepKey, { customDomain: e.target.value })
+            }
+            placeholder="yourdomain.example.com"
+            variant="outlined"
+          />
+        </Grid>
+        <Grid sx={{ xs: 12 }}>
+          <Alert severity="info">{t("domainOptionalMessage")}</Alert>
+        </Grid>
+      </Grid>
+    );
+  };
+
+  const SchemaInitializationStep = () => {
+    useEffect(() => {
+      // Simulate schema initialization
+      const timer = setTimeout(() => {
+        handleNext();
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }, []);
+
+    return (
+      <Box textAlign="center" py={4}>
+        <CircularProgress size={60} />
+        <Typography variant="h6" mt={2}>
+          {t("schemaInitializationTitle")}
+        </Typography>
+        <Typography variant="body2" color="textSecondary" mt={1}>
+          {t("schemaInitializationDescription")}
+        </Typography>
+      </Box>
+    );
+  };
+
+  const PaymentSetupStep = ({ stepKey }: { stepKey: string }) => {
+    const { register, handleSubmit, control } = useForm({
+      resolver: yupResolver(validationSchemas.payment_setup),
+      defaultValues: stepFormData[stepKey] || {},
+    });
+
+    // eslint-disable-next-line no-restricted-syntax
+    const { errors } = useFormState({ control });
+
+    const onSubmit = (data: any) => {
+      handleStepDataChange(stepKey, data);
+      handleNext();
+    };
+
+    return (
+      <form onSubmit={handleSubmit(onSubmit)} ref={formRef}>
+        <Grid container spacing={3}>
+          <Grid sx={{ xs: 12 }}>
+            <TextField
+              fullWidth
+              label={t("cardholderNamePlaceholder")}
+              {...register("cardName")}
+              error={!!errors.cardName}
+              helperText={errors.cardName?.message as string}
+              variant="outlined"
+              required
+            />
+          </Grid>
+          <Grid sx={{ xs: 12 }}>
+            <TextField
+              fullWidth
+              label={t("creditCardNumberPlaceholder")}
+              {...register("cardNumber")}
+              error={!!errors.cardNumber}
+              helperText={errors.cardNumber?.message as string}
+              variant="outlined"
+              required
+            />
+          </Grid>
+          <Grid sx={{ xs: 12, md: 4 }}>
+            <TextField
+              fullWidth
+              label={t("expiryDatePlaceholder")}
+              {...register("cardExpiry")}
+              error={!!errors.cardExpiry}
+              helperText={errors.cardExpiry?.message as string}
+              placeholder="MM/YY"
+              variant="outlined"
+              required
+            />
+          </Grid>
+          <Grid sx={{ xs: 12, md: 4 }}>
+            <TextField
+              fullWidth
+              label={t("cvvPlaceholder")}
+              {...register("cardCvv")}
+              error={!!errors.cardCvv}
+              helperText={errors.cardCvv?.message as string}
+              variant="outlined"
+              required
+            />
+          </Grid>
+        </Grid>
+      </form>
+    );
+  };
+
+  const BrandingConfigurationStep = ({ stepKey }: { stepKey: string }) => {
+    return (
+      <Grid container spacing={3}>
+        <Grid sx={{ xs: 12 }}>
+          <TextField
+            fullWidth
+            label={t("primaryColorPlaceholder")}
+            name="primaryColor"
+            value={stepFormData[stepKey]?.primaryColor || ""}
+            onChange={(e) =>
+              handleStepDataChange(stepKey, { primaryColor: e.target.value })
+            }
+            variant="outlined"
+          />
+        </Grid>
+        <Grid sx={{ xs: 12 }}>
+          <TextField
+            fullWidth
+            label={t("secondaryColorPlaceholder")}
+            name="secondaryColor"
+            value={stepFormData[stepKey]?.secondaryColor || ""}
+            onChange={(e) =>
+              handleStepDataChange(stepKey, { secondaryColor: e.target.value })
+            }
+            variant="outlined"
+          />
+        </Grid>
+        <Grid sx={{ xs: 12 }}>
+          <input
+            accept="image/*"
+            type="file"
+            id="logo-upload"
+            hidden
+            onChange={(e) => {
+              if (e.target.files?.[0]) {
+                handleStepDataChange(stepKey, { logo: e.target.files[0] });
+              }
+            }}
+          />
+          <label htmlFor="logo-upload">
+            <Button variant="outlined" component="span">
+              {t("uploadLogoButton")}
+            </Button>
+          </label>
+          {stepFormData[stepKey]?.logo && (
+            <Typography variant="body2" mt={1}>
+              {stepFormData[stepKey].logo.name}
+            </Typography>
+          )}
+        </Grid>
+      </Grid>
+    );
+  };
+
+  const InitialSettingsStep = ({ stepKey }: { stepKey: string }) => {
+    const { control, handleSubmit } = useForm({
+      resolver: yupResolver(validationSchemas.initial_settings),
+      defaultValues: stepFormData[stepKey] || {},
+    });
+
+    // eslint-disable-next-line no-restricted-syntax
+    const { errors } = useFormState({ control });
+
+    const onSubmit = (data: any) => {
+      handleStepDataChange(stepKey, data);
+      handleNext();
+    };
+
+    return (
+      <form onSubmit={handleSubmit(onSubmit)} ref={formRef}>
+        <Grid container spacing={3}>
+          <Grid sx={{ xs: 12, md: 6 }}>
+            <FormControl fullWidth variant="outlined">
+              <InputLabel>{t("languagePlaceholder")}</InputLabel>
+              <Controller
+                name="language"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    label={t("languagePlaceholder")}
+                    error={!!errors.language}
+                  >
+                    {LANGUAGES.map((lang) => (
+                      <MenuItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              />
+              {errors.language && (
+                <Typography color="error" variant="body2">
+                  {errors.language.message as string}
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+          <Grid sx={{ xs: 12, md: 6 }}>
+            <FormControl fullWidth variant="outlined">
+              <InputLabel>{t("timezonePlaceholder")}</InputLabel>
+              <Controller
+                name="timezone"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    label={t("timezonePlaceholder")}
+                    error={!!errors.timezone}
+                  >
+                    {TIMEZONES.map((tz) => (
+                      <MenuItem key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              />
+              {errors.timezone && (
+                <Typography color="error" variant="body2">
+                  {errors.timezone.message as string}
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+          <Grid sx={{ xs: 12 }}>
+            <Typography variant="h6" gutterBottom>
+              {t("notificationSettings.title")}
+            </Typography>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={!!stepFormData[stepKey]?.notification_email}
+                  onChange={(e) =>
+                    handleStepDataChange(stepKey, {
+                      notification_email: e.target.checked,
+                    })
+                  }
+                  name="notification_email"
+                />
+              }
+              label={t("notificationSettings.emailNotifications")}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={!!stepFormData[stepKey]?.notification_sms}
+                  onChange={(e) =>
+                    handleStepDataChange(stepKey, {
+                      notification_sms: e.target.checked,
+                    })
+                  }
+                  name="notification_sms"
+                />
+              }
+              label={t("notificationSettings.smsNotifications")}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={!!stepFormData[stepKey]?.notification_push}
+                  onChange={(e) =>
+                    handleStepDataChange(stepKey, {
+                      notification_push: e.target.checked,
+                    })
+                  }
+                  name="notification_push"
+                />
+              }
+              label={t("notificationSettings.pushNotifications")}
+            />
+          </Grid>
+        </Grid>
+      </form>
+    );
+  };
+
+  const GoLiveCheckStep = ({ stepKey }: { stepKey: string }) => {
+    const checkboxes = [
+      { name: "verifiedSettings", label: t("verifiedSettingsLabel") },
+      { name: "testedRegistration", label: t("testedRegistrationLabel") },
+      { name: "reviewedCompliance", label: t("reviewedComplianceLabel") },
+      { name: "backedUpConfig", label: t("backedUpConfigLabel") },
+    ];
+
+    return (
+      <Grid container spacing={3}>
+        {checkboxes.map((checkbox) => (
+          <Grid sx={{ xs: 12 }} key={checkbox.name}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={!!stepFormData[stepKey]?.[checkbox.name]}
+                  onChange={(e) =>
+                    handleStepDataChange(stepKey, {
+                      [checkbox.name]: e.target.checked,
+                    })
+                  }
+                  name={checkbox.name}
+                />
+              }
+              label={checkbox.label}
+            />
+          </Grid>
+        ))}
+      </Grid>
+    );
+  };
+
+  /**
+   * Get content for the current step
+   */
+  const getStepContent = (stepKey: string) => {
+    switch (stepKey) {
+      case "tenant_registration":
+        return <TenantRegistrationStep stepKey={stepKey} />;
+      case "admin_creation":
+        return <AdminAccountSetupStep stepKey={stepKey} />;
+      case "domain_configuration":
+        return <DomainConfigurationStep stepKey={stepKey} />;
+      case "schema_initialization":
+        return <SchemaInitializationStep />;
+      case "payment_setup":
+        return <PaymentSetupStep stepKey={stepKey} />;
+      case "branding_configuration":
+        return <BrandingConfigurationStep stepKey={stepKey} />;
+      case "initial_settings":
+        return <InitialSettingsStep stepKey={stepKey} />;
+      case "go_live_check":
+        return <GoLiveCheckStep stepKey={stepKey} />;
+      default:
+        return `Unknown step: ${stepKey}`;
+    }
+  };
+
+  /**
+   * Render step navigation buttons
+   */
+  const renderStepActions = () => {
+    if (!activeStepKey) {
+      return (
+        <Box mt={4}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => (window.location.href = "/")}
+          >
+            {t("backToHomeButton")}
+          </Button>
+        </Box>
+      );
+    }
+
+    const currentStepIndex = getStepIndex(activeStepKey);
+    const isLastStep = currentStepIndex === filteredSteps.length - 1;
+
+    return (
+      <Box mt={4} display="flex" justifyContent="space-between">
+        <Button disabled={currentStepIndex === 0} onClick={handleBack}>
+          {t("previousButton")}
+        </Button>
+
+        <Box>
+          {isStepOptional(activeStepKey) && (
+            <Button
+              variant="outlined"
+              onClick={handleSkip}
+              sx={{ mr: 2 }}
+              disabled={loading}
+            >
+              {t("skipButton")}
+            </Button>
+          )}
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              if (formRef.current) {
+                // Trigger form submission if form exists
+                formRef.current.dispatchEvent(
+                  new Event("submit", { cancelable: true, bubbles: true })
+                );
+              } else if (isLastStep) {
+                setConfirmDialogOpen(true);
+              } else {
+                handleNext();
+              }
+            }}
+            disabled={loading}
+          >
+            {loading ? (
+              <CircularProgress size={24} />
+            ) : isLastStep ? (
+              t("finishButton")
+            ) : (
+              t("nextButton")
+            )}
+          </Button>
+        </Box>
+      </Box>
+    );
+  };
+
+  /**
+   * Render completion screen
+   */
+  const renderCompletionScreen = () => (
+    <Box textAlign="center" py={6}>
+      <Box mb={3}>
+        <svg width="100" height="100" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="12" fill="#4CAF50" />
+          <path fill="none" stroke="#FFF" strokeWidth="2" d="M7 13l3 3 7-7" />
+        </svg>
+      </Box>
+      <Typography variant="h4" gutterBottom>
+        {t("tenantOnboardingSuccessTitle")}
+      </Typography>
+      <Typography variant="body1" color="textSecondary">
+        {t("completionMessage")}
+      </Typography>
+      <Box mt={4}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => (window.location.href = "/")}
+        >
+          {t("backToHomeButton")}
+        </Button>
+      </Box>
+    </Box>
+  );
+
+  if (loading) {
+    return (
+      <Container maxWidth="xl">
+        <Grid
+          container
+          justifyContent="center"
+          alignItems="center"
+          style={{ minHeight: "80vh" }}
+        >
+          <Grid sx={{ xs: 12 }} textAlign="center">
+            <CircularProgress size={60} />
+            <Typography variant="h6" mt={2}>
+              {t("loadingMessage")}
+            </Typography>
+          </Grid>
+        </Grid>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="xl">
+        <Grid container spacing={3} pt={3}>
+          <Grid sx={{ xs: 12 }}>
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+            <Button
+              variant="contained"
+              onClick={() => window.location.reload()}
+            >
+              {t("retryButton")}
+            </Button>
+            <Button variant="outlined" sx={{ ml: 2 }} href="/support">
+              {t("contactSupportButton")}
+            </Button>
+          </Grid>
+        </Grid>
+      </Container>
+    );
+  }
+
+  // Calculate active step index for stepper
+  const activeStepIndex = activeStepKey
+    ? getStepIndex(activeStepKey)
+    : filteredSteps.length;
+
+  return (
+    <Container maxWidth="xl">
+      <Grid container spacing={3} pt={3}>
+        <Grid sx={{ xs: 12 }} mb={2}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            <strong>{t("title")}</strong>
+          </Typography>
+          <Typography variant="subtitle1" color="textSecondary">
+            {t("description")}
+          </Typography>
+        </Grid>
+
+        <Grid sx={{ xs: 12 }}>
+          <Stepper
+            activeStep={activeStepIndex}
+            alternativeLabel
+            sx={{
+              mb: 4,
+              overflowX: "auto",
+              "& .MuiStepLabel-label": {
+                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              },
+            }}
+          >
+            {filteredSteps.map((step) => (
+              <Step
+                key={step.key}
+                completed={
+                  isStepCompleted(step.key) ||
+                  activeStepIndex > getStepIndex(step.key)
+                }
+              >
+                <StepLabel
+                  optional={
+                    step.isSkippable && (
+                      <Typography variant="caption">
+                        {t("optionalLabel")}
+                      </Typography>
+                    )
+                  }
+                  error={isStepSkipped(step.key)}
+                >
+                  {step.name}
+                </StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+
+          <Paper elevation={2} sx={{ p: 3 }}>
+            {!activeStepKey ? (
+              renderCompletionScreen()
+            ) : (
+              <>
+                <Typography variant="h5" gutterBottom>
+                  {stepsByKey[activeStepKey]?.name || ""}
+                </Typography>
+                <Typography variant="body1" color="textSecondary" mb={3}>
+                  {stepsByKey[activeStepKey]?.description || ""}
+                </Typography>
+
+                {getStepContent(activeStepKey)}
+
+                {renderStepActions()}
+              </>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDialogOpen}
+        onClose={() => setConfirmDialogOpen(false)}
+      >
+        <DialogTitle>{t("confirmationTitle")}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{t("confirmationDescription")}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setConfirmDialogOpen(false)}
+            disabled={loading}
+          >
+            {t("cancelButton")}
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : t("confirmButton")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
+  );
+}
+
+export default withPageRequiredAuth(TenantOnboarding, {
+  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER, RoleEnum.MANAGER],
+});
