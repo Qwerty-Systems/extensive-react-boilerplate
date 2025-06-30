@@ -74,7 +74,7 @@ export default function Hero({
       document.removeEventListener("click", handleUserInteraction);
       document.removeEventListener("touchstart", handleUserInteraction);
     };
-  }, []);
+  }, [videoThumbnail]);
 
   return (
     <Box

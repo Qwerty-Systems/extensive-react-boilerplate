@@ -57,7 +57,7 @@ export const USER_ONBOARDING_STEPS: OnboardingStepDefinition[] = [
     name: "Initial Settings",
     description: "Configure your preferences",
     order: 6,
-    isRequired: false,
+    isRequired: true,
     isSkippable: true,
   },
   {
@@ -65,7 +65,7 @@ export const USER_ONBOARDING_STEPS: OnboardingStepDefinition[] = [
     name: "First Action",
     description: "Perform your first platform action",
     order: 7,
-    isRequired: false,
+    isRequired: true,
     isSkippable: true,
   },
   {
@@ -73,7 +73,7 @@ export const USER_ONBOARDING_STEPS: OnboardingStepDefinition[] = [
     name: "Tutorial Completion",
     description: "Complete the interactive tutorial",
     order: 8,
-    isRequired: false,
+    isRequired: true,
     isSkippable: true,
   },
   {
@@ -81,7 +81,7 @@ export const USER_ONBOARDING_STEPS: OnboardingStepDefinition[] = [
     name: "App Download",
     description: "Download mobile application",
     order: 9,
-    isRequired: false,
+    isRequired: true,
     isSkippable: true,
   },
   {
@@ -89,12 +89,20 @@ export const USER_ONBOARDING_STEPS: OnboardingStepDefinition[] = [
     name: "Invite Friends",
     description: "Invite colleagues to the platform",
     order: 10,
-    isRequired: false,
+    isRequired: true,
     isSkippable: true,
   },
 ];
 
 export const TENANT_ONBOARDING_STEPS: OnboardingStepDefinition[] = [
+  {
+    key: "plan_selection",
+    name: "Plan Selection",
+    description: "Select a subscription plan",
+    order: 0,
+    isRequired: true,
+    isSkippable: false,
+  },
   {
     key: "tenant_registration",
     name: "Organization Registration",
@@ -102,6 +110,7 @@ export const TENANT_ONBOARDING_STEPS: OnboardingStepDefinition[] = [
     order: 1,
     isRequired: true,
     isSkippable: false,
+    dependencies: ["plan_selection"],
   },
   {
     key: "admin_creation",
@@ -117,8 +126,8 @@ export const TENANT_ONBOARDING_STEPS: OnboardingStepDefinition[] = [
     name: "Domain Configuration",
     description: "Configure custom domain",
     order: 3,
-    isRequired: false,
-    isSkippable: true,
+    isRequired: true,
+    isSkippable: false,
   },
   {
     key: "schema_initialization",
@@ -142,7 +151,7 @@ export const TENANT_ONBOARDING_STEPS: OnboardingStepDefinition[] = [
     name: "Branding Configuration",
     description: "Customize organization branding",
     order: 6,
-    isRequired: false,
+    isRequired: true,
     isSkippable: true,
   },
   {
@@ -158,7 +167,7 @@ export const TENANT_ONBOARDING_STEPS: OnboardingStepDefinition[] = [
     name: "Team Invitation",
     description: "Invite team members",
     order: 8,
-    isRequired: false,
+    isRequired: true,
     isSkippable: true,
   },
   {
@@ -174,7 +183,7 @@ export const TENANT_ONBOARDING_STEPS: OnboardingStepDefinition[] = [
     name: "Integration Setup",
     description: "Connect third-party services",
     order: 10,
-    isRequired: false,
+    isRequired: true,
     isSkippable: true,
   },
   {
@@ -182,7 +191,7 @@ export const TENANT_ONBOARDING_STEPS: OnboardingStepDefinition[] = [
     name: "Data Import",
     description: "Import initial data",
     order: 11,
-    isRequired: false,
+    isRequired: true,
     isSkippable: true,
   },
   {
@@ -198,7 +207,7 @@ export const TENANT_ONBOARDING_STEPS: OnboardingStepDefinition[] = [
     name: "Go-Live Checklist",
     description: "Complete pre-launch checklist",
     order: 13,
-    isRequired: false,
+    isRequired: true,
     isSkippable: true,
     dependencies: [
       "admin_creation",

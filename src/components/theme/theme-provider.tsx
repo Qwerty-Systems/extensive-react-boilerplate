@@ -80,7 +80,7 @@ function ThemeProvider({ children }: PropsWithChildren<{}>) {
           tooltip: 1500,
         },
       }),
-    [themePalette, themeDirection]
+    [validatedDirection, themePalette]
   );
 
   // Step 2: Compute derived theme properties

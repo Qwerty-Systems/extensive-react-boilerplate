@@ -147,11 +147,12 @@ function AuthProvider(props: PropsWithChildren<{}>) {
   const contextActionsValue = useMemo(
     () => ({
       setUser,
+      loadData,
       setTenant,
       logOut,
       setAuthMethod,
     }),
-    [logOut]
+    [loadData, logOut]
   );
 
   const contextTokensValue = useMemo(
