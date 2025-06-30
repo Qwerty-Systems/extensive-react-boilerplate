@@ -210,7 +210,7 @@ function TenantOnboarding() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [skippedSteps, setSkippedSteps] = useState<string[]>([]);
-  const { user, loadData } = useAuth();
+  const { user } = useAuth();
   const getOnboardingStatus = useGetOnboardingStatus();
   const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
