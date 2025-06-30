@@ -105,7 +105,7 @@ function FormActions() {
 }
 
 function Form() {
-  const [isTenantSignup, setIsTenantSignup] = useState(false);
+  const [isTenantSignup, setIsTenantSignup] = useState(true);
   const { setUser, setTenant } = useAuthActions();
   const { setTokensInfo } = useAuthTokens();
   const fetchAuthLogin = useAuthLoginService();
