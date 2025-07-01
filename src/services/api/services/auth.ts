@@ -11,6 +11,7 @@ export type AuthTenantSignUpRequest = {
   lastName: string;
   email: string;
   password: string;
+  phone: string;
   name: string;
   type: any;
 };

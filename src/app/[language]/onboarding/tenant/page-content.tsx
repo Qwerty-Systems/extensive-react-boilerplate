@@ -641,6 +641,77 @@ function TenantOnboarding() {
     );
   };
 
+  // const DomainConfigurationStep = ({ stepKey }: { stepKey: string }) => {
+  //   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "example.com";
+  //   const tenantName = stepFormData["tenant_registration"]?.tenantName || "";
+
+  //   const defaultSubdomain = useMemo(() => {
+  //     return tenantName
+  //       ? tenantName
+  //           .toLowerCase()
+  //           .replace(/\s+/g, "-")
+  //           .replace(/[^a-z0-9-]/g, "")
+  //       : "";
+  //   }, [tenantName]);
+
+  //   const { register, watch, setValue } = useForm({
+  //     defaultValues: {
+  //       subdomain: stepFormData[stepKey]?.subdomain || defaultSubdomain,
+  //     },
+  //   });
+
+  //   // eslint-disable-next-line no-restricted-syntax
+  //   const subdomain = watch("subdomain");
+  //   const fullDomain = useMemo(() => {
+  //     return subdomain ? `${subdomain}.${rootDomain}` : "";
+  //   }, [subdomain, rootDomain]);
+
+  //   const updateParentForm = useCallback(() => {
+  //     handleStepDataChange(stepKey, {
+  //       subdomain,
+  //       customDomain: fullDomain,
+  //     });
+  //   }, [subdomain, fullDomain, stepKey]);
+
+  //   const prevSubdomain = useRef(subdomain);
+  //   useEffect(() => {
+  //     if (prevSubdomain.current !== subdomain) {
+  //       updateParentForm();
+  //       prevSubdomain.current = subdomain;
+  //     }
+  //   }, [subdomain, updateParentForm]);
+
+  //   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //     const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
+  //     setValue("subdomain", value);
+  //   };
+
+  //   return (
+  //     <form ref={formRef}>
+  //       <Grid container spacing={3}>
+  //         <Grid sx={{ xs: 12 }}>
+  //           <TextField
+  //             fullWidth
+  //             label={t("subdomainPlaceholder")}
+  //             value={subdomain}
+  //             {...register("subdomain")}
+  //             onChange={handleInputChange}
+  //             helperText={t("domainHelperText", { domain: fullDomain })}
+  //             variant="outlined"
+  //           />
+  //         </Grid>
+  //         <Grid sx={{ xs: 12 }}>
+  //           <Alert severity="info">
+  //             {t("domainOptionalMessage")}
+  //             <Box component="span" fontWeight="bold">
+  //               {t("domainExample", { domain: fullDomain })}
+  //             </Box>
+  //           </Alert>
+  //         </Grid>
+  //       </Grid>
+  //     </form>
+  //   );
+  // };
   const DomainConfigurationStep = ({ stepKey }: { stepKey: string }) => {
     const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "example.com";
     const tenantName = stepFormData["tenant_registration"]?.tenantName || "";
@@ -654,55 +725,60 @@ function TenantOnboarding() {
         : "";
     }, [tenantName]);
 
-    const { register, watch, setValue } = useForm({
+    const { control, handleSubmit, watch } = useForm({
       defaultValues: {
         subdomain: stepFormData[stepKey]?.subdomain || defaultSubdomain,
       },
     });
 
     // eslint-disable-next-line no-restricted-syntax
+    const { errors } = useFormState({ control });
+
+    // eslint-disable-next-line no-restricted-syntax
     const subdomain = watch("subdomain");
+
     const fullDomain = useMemo(() => {
       return subdomain ? `${subdomain}.${rootDomain}` : "";
     }, [subdomain, rootDomain]);
 
-    const updateParentForm = useCallback(() => {
+    const onSubmit = (data: any) => {
       handleStepDataChange(stepKey, {
-        subdomain,
-        customDomain: fullDomain,
+        subdomain: data.subdomain,
+        customDomain: `${data.subdomain}.${rootDomain}`,
       });
-    }, [subdomain, fullDomain, stepKey]);
-
-    const prevSubdomain = useRef(subdomain);
-    useEffect(() => {
-      if (prevSubdomain.current !== subdomain) {
-        updateParentForm();
-        prevSubdomain.current = subdomain;
-      }
-    }, [subdomain, updateParentForm]);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
-      setValue("subdomain", value);
+      handleNext();
     };
 
     return (
-      <form ref={formRef}>
+      <form onSubmit={handleSubmit(onSubmit)} ref={formRef}>
         <Grid container spacing={3}>
           <Grid sx={{ xs: 12 }}>
-            <TextField
-              fullWidth
-              label={t("subdomainPlaceholder")}
-              value={subdomain}
-              {...register("subdomain")}
-              onChange={handleInputChange}
-              helperText={t("domainHelperText", { domain: fullDomain })}
-              variant="outlined"
+            <Controller
+              name="subdomain"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  fullWidth
+                  label={t("subdomainPlaceholder")}
+                  value={field.value}
+                  onChange={(e) => {
+                    const cleaned = e.target.value
+                      .toLowerCase()
+                      .replace(/[^a-z0-9-]/g, "");
+                    field.onChange(cleaned);
+                  }}
+                  helperText={t("domainHelperText", { domain: fullDomain })}
+                  error={!!errors.subdomain}
+                  variant="outlined"
+                  required
+                />
+              )}
             />
           </Grid>
+
           <Grid sx={{ xs: 12 }}>
             <Alert severity="info">
-              {t("domainOptionalMessage")}
+              {t("domainOptionalMessage")}&nbsp;
               <Box component="span" fontWeight="bold">
                 {t("domainExample", { domain: fullDomain })}
               </Box>
