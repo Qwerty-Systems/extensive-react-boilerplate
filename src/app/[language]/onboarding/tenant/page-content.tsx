@@ -401,7 +401,7 @@ function TenantOnboarding() {
       });
 
       refetch();
-      enqueueSnackbar(t("stepSkippedSuccess"), { variant: "info" });
+      enqueueSnackbar(t("stepSkippedSuccess"), { variant: "success" });
     } catch (err: any) {
       setError(err.message || t("errorSkippingStep"));
       enqueueSnackbar(t("stepSkipError"), { variant: "error" });
@@ -654,62 +654,51 @@ function TenantOnboarding() {
         : "";
     }, [tenantName]);
 
-    const { register, watch, setValue } = useForm({
-      defaultValues: {
-        subdomain: stepFormData[stepKey]?.subdomain || defaultSubdomain,
-      },
-    });
+    const [subdomain, setSubdomain] = useState(
+      stepFormData[stepKey]?.subdomain || defaultSubdomain
+    );
 
-    // eslint-disable-next-line no-restricted-syntax
-    const subdomain = watch("subdomain");
     const fullDomain = useMemo(() => {
       return subdomain ? `${subdomain}.${rootDomain}` : "";
     }, [subdomain, rootDomain]);
 
-    const updateParentForm = useCallback(() => {
+    // Update parent when subdomain changes
+    useEffect(() => {
       handleStepDataChange(stepKey, {
         subdomain,
         customDomain: fullDomain,
       });
     }, [subdomain, fullDomain, stepKey]);
 
-    const prevSubdomain = useRef(subdomain);
-    useEffect(() => {
-      if (prevSubdomain.current !== subdomain) {
-        updateParentForm();
-        prevSubdomain.current = subdomain;
-      }
-    }, [subdomain, updateParentForm]);
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
-      setValue("subdomain", value);
+      setSubdomain(value);
     };
 
     return (
-      <form ref={formRef}>
-        <Grid container spacing={3}>
-          <Grid sx={{ xs: 12 }}>
-            <TextField
-              fullWidth
-              label={t("subdomainPlaceholder")}
-              value={subdomain}
-              {...register("subdomain")}
-              onChange={handleInputChange}
-              helperText={t("domainHelperText", { domain: fullDomain })}
-              variant="outlined"
-            />
-          </Grid>
-          <Grid sx={{ xs: 12 }}>
-            <Alert severity="info">
-              {t("domainOptionalMessage")}
-              <Box component="span" fontWeight="bold">
-                {t("domainExample", { domain: fullDomain })}
-              </Box>
-            </Alert>
-          </Grid>
+      <Grid container spacing={3}>
+        <Grid sx={{ xs: 12 }}>
+          <TextField
+            fullWidth
+            label={t("subdomainPlaceholder")}
+            value={subdomain}
+            onChange={handleInputChange}
+            helperText={t("domainHelperText", { domain: fullDomain })}
+            variant="outlined"
+            inputProps={{
+              "data-testid": "subdomain-input",
+            }}
+          />
         </Grid>
-      </form>
+        <Grid sx={{ xs: 12 }}>
+          <Alert severity="info">
+            {t("domainOptionalMessage")}
+            <Box component="span" fontWeight="bold">
+              {t("domainExample", { domain: fullDomain })}
+            </Box>
+          </Alert>
+        </Grid>
+      </Grid>
     );
   };
 
@@ -2010,7 +1999,6 @@ function TenantOnboarding() {
     );
   };
 
-  // Integration field component for use with Controller
   const IntegrationField = ({
     value,
     onChange,
@@ -2021,36 +2009,29 @@ function TenantOnboarding() {
     t: any;
   }) => {
     const DEFAULT_INTEGRATIONS: any[] = [
-      { id: "google", name: "Google Workspace", enabled: false },
+      { id: "google", name: "Google Drive", enabled: false },
       { id: "Mpesa", name: "Mpesa Payment Notification", enabled: false },
       { id: "SMS", name: "SMS Notification", enabled: false },
       { id: "Whats App", name: "Whats App Notification", enabled: false },
     ];
-    const [integrations, setIntegrations] = useState<any[]>(
-      value?.length ? value : DEFAULT_INTEGRATIONS
-    );
 
-    useEffect(() => {
-      onChange(integrations);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [integrations]);
+    // Use value prop directly instead of local state
+    const integrations = value?.length ? value : DEFAULT_INTEGRATIONS;
 
     const toggleIntegration = (id: string) => {
-      setIntegrations((prev) =>
-        prev.map((integration) =>
-          integration.id === id
-            ? { ...integration, enabled: !integration.enabled }
-            : integration
-        )
+      const updated = integrations.map((integration) =>
+        integration.id === id
+          ? { ...integration, enabled: !integration.enabled }
+          : integration
       );
+      onChange(updated);
     };
 
     const handleApiKeyChange = (id: string, apiKey: string) => {
-      setIntegrations((prev) =>
-        prev.map((integration) =>
-          integration.id === id ? { ...integration, apiKey } : integration
-        )
+      const updated = integrations.map((integration) =>
+        integration.id === id ? { ...integration, apiKey } : integration
       );
+      onChange(updated);
     };
 
     return (
@@ -2101,29 +2082,15 @@ function TenantOnboarding() {
     );
   };
 
-  // IntegrationSetupStep using Controller
   const IntegrationSetupStep = ({ stepKey }: { stepKey: string }) => {
-    const { control } = useForm({
-      defaultValues: {
-        integrations: stepFormData[stepKey]?.integrations || [],
-      },
-    });
+    const integrations = stepFormData[stepKey]?.integrations || [];
+
+    const handleChange = (newIntegrations: any[]) => {
+      handleStepDataChange(stepKey, { integrations: newIntegrations });
+    };
 
     return (
-      <Controller
-        name="integrations"
-        control={control}
-        render={({ field }) => (
-          <IntegrationField
-            value={field.value}
-            onChange={(val) => {
-              field.onChange(val);
-              handleStepDataChange(stepKey, { integrations: val });
-            }}
-            t={t}
-          />
-        )}
-      />
+      <IntegrationField value={integrations} onChange={handleChange} t={t} />
     );
   };
   // Plan Selection Step Component
