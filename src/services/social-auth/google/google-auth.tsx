@@ -28,6 +28,7 @@ export default function GoogleAuth() {
     if (status === HTTP_CODES_ENUM.OK) {
       setTokensInfo(
         {
+          tenantId: null,
           token: data.token,
           refreshToken: data.refreshToken,
           tokenExpires: data.tokenExpires,
