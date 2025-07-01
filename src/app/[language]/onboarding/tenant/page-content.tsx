@@ -401,7 +401,7 @@ function TenantOnboarding() {
       });
 
       refetch();
-      enqueueSnackbar(t("stepSkippedSuccess"), { variant: "success" });
+      enqueueSnackbar(t("stepSkippedSuccess"), { variant: "info" });
     } catch (err: any) {
       setError(err.message || t("errorSkippingStep"));
       enqueueSnackbar(t("stepSkipError"), { variant: "error" });

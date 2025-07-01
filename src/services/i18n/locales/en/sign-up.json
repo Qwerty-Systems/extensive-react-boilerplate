@@ -47,6 +47,12 @@
     "isTenantSignup": {
       "label": "Sign up as a tenant"
     },
+    "phone": {
+      "label": "Tenant Phone",
+      "validation": {
+        "required": "Tenant phone is required"
+      }
+    },
     "tenantName": {
       "label": "Tenant Name",
       "validation": {

@@ -48,6 +48,7 @@ type SignUpFormData = {
   firstName: string;
   lastName: string;
   email: string;
+  phone: string;
   password: string;
   policy: TPolicy[];
   tenantName?: string; // New field
@@ -64,6 +65,12 @@ const useValidationSchema = (isTenantSignup: boolean) => {
     lastName: yup
       .string()
       .required(t("sign-up:inputs.lastName.validation.required")),
+    phone: yup.string().optional(),
+    // phone: yup.string().required(t("sign-up:inputs.phone.validation.required")),
+    // .matches(
+    //   /^\+?[1-9]\d{1,14}$/,
+    //   t("sign-up:inputs.phone.validation.invalid")
+    // ),
     email: yup
       .string()
       .email(t("sign-up:inputs.email.validation.invalid"))
@@ -147,6 +154,7 @@ function Form() {
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
+          phone: formData.phone,
           password: formData.password,
           name: formData.tenantName!,
           type: { id: formData.tenantType!.id },
@@ -297,6 +305,13 @@ function Form() {
             {/* Tenant Fields - Conditionally shown */}
             {isTenantSignup && (
               <>
+                <Grid sx={{ xs: 12 }}>
+                  <FormTextInput<SignUpFormData>
+                    name="phone"
+                    label={t("sign-up:inputs.phone.label")}
+                    testId="tenant-phone"
+                  />
+                </Grid>
                 <Grid sx={{ xs: 12 }}>
                   <FormTextInput<SignUpFormData>
                     name="tenantName"
