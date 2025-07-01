@@ -125,8 +125,10 @@ function Form() {
       return;
     }
     if (status === HTTP_CODES_ENUM.OK) {
+      console.log("singing data", data);
       setTokensInfo(
         {
+          tenantId: data?.user?.tenant?.id,
           token: data.token,
           refreshToken: data.refreshToken,
           tokenExpires: data.tokenExpires,

@@ -178,6 +178,7 @@ function Form() {
 
         if (statusSignIn === HTTP_CODES_ENUM.OK) {
           setTokensInfo({
+            tenantId: dataSignIn?.user?.tenant?.id,
             token: dataSignIn.token,
             refreshToken: dataSignIn.refreshToken,
             tokenExpires: dataSignIn.tokenExpires,
@@ -241,6 +242,7 @@ function Form() {
       if (statusSignIn === HTTP_CODES_ENUM.OK) {
         setTokensInfo(
           {
+            tenantId: dataSignIn?.user?.tenant?.id,
             token: dataSignIn.token,
             refreshToken: dataSignIn.refreshToken,
             tokenExpires: dataSignIn.tokenExpires,
