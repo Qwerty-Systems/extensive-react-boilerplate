@@ -150,12 +150,12 @@ function useFetch() {
       }
 
       // Add tenant ID header if available
-      // if (tokens?.tenantId) {
-      //   headers = {
-      //     ...headers,
-      //     "x-tenant-id": tokens.tenantId,
-      //   };
-      // }
+      if (tokens?.tenantId) {
+        headers = {
+          ...headers,
+          "x-tenant-id": tokens.tenantId,
+        };
+      }
 
       // Refresh token if about to expire
       if (tokens?.tokenExpires && tokens.tokenExpires - 60000 <= Date.now()) {
