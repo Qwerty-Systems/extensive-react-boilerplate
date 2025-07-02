@@ -144,11 +144,6 @@ function PaymentMethods() {
 
   const columns: GridColDef[] = [
     {
-      field: "id",
-      headerName: tPaymentMethods("admin-panel-payment-methods:table.column1"),
-      width: 120,
-    },
-    {
       field: "name",
       headerName: tPaymentMethods("admin-panel-payment-methods:table.column2"),
       flex: 1,
@@ -163,18 +158,21 @@ function PaymentMethods() {
       field: "config",
       headerName: tPaymentMethods("admin-panel-payment-methods:table.column4"),
       width: 200,
-      valueGetter: (params: any) => params?.value?.provider || "-",
-      renderCell: (params) => (
-        <Box
-          sx={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {params?.value?.provider || "-"}
-        </Box>
-      ),
+      valueGetter: (params: any) => params?.provider || "-",
+      renderCell: (params: any) => {
+        console.log("params", params);
+        return (
+          <Box
+            sx={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {params?.row?.config?.provider || "-"}
+          </Box>
+        );
+      },
     },
     {
       field: "sandbox",

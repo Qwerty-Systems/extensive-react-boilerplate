@@ -68,12 +68,8 @@ function AuditLogs() {
       headerName: t("table.action"),
       flex: 1,
       minWidth: 150,
-      renderCell: (params) => (
-        <Chip
-          label={t(`audit.action.${params?.row?.action}`)}
-          color="primary"
-          size="small"
-        />
+      renderCell: (params: any) => (
+        <Chip label={params?.row?.action} color="primary" size="small" />
       ),
     },
     {
@@ -88,22 +84,31 @@ function AuditLogs() {
       flex: 1,
       minWidth: 200,
       valueGetter: (params: any) =>
-        params?.row?.performedByUser
-          ? `${params?.row?.performedByUser?.firstName} ${params?.row?.performedByUser?.lastName}`
-          : "",
+        params ? `${params?.firstName} ${params?.lastName}` : "-",
     },
     {
       field: "performedByTenant",
       headerName: t("table.tenant"),
       flex: 1,
       minWidth: 200,
-      valueGetter: (params: any) => params?.row?.performedByTenant?.name,
+      valueGetter: (params: any) => params?.name || "-",
     },
     {
       field: "description",
       headerName: t("table.description"),
       flex: 1,
       minWidth: 300,
+      renderCell: (params) => (
+        <Box
+          sx={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {params?.value || "-"}
+        </Box>
+      ),
     },
     {
       field: "createdAt",
@@ -111,9 +116,7 @@ function AuditLogs() {
       flex: 1,
       minWidth: 180,
       valueGetter: (params: any) =>
-        params?.row?.createdAt
-          ? format(new Date(params?.row?.createdAt), "PPpp")
-          : "-",
+        params ? format(new Date(params), "PPpp") : "-",
     },
   ];
 
