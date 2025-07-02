@@ -27,6 +27,9 @@ import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import { Index } from "@/components/common/PageCarded";
+import TenantHeader from "./tenant-header";
+import TenantSidebar from "./tenant-sidebar";
 
 type TenantsKeys = keyof Tenant;
 
@@ -332,6 +335,30 @@ function Tenants() {
   );
 }
 
-export default withPageRequiredAuth(Tenants, {
-  roles: [RoleEnum.ADMIN, RoleEnum.PLATFORM_OWNER],
+function CustomersClient() {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  // const [selectedItem, setSelectedItem] = useState<User>();
+  // const handleSelect = (user: User) => {
+  //   setSelectedItem(user);
+  //   setIsDrawerOpen(true);
+  // };
+  return (
+    <Index
+      header={<TenantHeader />}
+      content={<Tenants /* onSelect={handleSelect} */ />}
+      sidebarContent={<TenantSidebar />}
+      sidebarWidth={500}
+      scroll="normal"
+      isOpen={isDrawerOpen}
+      setIsOpen={setIsDrawerOpen}
+    />
+  );
+}
+export default withPageRequiredAuth(CustomersClient, {
+  roles: [
+    RoleEnum.ADMIN,
+    RoleEnum.PLATFORM_OWNER,
+    RoleEnum.AGENT,
+    RoleEnum.MANAGER,
+  ],
 });

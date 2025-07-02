@@ -125,8 +125,10 @@ function Form() {
       return;
     }
     if (status === HTTP_CODES_ENUM.OK) {
+      console.log("singing data", data);
       setTokensInfo(
         {
+          tenantId: data?.user?.tenant?.id,
           token: data.token,
           refreshToken: data.refreshToken,
           tokenExpires: data.tokenExpires,
@@ -175,6 +177,7 @@ function Form() {
                     type="email"
                     testId="email"
                     autoFocus
+                    fullWidth={true}
                   />
                 </Grid>
 
@@ -184,6 +187,7 @@ function Form() {
                     label={t("sign-in:inputs.password.label")}
                     type="password"
                     testId="password"
+                    fullWidth={true}
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>

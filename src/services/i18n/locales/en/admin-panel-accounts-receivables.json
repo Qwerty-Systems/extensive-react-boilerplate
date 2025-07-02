@@ -1,0 +1,100 @@
+{
+  "title": "Receivables",
+  "table": {
+    "column1": "ID",
+    "name": "Name",
+    "type": "Type",
+    "balance": "Balance",
+    "status": "Status",
+    "tenant": "Tenant",
+    "owner": "Owner",
+    "actions": "Actions",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "createdBy": "Created By",
+    "updatedBy": "Updated By",
+    "active": "Active",
+    "inactive": "Inactive",
+
+    "itemName": "Item Name",
+    "itemDescription": "Item Description",
+    "quantity": "Quantity",
+    "purchasePrice": "Purchase Price",
+    "amount": "Amount",
+
+    "transactionType": "Transaction Type",
+    "accountType": "Account Type"
+  },
+  "transactionType": {
+    "CREDIT": "Credit",
+    "DEBIT": "Debit",
+    "TRANSFER": "Transfer",
+    "REFUND": "Refund",
+    "WRITE_OFF": "Write-off",
+    "LATE_FEE": "Late Fee",
+    "ADJUSTMENT": "Adjustment",
+    "CREDIT_MEMO": "Credit Memo",
+    "INVOICE_PAYMENT": "Invoice Payment",
+    "CHARGEBACK": "Chargeback",
+    "PAYMENT": "Payment",
+    "DISCOUNT": "Discount",
+    "FEE": "Fee",
+    "TAX": "Tax",
+    "INTEREST": "Interest",
+    "REVERSAL": "Reversal",
+    "PREPAYMENT": "Prepayment",
+    "OVERPAYMENT": "Overpayment",
+    "UNDERPAYMENT": "Underpayment",
+    "ESCALATION_CHARGE": "Escalation Charge",
+    "SERVICE_CHARGE": "Service Charge",
+    "PENALTY": "Penalty",
+    "CASH_RECEIPT": "Cash Receipt",
+    "ALLOCATION": "Allocation",
+    "MANUAL_ENTRY": "Manual Entry",
+    "SERVICE_FEE": "Service Fee",
+    "ASSET_PURCHASE": "Asset Purchase",
+    "FUEL_PURCHASE": "Fuel Purchase",
+    "MAINTENANCE": "Maintenance",
+    "WASTE_COLLECTION": "Waste Collection",
+    "OFFICE_SUPPLIES": "Office Supplies",
+    "VENDOR_PAYMENT": "Vendor Payment"
+  },
+  "accountType": {
+    "asset": "Asset",
+    "liability": "Liability",
+    "equity": "Equity",
+    "revenue": "Revenue",
+    "expense": "Expense"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "actions": {
+    "add": "Add Account",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create Account"
+  },
+  "confirm": {
+    "delete": {
+      "title": "Delete Account",
+      "message": "Are you sure you want to delete this Account?"
+    }
+  },
+  "filter": {
+    "actions": {
+      "filter": "Filter",
+      "apply": "Apply"
+    },
+    "inputs": {
+      "role": {
+        "label": "Role",
+        "options": {
+          "1": "Admin",
+          "2": "Account"
+        }
+      }
+    }
+  }
+}

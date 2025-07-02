@@ -137,11 +137,6 @@ function Exemptions() {
 
   const columns: GridColDef[] = [
     {
-      field: "id",
-      headerName: tExemptions("admin-panel-exemptions:table.column1"),
-      width: 120,
-    },
-    {
       field: "reason",
       headerName: tExemptions("admin-panel-exemptions:table.column2"),
       flex: 1,
@@ -154,7 +149,7 @@ function Exemptions() {
             textOverflow: "ellipsis",
           }}
         >
-          {params.value || "-"}
+          {params?.value || "-"}
         </Box>
       ),
     },
@@ -163,9 +158,7 @@ function Exemptions() {
       headerName: tExemptions("admin-panel-exemptions:table.column3"),
       width: 200,
       valueGetter: (params: any) =>
-        params?.row.customer
-          ? `${params.row.customer.firstName} ${params.row.customer.lastName}`
-          : "-",
+        params ? `${params?.firstName} ${params?.lastName}` : "-",
       renderCell: (params) => (
         <Box
           sx={{
@@ -174,7 +167,45 @@ function Exemptions() {
             textOverflow: "ellipsis",
           }}
         >
-          {params.value}
+          {params?.value}
+        </Box>
+      ),
+    },
+    {
+      field: "tenant",
+      headerName: tExemptions("admin-panel-exemptions:table.columnTenant"), // Add translation key
+      width: 200,
+      valueGetter: (params: any) => {
+        return params?.name || params?.domain || "-";
+      },
+      renderCell: (params) => {
+        return (
+          <Box
+            sx={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {params?.value}
+          </Box>
+        );
+      },
+    },
+    {
+      field: "region",
+      headerName: tExemptions("admin-panel-exemptions:table.region"), // Add translation key
+      width: 200,
+      valueGetter: (params: any) => params?.name || params?.domain || "-",
+      renderCell: (params) => (
+        <Box
+          sx={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {params?.value}
         </Box>
       ),
     },
@@ -182,14 +213,16 @@ function Exemptions() {
       field: "dateRange",
       headerName: tExemptions("admin-panel-exemptions:table.column4"),
       width: 250,
-      valueGetter: (params: any) =>
-        `${format(new Date(params.row.startDate), "dd/MM/yyyy")} - ${format(new Date(params.row.endDate), "dd/MM/yyyy")}`,
+      renderCell: (params: any) =>
+        params?.row?.startDate
+          ? `${format(new Date(params?.row?.startDate), "dd/MM/yyyy")} - ${format(new Date(params?.row?.endDate), "dd/MM/yyyy")}`
+          : "-",
     },
     {
       field: "actions",
       headerName: "",
       width: 120,
-      renderCell: (params) => <Actions exemption={params.row} />,
+      renderCell: (params) => <Actions exemption={params?.row} />,
       sortable: false,
       filterable: false,
     },

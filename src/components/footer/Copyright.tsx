@@ -45,7 +45,7 @@ export default function Copyright({
         gap: { xs: 1.5, sm: isDivider ? 1.5 : 3 },
       }}
     >
-      <Typography variant="caption" sx={{ color: "text.secondary" }}>
+      <Typography variant="caption" sx={{ color: "#FFC107" }}>
         Copyright © {new Date().getFullYear()}
         <Link
           {...linkProps}

@@ -45,7 +45,8 @@ function SelectInputRaw<T extends object>(
         labelId={`select-label-${props.name}`}
         id={`select-${props.name}`}
         size={props.size}
-        value={props.value?.[props.keyValue]?.toString() ?? ""}
+        // value={props.value?.[props.keyValue]?.toString() ?? ""}
+        value={props.value || ""}
         label={props.label}
         sx={{ minWidth: 200 }}
         variant="outlined"

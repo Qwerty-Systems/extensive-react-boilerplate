@@ -140,11 +140,6 @@ function Discounts() {
 
   const columns: GridColDef[] = [
     {
-      field: "id",
-      headerName: tDiscounts("admin-panel-discounts:table.column1"),
-      width: 120,
-    },
-    {
       field: "description",
       headerName: tDiscounts("admin-panel-discounts:table.column2"),
       flex: 1,
@@ -157,7 +152,7 @@ function Discounts() {
             textOverflow: "ellipsis",
           }}
         >
-          {params.value || "-"}
+          {params?.value || "-"}
         </Box>
       ),
     },
@@ -167,11 +162,42 @@ function Discounts() {
       width: 150,
       renderCell: (params) => (
         <Chip
-          label={tDiscountTypes(`discount-type:${params.value}`)}
+          label={tDiscountTypes(`discount-type:${params?.value}`)}
           color="primary"
           size="small"
         />
       ),
+    },
+    // Add tenant column
+    {
+      field: "tenant",
+      headerName: "Tenant", // Add translation key
+      width: 200,
+      valueGetter: (params: any) => params?.tenant?.name || "-",
+      renderCell: (params) => (
+        <Box
+          sx={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {params.value || "-"}
+        </Box>
+      ),
+    },
+    // Add customer column
+    {
+      field: "customer",
+      headerName: "Customer", // Add translation key
+      width: 180,
+      valueGetter: (params: any) => {
+        const customer = params?.customer;
+        if (!customer) return "-";
+        return customer.phoneNumber
+          ? `${customer.countryCode || ""} ${customer.phoneNumber}`
+          : "-";
+      },
     },
     {
       field: "value",
@@ -179,9 +205,13 @@ function Discounts() {
       width: 120,
       renderCell: (params) => (
         <span>
-          {params.row.type === DiscountTypeEnum.PERCENTAGE
-            ? `${params.value}%`
-            : `$${params.value.toFixed(2)}`}
+          {params?.row?.type
+            ? params?.row?.type === DiscountTypeEnum.PERCENTAGE
+              ? `${params?.value}%`
+              : params.value
+                ? /** `$${params?.value?.toFixed(2)}`*/ "-"
+                : "-"
+            : "-"}
         </span>
       ),
     },
@@ -189,8 +219,19 @@ function Discounts() {
       field: "validRange",
       headerName: tDiscounts("admin-panel-discounts:table.column5"),
       width: 250,
-      valueGetter: (params: any) =>
-        `${format(new Date(params.row.validFrom), "dd/MM/yyyy")} - ${format(new Date(params.row.validTo), "dd/MM/yyyy")}`,
+      renderCell: (params: any) => {
+        const row = params?.row;
+        if (!row || !row?.validFrom || !row?.validTo) return "-";
+
+        try {
+          return `${format(new Date(row?.validFrom), "dd/MM/yyyy")} - ${format(
+            new Date(row?.validTo),
+            "dd/MM/yyyy"
+          )}`;
+        } catch (e) {
+          return "Invalid date";
+        }
+      },
     },
     {
       field: "isActive",
@@ -199,11 +240,11 @@ function Discounts() {
       renderCell: (params) => (
         <Chip
           label={
-            params.value
+            params?.value
               ? tDiscounts("admin-panel-discounts:status.active")
               : tDiscounts("admin-panel-discounts:status.inactive")
           }
-          color={params.value ? "success" : "error"}
+          color={params?.value ? "success" : "error"}
           size="small"
         />
       ),
@@ -212,7 +253,7 @@ function Discounts() {
       field: "actions",
       headerName: "",
       width: 120,
-      renderCell: (params) => <Actions discount={params.row} />,
+      renderCell: (params) => <Actions discount={params?.row} />,
       sortable: false,
       filterable: false,
     },

@@ -35,18 +35,23 @@ export const useGetInvoicesQuery = ({
     queryKey: invoicesQueryKeys.list().sub.by({ sort, filter }).key,
     initialPageParam: 1,
     queryFn: async ({ pageParam, signal }) => {
+      const mappedFilter = filter
+        ? {
+            ...filter,
+          }
+        : undefined;
       const { status, data } = await fetch(
         {
           page: pageParam,
           limit: 10,
-          filters: filter,
+          filters: mappedFilter,
           sort: sort ? [sort] : undefined,
         },
         {
           signal,
         }
       );
-
+      console.log("status, data ", status, data);
       if (status === HTTP_CODES_ENUM.OK) {
         return {
           data: data.data,

@@ -3,7 +3,6 @@
 import { alpha, useTheme } from "@mui/material/styles";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
 // @third-party
@@ -15,18 +14,19 @@ import ContainerWrapper from "@/components/ContainerWrapper";
 
 import { SECTION_COMMON_PY } from "@/utils/constant";
 import GraphicsImage from "../GraphicsImage";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 
 /***************************  CLIENTELE - 3  ***************************/
 
 interface Clientele3Props {
-  title?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clienteleList: Array<Record<string, any>>;
 }
 
-export default function Clientele3({ title, clienteleList }: Clientele3Props) {
+export default function Clientele3({ clienteleList }: Clientele3Props) {
   const theme = useTheme();
-
+  // const isLight = theme.palette.mode === "light";
   const settings = {
     autoplay: true,
     arrows: false,
@@ -60,27 +60,29 @@ export default function Clientele3({ title, clienteleList }: Clientele3Props) {
   };
 
   return (
-    <ContainerWrapper sx={{ py: SECTION_COMMON_PY }}>
+    <ContainerWrapper
+      sx={{ py: SECTION_COMMON_PY /* , background: "#005c24" */ }}
+    >
       <Stack sx={{ gap: 2.5 }}>
-        {title && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{
-              duration: 0.5,
-              delay: 0.3,
-            }}
-          >
+        <Box
+          sx={{
+            py: SECTION_COMMON_PY,
+            textAlign: "center",
+          }}
+        >
+          <ContainerWrapper>
             <Typography
-              variant="subtitle2"
-              align="center"
-              sx={{ color: "text.secondary" }}
+              variant="h3"
+              sx={{
+                fontSize: "1.5rem",
+                mb: 1,
+                color: "#FFC107",
+              }}
             >
-              {title}
+              Partners in Clean Communities
             </Typography>
-          </motion.div>
-        )}
+          </ContainerWrapper>
+        </Box>
         <Box
           sx={{
             position: "relative",
@@ -115,16 +117,20 @@ export default function Clientele3({ title, clienteleList }: Clientele3Props) {
                 >
                   <Chip
                     label={
-                      //TTODO: Uncomment this when you have the GraphicsImage component ready
                       <GraphicsImage
-                        nestedChildren={item.nestedChildren || null}
-                        image={item.image || ""}
-                        sx={item.sx || {}}
-                        cardMediaProps={item.cardMediaProps || {}}
+                        image={item.image}
+                        nestedChildren={null}
+                        sx={{
+                          height: { xs: 120, sm: 120, md: 120 },
+                          width: "auto",
+                          maxWidth: "100%",
+                          objectFit: "contain",
+                        }}
+                        cardMediaProps={{ component: "img" }}
                       />
                     }
                     sx={{
-                      bgcolor: "grey.100",
+                      bgcolor: "transparent",
                       height: { xs: 40, sm: 46, md: 60 },
                       width: 1,
                       "& .MuiChip-label": { p: 0 },
@@ -134,6 +140,34 @@ export default function Clientele3({ title, clienteleList }: Clientele3Props) {
               ))}
             </Slider>
           </motion.div>
+        </Box>
+        <Box
+          sx={{
+            py: SECTION_COMMON_PY,
+            textAlign: "center",
+          }}
+        >
+          <ContainerWrapper>
+            <Button
+              href="/en/sign-up"
+              rel="noopener noreferrer"
+              variant="contained"
+              sx={{
+                background: "linear-gradient(45deg, #FFC107, #ffb300)",
+                color: "#003d1a",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+                fontWeight: 700,
+                borderRadius: "50px",
+                boxShadow: "0 10px 30px rgba(255,193,7,0.4)",
+                px: 3,
+                py: 1.5,
+              }}
+            >
+              {" "}
+              Join us on this journey!
+            </Button>
+          </ContainerWrapper>
         </Box>
       </Stack>
     </ContainerWrapper>

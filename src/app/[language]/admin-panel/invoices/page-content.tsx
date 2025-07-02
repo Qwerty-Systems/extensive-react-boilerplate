@@ -112,10 +112,7 @@ function Invoices() {
       filter,
       sort: {
         order: (sortModel[0]?.sort?.toUpperCase() as SortEnum) || SortEnum.DESC,
-        orderBy:
-          typeof sortModel[0]?.field === "string"
-            ? (sortModel[0]?.field as InvoicesKeys)
-            : ("id" as InvoicesKeys),
+        orderBy: (sortModel[0]?.field as InvoicesKeys) || "id",
       },
     });
 

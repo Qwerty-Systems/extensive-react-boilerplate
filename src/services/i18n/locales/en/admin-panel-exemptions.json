@@ -1,0 +1,64 @@
+{
+  "title": "Exemptions",
+  "table": {
+    "column2": "Reason",
+    "column3": "Customer",
+    "column4": "Date Range",
+    "columnTenant": "Tenant",
+    "region": "Region",
+
+    "name": "Name",
+    "type": "Type",
+    "balance": "Balance",
+    "status": "Status",
+    "tenant": "Tenant",
+    "owner": "Owner",
+    "actions": "Actions",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "createdBy": "Created By",
+    "updatedBy": "Updated By",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "account": {
+    "types": {
+      "asset": "Asset",
+      "liability": "Liability",
+      "equity": "Equity",
+      "revenue": "Revenue",
+      "expense": "Expense"
+    }
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "actions": {
+    "add": "Add Account",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create Account"
+  },
+  "confirm": {
+    "delete": {
+      "title": "Delete Account",
+      "message": "Are you sure you want to delete this Account?"
+    }
+  },
+  "filter": {
+    "actions": {
+      "filter": "Filter",
+      "apply": "Apply"
+    },
+    "inputs": {
+      "role": {
+        "label": "Role",
+        "options": {
+          "1": "Admin",
+          "2": "Account"
+        }
+      }
+    }
+  }
+}

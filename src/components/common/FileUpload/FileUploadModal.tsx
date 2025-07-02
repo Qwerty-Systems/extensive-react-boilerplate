@@ -4,19 +4,21 @@
 // import { LoadingButton } from "@mui/lab";
 // import { FormikProvider, useFormik, FieldArray, ArrayHelpers } from "formik";
 // import { UploadFile } from "@mui/icons-material";
-// import { Modal } from "components/common/Modal";
 // import { FileUploadInput } from "./FileUploadInput";
 // import { DragContainer } from "./styles";
 // import * as yup from "yup";
-// import { useThemeProvider } from "app/global/providers/ThemeProvider";
 // import {
 //   ACCEPTED_ATTACHMENT_CONTENT_TYPE,
 //   ACCEPTED_ATTACHMENT_CONTENT_TYPES,
 //   ACCEPTED_FILE_UPLOAD_CONTENT_TYPE,
 //   ACCEPTED_FILE_UPLOAD_CONTENT_TYPES,
 // } from "app/global/constants/contentTypes";
-// import { formatBytes } from "app/global/constants/formatBytes";
-// import Grid from "@mui/material/Grid2";
+// import Typography from "@mui/material/Typography";
+// import Box from "@mui/material/Box";
+// import Button from "@mui/material/Button";
+// import Grid from "@mui/material/Grid";
+// import { formatBytes } from "@/services/global/constants/formatBytes";
+// import { useTheme } from "@mui/material/styles";
 
 // const attachment_schema = yup.object().shape({
 //   attachments: yup
@@ -84,7 +86,7 @@
 
 // export function FileUploadModal(props: FileUploadModalProps) {
 //   const { t } = useTranslation();
-//   const { paletteMode } = useThemeProvider();
+//   const { palette } = useTheme();
 
 //   const initialValues: FormValues =
 //     props.type === "file_upload" ? { files: [] } : { attachments: [] };
@@ -92,7 +94,12 @@
 //     initialValues,
 //     validationSchema:
 //       props.type === "file_upload" ? file_upload_schema : attachment_schema,
-//     onSubmit: (values, formikHelpers) => {
+//     onSubmit: (
+//       values:
+//         | { attachments: { [x: string]: any }[] }
+//         | { files: { [x: string]: any }[] },
+//       formikHelpers: { setSubmitting: (arg0: boolean) => void }
+//     ) => {
 //       props.handleSubmit(values as AttachmentsSchema | FileUploadSchema);
 //       formikHelpers.setSubmitting(false);
 //     },
@@ -160,7 +167,7 @@
 //                   variant="body1"
 //                   sx={{
 //                     mt: 1,
-//                     color: paletteMode === "dark" ? "white" : "grey",
+//                     color: palette. === "dark" ? "white" : "grey",
 //                     cursor: "pointer",
 //                   }}
 //                 >
@@ -202,14 +209,16 @@
 //                           overflowY: "auto",
 //                         }}
 //                       >
-//                         {(formik.values[arrayName] || []).map((file, index) => (
-//                           <FileUploadInput
-//                             index={index}
-//                             key={`${file?.fileName ?? "file"}-${index}`}
-//                             onDelete={() => remove(index)}
-//                             isFile={true}
-//                           />
-//                         ))}
+//                         {(formik.values[arrayName] || []).map(
+//                           (file: { fileName: any }, index: number) => (
+//                             <FileUploadInput
+//                               index={index}
+//                               key={`${file?.fileName ?? "file"}-${index}`}
+//                               onDelete={() => remove(index)}
+//                               isFile={true}
+//                             />
+//                           )
+//                         )}
 //                       </Box>
 //                     </Grid>
 //                   )}

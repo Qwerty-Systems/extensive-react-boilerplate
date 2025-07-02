@@ -77,13 +77,6 @@ function PaymentNotifications() {
 
   const columns: GridColDef[] = [
     {
-      field: "id",
-      headerName: tPaymentNotifications(
-        "admin-panel-payment-notifications:table.column1"
-      ),
-      width: 120,
-    },
-    {
       field: "external_txn_id",
       headerName: tPaymentNotifications(
         "admin-panel-payment-notifications:table.column2"
@@ -97,7 +90,9 @@ function PaymentNotifications() {
       ),
       width: 120,
       renderCell: (params) =>
-        `${formatCurrency(params.value)} ${tCurrency(`currency:${params.row.currency}`)}`,
+        params?.value
+          ? `${formatCurrency(params?.value)} ${tCurrency(`currency:${params?.row?.currency}`)}`
+          : "-",
     },
     {
       field: "provider",
@@ -105,7 +100,7 @@ function PaymentNotifications() {
         "admin-panel-payment-notifications:table.column4"
       ),
       width: 120,
-      renderCell: (params) => tProvider(`payment-provider:${params.value}`),
+      renderCell: (params) => tProvider(`payment-provider:${params?.value}`),
     },
     {
       field: "payment_method",
@@ -113,7 +108,7 @@ function PaymentNotifications() {
         "admin-panel-payment-notifications:table.column5"
       ),
       width: 120,
-      renderCell: (params) => tPaymentMethod(`payment-method:${params.value}`),
+      renderCell: (params) => tPaymentMethod(`payment-method:${params?.value}`),
     },
     {
       field: "status",
@@ -165,8 +160,8 @@ function PaymentNotifications() {
 
         return (
           <Chip
-            label={tStatus(`payment-status:${params.value}`)}
-            color={statusColors[params.value as PaymentStatus]}
+            label={tStatus(`payment-status:${params?.value}`)}
+            color={statusColors[params?.value as PaymentStatus]}
             size="small"
           />
         );
@@ -179,7 +174,7 @@ function PaymentNotifications() {
       ),
       width: 150,
       valueGetter: (params: any) =>
-        format(new Date(params.value), "dd/MM/yyyy HH:mm"),
+        params ? format(new Date(params), "dd/MM/yyyy HH:mm") : "-",
     },
     {
       field: "processed",
@@ -190,7 +185,7 @@ function PaymentNotifications() {
       renderCell: (params) => (
         <Chip
           label={
-            params.value
+            params?.value
               ? tPaymentNotifications(
                   "admin-panel-payment-notifications:status.processed"
                 )
@@ -198,7 +193,7 @@ function PaymentNotifications() {
                   "admin-panel-payment-notifications:status.pending"
                 )
           }
-          color={params.value ? "success" : "warning"}
+          color={params?.value ? "success" : "warning"}
           size="small"
         />
       ),

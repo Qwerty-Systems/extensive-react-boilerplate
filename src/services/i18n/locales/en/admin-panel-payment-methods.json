@@ -1,0 +1,73 @@
+{
+  "title": "Payment Methods",
+  "table": {
+    "column1": "ID",
+    "column2": "Name",
+    "column3": "Processor Type",
+    "column4": "Provider",
+    "column5": "Sandbox Mode",
+
+    "name": "Name",
+    "type": "Type",
+    "balance": "Balance",
+    "status": "Status",
+    "tenant": "Tenant",
+    "account": "Account",
+    "owner": "Owner",
+    "actions": "Actions",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "createdBy": "Created By",
+    "updatedBy": "Updated By",
+    "active": "Active",
+    "inactive": "Inactive",
+
+    "itemName": "Item Name",
+    "itemDescription": "Item Description",
+    "quantity": "Quantity",
+    "purchasePrice": "Purchase Price",
+    "amount": "Amount"
+  },
+  "account": {
+    "types": {
+      "asset": "Asset",
+      "liability": "Liability",
+      "equity": "Equity",
+      "revenue": "Revenue",
+      "expense": "Expense"
+    }
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "sandbox": "Sandbox",
+    "live": "Live"
+  },
+  "actions": {
+    "add": "Add Account",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create Account"
+  },
+  "confirm": {
+    "delete": {
+      "title": "Delete Account",
+      "message": "Are you sure you want to delete this Account?"
+    }
+  },
+  "filter": {
+    "actions": {
+      "filter": "Filter",
+      "apply": "Apply"
+    },
+    "inputs": {
+      "role": {
+        "label": "Role",
+        "options": {
+          "1": "Admin",
+          "2": "Account"
+        }
+      }
+    }
+  }
+}

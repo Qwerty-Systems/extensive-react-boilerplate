@@ -42,7 +42,7 @@ export const useGetResidencesQuery = ({
           page: pageParam,
           limit: 10,
           //TODO
-          //filters: filter,
+          filters: filter,
           sort: sort ? [sort] : undefined,
         },
         {
