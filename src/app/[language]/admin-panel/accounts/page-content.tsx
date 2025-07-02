@@ -131,14 +131,14 @@ function Accounts() {
   const columns: GridColDef[] = [
     {
       field: "name",
-      headerName: t("table.name"),
+      headerName: t("table.name"), // Preferably use "table.column2" if aligned with translations
       flex: 1,
       minWidth: 200,
     },
     {
       field: "type",
       headerName: t("table.type"),
-      valueGetter: (params: any) => t(`account.types.${params?.row?.type}`),
+      valueGetter: (params: any) => t(`account.types.${params}`),
       flex: 1,
       minWidth: 150,
     },
@@ -148,7 +148,10 @@ function Accounts() {
       type: "number",
       flex: 1,
       minWidth: 150,
-      valueFormatter: (params: any) => `$${params.value?.toFixed(2)}`,
+      valueFormatter: (params: any) => {
+        console.log("params ,,,,,", params);
+        return typeof params === "number" ? `KSH ${params.toFixed(2)}` : "-";
+      },
     },
     {
       field: "active",
@@ -162,9 +165,9 @@ function Accounts() {
       ),
     },
     {
-      field: "tenant",
-      headerName: t("table.tenant"),
-      valueGetter: (params: any) => params?.row?.tenant?.name,
+      field: "owner",
+      headerName: t("table.owner"),
+      valueGetter: (params: any) => params?.row?.owner?.tenant?.name ?? "-",
       flex: 1,
       minWidth: 200,
     },
@@ -172,8 +175,9 @@ function Accounts() {
       field: "actions",
       headerName: "",
       width: 120,
-      renderCell: (params) => <Actions account={params?.row} />,
+      renderCell: (params: any) => <Actions account={params?.row} />,
       sortable: false,
+      filterable: false,
     },
   ];
 

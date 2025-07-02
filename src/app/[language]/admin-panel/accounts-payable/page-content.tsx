@@ -29,7 +29,7 @@ function Actions({ accountsPayable }: { accountsPayable: AccountsPayable }) {
   const { confirmDialog } = useConfirmDialog();
   const fetchAccountsPayableDelete = useDeleteAccountsPayableService();
   const queryClient = useQueryClient();
-  const { t } = useTranslation("admin-panel-accounts-payables");
+  const { t } = useTranslation("admin-panel-accounts-payable");
 
   const handleDelete = async () => {
     const isConfirmed = await confirmDialog({
@@ -83,7 +83,7 @@ function Actions({ accountsPayable }: { accountsPayable: AccountsPayable }) {
 }
 
 function AccountsPayables() {
-  const { t } = useTranslation("admin-panel-accounts-payables");
+  const { t } = useTranslation("admin-panel-accounts-payable");
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -140,6 +140,15 @@ function AccountsPayables() {
       minWidth: 250,
     },
     {
+      field: "account",
+      headerName: t("table.account"),
+      type: "number",
+      flex: 1,
+      minWidth: 150,
+      valueFormatter: (params: any) =>
+        `${params[0]?.name + " (" + params[0]?.number + ")"}`,
+    },
+    {
       field: "quantity",
       headerName: t("table.quantity"),
       type: "number",
@@ -152,7 +161,7 @@ function AccountsPayables() {
       type: "number",
       flex: 1,
       minWidth: 150,
-      valueFormatter: (params: any) => `$${params?.value?.toFixed(2)}`,
+      valueFormatter: (params: any) => `KSH ${params?.toFixed(2)}`,
     },
     {
       field: "amount",
@@ -160,15 +169,15 @@ function AccountsPayables() {
       type: "number",
       flex: 1,
       minWidth: 150,
-      valueFormatter: (params: any) => `$${params?.value?.toFixed(2)}`,
+      valueFormatter: (params: any) => `KSH ${params?.toFixed(2)}`,
     },
-    {
-      field: "tenant",
-      headerName: t("table.tenant"),
-      valueGetter: (params: any) => params?.row?.tenant?.name,
-      flex: 1,
-      minWidth: 200,
-    },
+    // {
+    //   field: "tenant",
+    //   headerName: t("table.tenant"),
+    //   valueGetter: (params: any) => params?.name,
+    //   flex: 1,
+    //   minWidth: 200,
+    // },
     {
       field: "actions",
       headerName: "",

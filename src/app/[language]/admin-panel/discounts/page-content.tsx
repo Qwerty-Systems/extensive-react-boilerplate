@@ -140,11 +140,6 @@ function Discounts() {
 
   const columns: GridColDef[] = [
     {
-      field: "id",
-      headerName: tDiscounts("admin-panel-discounts:table.column1"),
-      width: 120,
-    },
-    {
       field: "description",
       headerName: tDiscounts("admin-panel-discounts:table.column2"),
       flex: 1,
@@ -173,6 +168,37 @@ function Discounts() {
         />
       ),
     },
+    // Add tenant column
+    {
+      field: "tenant",
+      headerName: "Tenant", // Add translation key
+      width: 200,
+      valueGetter: (params: any) => params?.tenant?.name || "-",
+      renderCell: (params) => (
+        <Box
+          sx={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {params.value || "-"}
+        </Box>
+      ),
+    },
+    // Add customer column
+    {
+      field: "customer",
+      headerName: "Customer", // Add translation key
+      width: 180,
+      valueGetter: (params: any) => {
+        const customer = params?.customer;
+        if (!customer) return "-";
+        return customer.phoneNumber
+          ? `${customer.countryCode || ""} ${customer.phoneNumber}`
+          : "-";
+      },
+    },
     {
       field: "value",
       headerName: tDiscounts("admin-panel-discounts:table.column4"),
@@ -193,10 +219,19 @@ function Discounts() {
       field: "validRange",
       headerName: tDiscounts("admin-panel-discounts:table.column5"),
       width: 250,
-      valueGetter: (params: any) =>
-        params?.row?.validFrom
-          ? `${format(new Date(params?.row?.validFrom), "dd/MM/yyyy")} - ${format(new Date(params?.row?.validTo), "dd/MM/yyyy")}`
-          : "-",
+      renderCell: (params: any) => {
+        const row = params?.row;
+        if (!row || !row?.validFrom || !row?.validTo) return "-";
+
+        try {
+          return `${format(new Date(row?.validFrom), "dd/MM/yyyy")} - ${format(
+            new Date(row?.validTo),
+            "dd/MM/yyyy"
+          )}`;
+        } catch (e) {
+          return "Invalid date";
+        }
+      },
     },
     {
       field: "isActive",

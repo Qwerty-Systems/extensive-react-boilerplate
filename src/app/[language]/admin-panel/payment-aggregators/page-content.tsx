@@ -153,13 +153,6 @@ function PaymentAggregators() {
 
   const columns: GridColDef[] = [
     {
-      field: "id",
-      headerName: tPaymentAggregators(
-        "admin-panel-payment-aggregators:table.column1"
-      ),
-      width: 120,
-    },
-    {
       field: "name",
       headerName: tPaymentAggregators(
         "admin-panel-payment-aggregators:table.column2"
@@ -173,7 +166,7 @@ function PaymentAggregators() {
         "admin-panel-payment-aggregators:table.column3"
       ),
       width: 200,
-      valueGetter: (params: any) => params?.row?.config?.webhookUrl || "-",
+      valueGetter: (params: any) => params?.webhookUrl || "-",
       renderCell: (params) => (
         <Box
           sx={{

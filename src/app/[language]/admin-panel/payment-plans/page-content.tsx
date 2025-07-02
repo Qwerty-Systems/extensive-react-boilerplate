@@ -29,46 +29,6 @@ import { useGetPaymentPlansQuery } from "./queries/queries";
 import { useSearchParams } from "next/navigation";
 import CircularProgress from "@mui/material/CircularProgress";
 
-// // Mock service - replace with actual implementation
-// const useGetPaymentPlansService = () => {
-//   return async () => {
-//     return {
-//       status: 200,
-//       data: {
-//         data: [
-//           {
-//             id: "1",
-//             name: "Basic Monthly",
-//             description: "Flat monthly fee",
-//             isActive: true,
-//             type: PlanType.FLAT_MONTHLY,
-//             minimumCharge: 29.99,
-//             unit: "month",
-//             rateStructure: { type: "FLAT", amount: 29.99 },
-//             createdAt: new Date("2025-01-01"),
-//             updatedAt: new Date("2025-01-01"),
-//             tenant: { id: "t1", name: "Tenant A" },
-//           },
-//           {
-//             id: "2",
-//             name: "Per Weight Plan",
-//             description: "Pay per kilogram",
-//             isActive: true,
-//             type: PlanType.PER_WEIGHT,
-//             minimumCharge: 10.0,
-//             unit: "kg",
-//             rateStructure: { type: "PER_UNIT", rate: 0.5 },
-//             createdAt: new Date("2025-02-15"),
-//             updatedAt: new Date("2025-02-15"),
-//             tenant: { id: "t1", name: "Tenant A" },
-//           },
-//         ],
-//         hasNextPage: false,
-//       },
-//     };
-//   };
-// };
-
 const formatRateStructure = (rateStructure: any) => {
   if (!rateStructure) return "-";
 

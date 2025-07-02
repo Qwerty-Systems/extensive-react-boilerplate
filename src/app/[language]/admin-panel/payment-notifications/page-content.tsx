@@ -77,13 +77,6 @@ function PaymentNotifications() {
 
   const columns: GridColDef[] = [
     {
-      field: "id",
-      headerName: tPaymentNotifications(
-        "admin-panel-payment-notifications:table.column1"
-      ),
-      width: 120,
-    },
-    {
       field: "external_txn_id",
       headerName: tPaymentNotifications(
         "admin-panel-payment-notifications:table.column2"
@@ -181,9 +174,7 @@ function PaymentNotifications() {
       ),
       width: 150,
       valueGetter: (params: any) =>
-        params?.value
-          ? format(new Date(params?.value), "dd/MM/yyyy HH:mm")
-          : "-",
+        params ? format(new Date(params), "dd/MM/yyyy HH:mm") : "-",
     },
     {
       field: "processed",

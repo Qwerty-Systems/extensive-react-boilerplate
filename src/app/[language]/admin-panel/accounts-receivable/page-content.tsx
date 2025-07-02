@@ -137,18 +137,14 @@ function AccountsReceivables() {
       headerName: t("table.transactionType"),
       flex: 1,
       minWidth: 150,
-      valueGetter: (params: any) =>
-        t(`transactionType.${params?.row?.transactionType}`),
+      valueGetter: (params: any) => t(`transactionType.${params}`),
     },
     {
       field: "accountType",
       headerName: t("table.accountType"),
       flex: 1,
       minWidth: 150,
-      valueGetter: (params: any) =>
-        params?.row?.accountType
-          ? t(`accountType.${params?.row?.accountType}`)
-          : "",
+      valueGetter: (params: any) => (params ? t(`accountType.${params}`) : ""),
     },
     {
       field: "amount",
@@ -156,12 +152,12 @@ function AccountsReceivables() {
       type: "number",
       flex: 1,
       minWidth: 150,
-      valueFormatter: (params: any) => `$${params?.value?.toFixed(2)}`,
+      valueFormatter: (params: any) => `KSH ${params?.toFixed(2)}`,
     },
     {
       field: "tenant",
       headerName: t("table.tenant"),
-      valueGetter: (params: any) => params?.row?.tenant?.name,
+      valueGetter: (params: any) => params?.toString(),
       flex: 1,
       minWidth: 200,
     },
@@ -171,7 +167,7 @@ function AccountsReceivables() {
       type: "dateTime",
       flex: 1,
       minWidth: 180,
-      valueGetter: (params: any) => new Date(params?.row?.createdAt),
+      valueGetter: (params: any) => new Date(params),
     },
     {
       field: "actions",

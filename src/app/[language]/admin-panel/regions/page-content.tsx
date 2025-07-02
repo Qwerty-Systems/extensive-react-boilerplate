@@ -132,23 +132,19 @@ function Regions() {
       minWidth: 200,
     },
     {
-      field: "tenant",
-      headerName: t("table.column3"),
-      valueGetter: (params: any) => (params?.row?.tenant as Tenant)?.name,
-      flex: 1,
-      minWidth: 200,
-    },
-    {
       field: "serviceTypes",
       headerName: t("table.column4"),
-      valueGetter: (params: any) => params?.row?.serviceTypes?.join(", "),
+      valueGetter: (params: any) => {
+        return Array.isArray(params) ? params.join(", ") : "-";
+      },
       flex: 1,
       minWidth: 250,
     },
     {
       field: "zipCodes",
       headerName: t("table.column5"),
-      valueGetter: (params: any) => params?.row?.zipCodes?.join(", "),
+      valueGetter: (params: any) =>
+        Array.isArray(params) ? params.join(", ") : "-",
       flex: 1,
       minWidth: 200,
     },
@@ -156,8 +152,11 @@ function Regions() {
       field: "operatingHours",
       headerName: t("table.column6"),
       valueGetter: (params: any) => {
-        const oh = params?.row?.operatingHours;
-        return oh ? `${oh.days?.join(", ")} ${oh.startTime}-${oh.endTime}` : "";
+        const oh = params;
+        if (!oh) return "-";
+        const days = oh.days?.join(", ") ?? "";
+        const timeRange = `${oh.startTime ?? ""}-${oh.endTime ?? ""}`;
+        return `${days} ${timeRange}`.trim();
       },
       flex: 1,
       minWidth: 300,
@@ -168,6 +167,7 @@ function Regions() {
       width: 120,
       renderCell: (params: any) => <Actions region={params?.row} />,
       sortable: false,
+      filterable: false,
     },
   ];
 
