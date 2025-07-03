@@ -147,60 +147,77 @@ function CustomerPlans() {
 
   const columns: GridColDef[] = [
     {
-      field: "id",
-      headerName: tCustomerPlans("admin-panel-customer-plans:table.column1"),
-      width: 120,
-    },
-    {
       field: "customer",
       headerName: tCustomerPlans("admin-panel-customer-plans:table.column2"),
-      width: 200,
-      valueGetter: (params: any) =>
-        params.row?.customer?.map((c: any) => c.email).join(", "),
-      renderCell: (params) => (
-        <Box
-          sx={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {params.row?.customer?.map((c: any) => c.email).join(", ")}
-        </Box>
-      ),
+      width: 250,
+      valueGetter: (params: any) => {
+        const customers = params.row?.customer || [];
+        return customers
+          .map((c: any) => `${c.firstName} ${c.lastName}`)
+          .join(", ");
+      },
+      renderCell: (params: any) => {
+        const customers = params.row?.customer || [];
+        return (
+          <Box
+            sx={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "flex",
+              gap: 1,
+            }}
+          >
+            {customers.map((c: any) => (
+              // <Link
+              //   key={c.id}
+              //   href={`/admin/customers/${c.id}`} // Adjust your route if needed
+              //   style={{ textDecoration: "none", color: "#1976d2" }}
+              // >
+              <>{`${c.firstName} ${c.lastName}`}</>
+              // </Link>
+            ))}
+          </Box>
+        );
+      },
     },
     {
       field: "plan",
       headerName: tCustomerPlans("admin-panel-customer-plans:table.column3"),
       flex: 1,
       minWidth: 200,
-      valueGetter: (params: any) =>
-        params.row?.plan.map((p: any) => p.name).join(", "),
-      renderCell: (params) => (
-        <Box
-          sx={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {params.row?.plan.map((p: any) => p.name).join(", ")}
-        </Box>
-      ),
+      valueGetter: (params: any) => {
+        const plans = params.row?.plan || [];
+        return plans.map((p: any) => p.name).join(", ");
+      },
+      renderCell: (params) => {
+        const plans = params.row?.plan || [];
+        return (
+          <Box
+            sx={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {plans.map((p: any) => p.name).join(", ")}
+          </Box>
+        );
+      },
     },
     {
       field: "startDate",
       headerName: tCustomerPlans("admin-panel-customer-plans:table.column4"),
       width: 150,
       valueGetter: (params: any) =>
-        params?.value ? format(new Date(params.value), "dd/MM/yyyy") : "-",
+        params ? format(new Date(params), "dd/MM/yyyy") : "-",
     },
     {
       field: "endDate",
       headerName: tCustomerPlans("admin-panel-customer-plans:table.column5"),
       width: 150,
       valueGetter: (params: any) =>
-        params?.value ? format(new Date(params.value), "dd/MM/yyyy") : "-",
+        params ? format(new Date(params), "dd/MM/yyyy") : "-",
     },
     {
       field: "status",
